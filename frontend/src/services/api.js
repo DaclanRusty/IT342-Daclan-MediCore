@@ -1,9 +1,7 @@
-const BASE_URL = 'http://localhost:8080/api/v1';
+const BASE_URL = 'http://localhost:8081/api/v1';
 
-// Helper: get stored token
 const getToken = () => localStorage.getItem('accessToken');
 
-// Core fetch wrapper
 async function request(endpoint, options = {}) {
   const headers = {
     'Content-Type': 'application/json',
@@ -14,53 +12,47 @@ async function request(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${getToken()}`;
   }
 
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-    credentials: 'include',
-  });
+  let res;
+  try {
+    res = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      credentials: 'include',
+    });
+  } catch {
+    throw new Error('Cannot connect to server. Make sure Spring Boot is running on port 8081.');
+  }
 
   const data = await res.json();
 
-  if (!res.ok || !data.success) {
+  if (!res.ok) {
+    // Pull message from our ApiResponse error shape
     const message =
-      data?.error?.message || 'Something went wrong. Please try again.';
+      data?.error?.message ||
+      data?.message ||
+      `Request failed (${res.status})`;
     throw new Error(message);
   }
 
-  return data.data;
+  // Return data.data if wrapped, otherwise return data directly
+  return data?.data !== undefined ? data.data : data;
 }
 
-// ─── Auth ────────────────────────────────────────────────
+// ─── Auth ────────────────────────────────────────────────────────────────────
 export const authApi = {
-  /**
-   * Login
-   * POST /api/v1/auth/login
-   * Body: { email, password }
-   * Returns: { user: { email, firstname, lastname, role }, accessToken, refreshToken }
-   */
+
   login: (email, password) =>
     request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     }),
 
-  /**
-   * Register Patient
-   * POST /api/v1/auth/register
-   * Body: RegisterRequest with role = "PATIENT"
-   */
   registerPatient: (formData) =>
     request('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ ...formData, role: 'PATIENT' }),
     }),
 
-  /**
-   * Register Doctor
-   * POST /api/v1/auth/register
-   * Body: RegisterRequest with role = "DOCTOR"
-   */
   registerDoctor: (formData) =>
     request('/auth/register', {
       method: 'POST',
@@ -68,7 +60,7 @@ export const authApi = {
     }),
 };
 
-// ─── Token helpers ────────────────────────────────────────
+// ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (accessToken, refreshToken) => {
     localStorage.setItem('accessToken', accessToken);
@@ -81,10 +73,7 @@ export const tokenStorage = {
   },
   saveUser: (user) => localStorage.setItem('user', JSON.stringify(user)),
   getUser: () => {
-    try {
-      return JSON.parse(localStorage.getItem('user'));
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(localStorage.getItem('user')); }
+    catch { return null; }
   },
 };

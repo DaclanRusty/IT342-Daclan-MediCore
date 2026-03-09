@@ -20,7 +20,6 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    // Manual constructor instead of @RequiredArgsConstructor
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
@@ -55,10 +54,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:3000"
-        ));
+
+        // ── Allows any localhost port so you never have to update this again ──
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:*"));
+
         configuration.setAllowedMethods(List.of(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
         ));

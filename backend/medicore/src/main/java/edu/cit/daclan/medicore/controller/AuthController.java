@@ -13,7 +13,6 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // Manual constructor instead of @RequiredArgsConstructor
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
@@ -32,5 +31,21 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request) {
         AuthResponse data = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    // ── Google Sign-In: patient logs in with Google token ─────────────────
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(
+            @RequestBody GoogleAuthRequest request) {
+        AuthResponse data = authService.googleLogin(request.getCredential());
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    // ── Verify Google token during registration (returns email) ───────────
+    @PostMapping("/google/verify")
+    public ResponseEntity<ApiResponse<String>> verifyGoogleToken(
+            @RequestBody GoogleAuthRequest request) {
+        String email = authService.verifyGoogleToken(request.getCredential());
+        return ResponseEntity.ok(ApiResponse.success(email));
     }
 }

@@ -4,9 +4,8 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import PatientRegisterPage from './pages/PatientRegisterPage';
 import DoctorRegisterPage from './pages/DoctorRegisterPage';
+import SecretaryDashboard from './pages/SecretaryDashboard';
 
-// ── Placeholder Dashboards ─────────────────────────────────
-// Replace these with your actual dashboard components later
 function PatientDashboard() {
   const { user, logout } = useAuth();
   return (
@@ -29,16 +28,6 @@ function DoctorDashboard() {
   );
 }
 
-function SecretaryDashboard() {
-  const { user, logout } = useAuth();
-  return (
-    <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-      <h2>Secretary Dashboard</h2>
-      <p>Welcome, {user?.firstname}!</p>
-      <button onClick={logout} style={{ marginTop: 16, padding: '8px 20px', cursor: 'pointer' }}>Logout</button>
-    </div>
-  );
-}
 
 // ── Protected Route ────────────────────────────────────────
 function ProtectedRoute({ children, requiredRole }) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,6 +17,7 @@ const RoleIcon = ({ roleKey }) => {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [role, setRole] = useState('patient');
   const [email, setEmail] = useState('');
@@ -27,13 +28,18 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const activeRole = ROLES.find(r => r.key === role);
 
+  const registeredMessage = location.state?.message;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
       const data = await authApi.login(email, password);
       const serverRole = data.user.role.toLowerCase();
-      if (serverRole !== role) { setError(`This account is a ${data.user.role}. Please select the correct role.`); return; }
+      if (serverRole !== role) {
+        setError(`This account is a ${data.user.role}. Please select the correct role.`);
+        return;
+      }
       login(data.user, data.accessToken, data.refreshToken);
       navigate(`/dashboard/${role}`);
     } catch (err) {
@@ -80,6 +86,18 @@ export default function LoginPage() {
           <h2 style={{fontFamily:"'Sora',sans-serif",fontSize:22,fontWeight:800,color:'#0f172a',marginBottom:6}}>Sign In</h2>
           <p style={{color:'#94a3b8',fontSize:13,marginBottom:24}}>Select your role and enter your credentials</p>
 
+          {registeredMessage && role === 'doctor' && (
+            <div style={{background:'linear-gradient(135deg,#f0fdf4,#dcfce7)',border:'1px solid #bbf7d0',borderRadius:12,padding:'12px 16px',marginBottom:20,display:'flex',alignItems:'flex-start',gap:10}}>
+              <div style={{width:28,height:28,borderRadius:8,flexShrink:0,background:'linear-gradient(135deg,#10b981,#059669)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:'#065f46',marginBottom:2}}>Registration Submitted!</div>
+                <div style={{fontSize:12,color:'#059669',lineHeight:1.5}}>{registeredMessage}</div>
+              </div>
+            </div>
+          )}
+
           <div style={{display:'flex',gap:10,marginBottom:26}}>
             {ROLES.map(r => {
               const isActive = role === r.key;
@@ -123,9 +141,33 @@ export default function LoginPage() {
               <button type="button" style={{background:'none',border:'none',color:activeRole.color,fontSize:13,fontWeight:600,cursor:'pointer'}}>Forgot password?</button>
             </div>
 
-            {error && <div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius:10,padding:'10px 14px',marginBottom:16,color:'#dc2626',fontSize:13}}>{error}</div>}
+            {error && (
+              <div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius:10,padding:'10px 14px',marginBottom:16,color:'#dc2626',fontSize:13}}>
+                {error.includes('pending approval') && role === 'doctor' ? (
+                  <div style={{display:'flex',alignItems:'flex-start',gap:8}}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" width="15" height="15" style={{flexShrink:0,marginTop:1}}>
+                      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <div style={{color:'#92400e'}}>
+                      <strong>Account Pending Approval</strong><br/>
+                      <span style={{fontSize:12}}>Your registration is being reviewed by the secretary. You'll be able to login once approved.</span>
+                    </div>
+                  </div>
+                ) : error.includes('rejected') && role === 'doctor' ? (
+                  <div style={{display:'flex',alignItems:'flex-start',gap:8}}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" width="15" height="15" style={{flexShrink:0,marginTop:1}}>
+                      <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    <div>
+                      <strong>Registration Rejected</strong><br/>
+                      <span style={{fontSize:12}}>Your registration was rejected. Please contact support.</span>
+                    </div>
+                  </div>
+                ) : error}
+              </div>
+            )}
 
-            {role==='secretary' && (
+            {role === 'secretary' && (
               <div style={{background:'#faf5ff',border:'1px solid #e9d5ff',borderRadius:10,padding:'12px 14px',marginBottom:16,fontSize:13,color:'#7c3aed'}}>
                 <strong>Secretary accounts</strong> are created by hospital administrators. Please contact your administrator for access credentials.
               </div>
@@ -137,10 +179,13 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p style={{textAlign:'center',marginTop:20,fontSize:13,color:'#94a3b8'}}>
-            Don't have an account?{' '}
-            <button onClick={()=>navigate(role==='doctor'?'/register/doctor':'/register/patient')} style={{background:'none',border:'none',color:activeRole.color,fontWeight:600,cursor:'pointer',fontSize:13}}>Register</button>
-          </p>
+          {/* Hide register link for secretary */}
+          {role !== 'secretary' && (
+            <p style={{textAlign:'center',marginTop:20,fontSize:13,color:'#94a3b8'}}>
+              Don't have an account?{' '}
+              <button onClick={()=>navigate(role==='doctor'?'/register/doctor':'/register/patient')} style={{background:'none',border:'none',color:activeRole.color,fontWeight:600,cursor:'pointer',fontSize:13}}>Register</button>
+            </p>
+          )}
         </div>
       </div>
     </div>

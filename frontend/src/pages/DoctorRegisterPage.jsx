@@ -4,9 +4,31 @@ import { authApi } from '../services/api';
 
 const SPECS = ['General Medicine','Cardiology','Dermatology','Endocrinology','Gastroenterology','Neurology','Obstetrics & Gynecology','Oncology','Ophthalmology','Orthopedics','Pediatrics','Psychiatry','Pulmonology','Radiology','Surgery','Urology','Other'];
 
+// Formats digits into +63 9xx xxx xxxx
+// Stores raw digits (without +63) in form state, displays formatted version
+function formatPHPhone(raw) {
+  // Strip everything except digits
+  let digits = raw.replace(/\D/g, '');
+
+  // Remove leading 63 or 0 if user typed it
+  if (digits.startsWith('63')) digits = digits.slice(2);
+  if (digits.startsWith('0'))  digits = digits.slice(1);
+
+  // Cap at 10 digits (9xxxxxxxxx)
+  digits = digits.slice(0, 10);
+
+  // Build display string: +63 9xx xxx xxxx
+  let display = '+63 ';
+  if (digits.length === 0) return { display: '+63 ', raw: '' };
+  if (digits.length <= 3)  return { display: '+63 ' + digits, raw: digits };
+  if (digits.length <= 6)  return { display: `+63 ${digits.slice(0,3)} ${digits.slice(3)}`, raw: digits };
+  return { display: `+63 ${digits.slice(0,3)} ${digits.slice(3,6)} ${digits.slice(6)}`, raw: digits };
+}
+
 export default function DoctorRegisterPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({firstname:'',lastname:'',email:'',password:'',confirmPassword:'',phoneNumber:'',specialization:'',licenseNumber:''});
+  const [phoneDisplay, setPhoneDisplay] = useState('+63 ');
   const [picPreview, setPicPreview] = useState(null);
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [agreedAcc, setAgreedAcc] = useState(false);
@@ -17,6 +39,16 @@ export default function DoctorRegisterPage() {
   const [fe, setFe] = useState({});
 
   const upd = (f,v) => { setForm(p=>({...p,[f]:v})); setFe(p=>({...p,[f]:''})); setError(''); };
+
+  const handlePhoneChange = (e) => {
+    const { display, raw } = formatPHPhone(e.target.value);
+    setPhoneDisplay(display);
+    // Store full number with +63 prefix in form state
+    const fullNumber = raw.length > 0 ? `+63${raw}` : '';
+    setForm(p => ({ ...p, phoneNumber: fullNumber }));
+    setFe(p => ({ ...p, phoneNumber: '' }));
+    setError('');
+  };
 
   const handlePic = (e) => {
     const file = e.target.files[0];
@@ -30,7 +62,9 @@ export default function DoctorRegisterPage() {
     if(!form.email.trim()) e.email='Required';
     if(form.password.length<8) e.password='Min 8 characters';
     if(form.password!==form.confirmPassword) e.confirmPassword='Passwords do not match';
-    if(!form.phoneNumber.trim()) e.phoneNumber='Required';
+    // Validate 10 digits after +63
+    const digits = form.phoneNumber.replace(/\D/g,'').replace(/^63/,'');
+    if(digits.length !== 10) e.phoneNumber='Enter a valid 10-digit PH number';
     if(!form.specialization) e.specialization='Required';
     if(!form.licenseNumber.trim()) e.licenseNumber='Required';
     return e;
@@ -38,20 +72,36 @@ export default function DoctorRegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const errs=validate();
-    if(Object.keys(errs).length>0){setFe(errs);return;}
-    if(!agreedTerms||!agreedAcc){setError('Please check both agreement boxes');return;}
+    const errs = validate();
+    if (Object.keys(errs).length > 0) { setFe(errs); return; }
+    if (!agreedTerms || !agreedAcc) {
+      setError('Please check both agreement boxes'); return;
+    }
     setLoading(true); setError('');
     try {
-      await authApi.registerDoctor({
-        firstname:form.firstname, lastname:form.lastname, email:form.email,
-        password:form.password, phoneNumber:form.phoneNumber,
-        specialization:form.specialization, licenseNumber:form.licenseNumber,
-        dateOfBirth:'', gender:'', address:'',
+      const result = await authApi.registerDoctor({
+        firstname:      form.firstname,
+        lastname:       form.lastname,
+        email:          form.email,
+        password:       form.password,
+        phoneNumber:    form.phoneNumber,
+        specialization: form.specialization,
+        licenseNumber:  form.licenseNumber,
       });
-      navigate('/login',{state:{registered:true,role:'doctor'}});
-    } catch(err){ setError(err.message); }
-    finally{ setLoading(false); }
+
+      navigate('/login', {
+        state: {
+          registered: true,
+          role: 'doctor',
+          message: result?.message ||
+            'Registration submitted! Please wait for secretary approval.',
+        },
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inp=(f,ex={})=>({width:'100%',padding:'11px 12px 11px 38px',borderRadius:10,border:`1.5px solid ${fe[f]?'#ef4444':'#e2e8f0'}`,fontSize:14,color:'#0f172a',background:'#fff',boxSizing:'border-box',...ex});
@@ -180,13 +230,24 @@ export default function DoctorRegisterPage() {
               </div>
             </div>
 
+            {/* Phone Number with auto-format */}
             <div style={{marginBottom:24}}>
               <label style={lbl}>Phone Number <span style={{color:'#ef4444'}}>*</span></label>
               <div style={{position:'relative'}}>
                 <svg style={ic} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.1a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16z"/></svg>
-                <input value={form.phoneNumber} onChange={e=>upd('phoneNumber',e.target.value)} placeholder="+63 900 000 0000" style={inp('phoneNumber')}/>
+                <input
+                  type="tel"
+                  value={phoneDisplay}
+                  onChange={handlePhoneChange}
+                  placeholder="+63 9xx xxx xxxx"
+                  maxLength={17}
+                  style={inp('phoneNumber')}
+                />
               </div>
-              {fe.phoneNumber && <p style={{color:'#ef4444',fontSize:12,marginTop:4}}>{fe.phoneNumber}</p>}
+              {fe.phoneNumber
+                ? <p style={{color:'#ef4444',fontSize:12,marginTop:4}}>{fe.phoneNumber}</p>
+                : <p style={{color:'#94a3b8',fontSize:12,marginTop:4}}>Format: +63 9xx xxx xxxx</p>
+              }
             </div>
 
             <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:20}}>

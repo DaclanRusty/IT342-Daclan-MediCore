@@ -21,44 +21,41 @@ public class RegisterRequest {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-    @NotBlank(message = "Date of birth is required")
-    private String dateOfBirth;
-
-    @NotBlank(message = "Gender is required")
-    private String gender;
-
-    @NotBlank(message = "Address is required")
-    private String address;
-
     @NotBlank(message = "Role is required")
     private String role;
 
+    // Optional for DOCTOR — only required for PATIENT (validated manually in AuthService)
+    private String dateOfBirth;
+    private String gender;
+    private String address;
+
+    // Only for DOCTOR
     private String licenseNumber;
     private String specialization;
 
     public RegisterRequest() {}
 
-    public String getFirstname() { return firstname; }
-    public String getLastname() { return lastname; }
-    public String getEmail() { return email; }
-    public String getPassword() { return password; }
-    public String getPhoneNumber() { return phoneNumber; }
-    public String getDateOfBirth() { return dateOfBirth; }
-    public String getGender() { return gender; }
-    public String getAddress() { return address; }
-    public String getRole() { return role; }
-    public String getLicenseNumber() { return licenseNumber; }
+    public String getFirstname()      { return firstname; }
+    public String getLastname()       { return lastname; }
+    public String getEmail()          { return email; }
+    public String getPassword()       { return password; }
+    public String getPhoneNumber()    { return phoneNumber; }
+    public String getRole()           { return role; }
+    public String getDateOfBirth()    { return dateOfBirth; }
+    public String getGender()         { return gender; }
+    public String getAddress()        { return address; }
+    public String getLicenseNumber()  { return licenseNumber; }
     public String getSpecialization() { return specialization; }
 
-    public void setFirstname(String firstname) { this.firstname = firstname; }
-    public void setLastname(String lastname) { this.lastname = lastname; }
-    public void setEmail(String email) { this.email = email; }
-    public void setPassword(String password) { this.password = password; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
-    public void setDateOfBirth(String dateOfBirth) { this.dateOfBirth = dateOfBirth; }
-    public void setGender(String gender) { this.gender = gender; }
-    public void setAddress(String address) { this.address = address; }
-    public void setRole(String role) { this.role = role; }
-    public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
-    public void setSpecialization(String specialization) { this.specialization = specialization; }
+    public void setFirstname(String v)      { this.firstname = v; }
+    public void setLastname(String v)       { this.lastname = v; }
+    public void setEmail(String v)          { this.email = v; }
+    public void setPassword(String v)       { this.password = v; }
+    public void setPhoneNumber(String v)    { this.phoneNumber = v; }
+    public void setRole(String v)           { this.role = v; }
+    public void setDateOfBirth(String v)    { this.dateOfBirth = v; }
+    public void setGender(String v)         { this.gender = v; }
+    public void setAddress(String v)        { this.address = v; }
+    public void setLicenseNumber(String v)  { this.licenseNumber = v; }
+    public void setSpecialization(String v) { this.specialization = v; }
 }

@@ -18,6 +18,15 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("DB-002", e.getMessage()));
     }
 
+    // ← NEW: handles PENDING / REJECTED doctor login attempts
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalState(
+            IllegalStateException e) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error("AUTH-003", e.getMessage()));
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Void>> handleBadCredentials(
             BadCredentialsException e) {
@@ -29,7 +38,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidation(
             MethodArgumentNotValidException e) {
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> errors = new LinkedHashMap<>();
         e.getBindingResult().getFieldErrors()
                 .forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
         return ResponseEntity
