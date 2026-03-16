@@ -6,7 +6,6 @@ import edu.cit.daclan.medicore.repository.DoctorRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class DoctorApprovalService {
@@ -32,7 +31,7 @@ public class DoctorApprovalService {
     }
 
     @Transactional
-    public DoctorSummaryResponse updateDoctorStatus(UUID doctorId, String newStatus) {
+    public DoctorSummaryResponse updateDoctorStatus(Long doctorId, String newStatus) {
         String upper = newStatus.toUpperCase();
         if (!upper.equals("APPROVED") && !upper.equals("REJECTED")) {
             throw new IllegalArgumentException("Status must be APPROVED or REJECTED");
@@ -50,10 +49,10 @@ public class DoctorApprovalService {
                 .firstName(d.getUser().getFirstName())
                 .lastName(d.getUser().getLastName())
                 .email(d.getUser().getEmail())
-                .phoneNumber(d.getUser().getPhoneNumber())      // ← added
+                .phoneNumber(d.getUser().getPhoneNumber())
                 .specialization(d.getSpecialization())
                 .licenseNumber(d.getLicenseNumber())
-                .profilePicture(d.getProfilePicture())          // ← added
+                .profilePicture(d.getProfilePicture())
                 .status(d.getStatus())
                 .build();
     }

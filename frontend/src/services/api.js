@@ -26,7 +26,6 @@ async function request(endpoint, options = {}) {
   const data = await res.json();
 
   if (!res.ok) {
-    // Pull message from our ApiResponse error shape
     const message =
       data?.error?.message ||
       data?.message ||
@@ -34,33 +33,55 @@ async function request(endpoint, options = {}) {
     throw new Error(message);
   }
 
-  // Return data.data if wrapped, otherwise return data directly
   return data?.data !== undefined ? data.data : data;
 }
 
-// ─── Auth ────────────────────────────────────────────────────────────────────
 export const authApi = {
-
   login: (email, password) =>
     request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     }),
 
+  googleLogin: (accessToken) =>
+    request('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential: accessToken }),
+    }),
+
   registerPatient: (formData) =>
     request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ ...formData, role: 'PATIENT' }),
+      body: JSON.stringify({
+        ...formData,
+        role: 'PATIENT',
+        googleVerified: true,  // ← ADDED
+      }),
     }),
 
   registerDoctor: (formData) =>
     request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ ...formData, role: 'DOCTOR' }),
+      body: JSON.stringify({
+        ...formData,
+        role: 'DOCTOR',
+        googleVerified: true,  // ← ADDED
+      }),
+    }),
+
+  getAvailableDoctors: () => request('/auth/doctors/available'),
+
+  registerSecretary: (formData) =>
+    request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...formData,
+        role: 'SECRETARY',
+        googleVerified: true,  // ← ADDED
+      }),
     }),
 };
 
-// ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (accessToken, refreshToken) => {
     localStorage.setItem('accessToken', accessToken);
@@ -76,4 +97,49 @@ export const tokenStorage = {
     try { return JSON.parse(localStorage.getItem('user')); }
     catch { return null; }
   },
+};
+
+export const adminApi = {
+  // ── Users ───────────────────────────────────────────────────────────────
+  getAllUsers: () => request('/admin/users'),
+
+  deleteUser: (userId) =>
+    request(`/admin/users/${userId}`, { method: 'DELETE' }),
+
+  updateUserRole: (userId, role) =>
+    request(`/admin/users/${userId}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    }),
+
+  // ── Block / Unblock ─────────────────────────────────────────────────────
+  blockUser: (userId) =>
+    request(`/admin/users/${userId}/block`, { method: 'PUT' }),
+
+  unblockUser: (userId) =>
+    request(`/admin/users/${userId}/unblock`, { method: 'PUT' }),
+
+  // ── Doctors ─────────────────────────────────────────────────────────────
+  getAllDoctors: () => request('/admin/doctors'),
+
+  approveDoctor: (doctorId) =>
+    request(`/admin/doctors/${doctorId}/approve`, { method: 'PUT' }),
+
+  rejectDoctor: (doctorId) =>
+    request(`/admin/doctors/${doctorId}/reject`, { method: 'PUT' }),
+
+  // ── Secretary Assignments ────────────────────────────────────────────────
+  getSecretaryAssignments: () => request('/admin/secretary-assignments'),
+};
+
+export const doctorApi = {
+  getSecretaryRequests: () => request('/doctor/secretary-requests'),
+
+  approveSecretary: (secretaryId) =>
+    request(`/doctor/secretary-requests/${secretaryId}/approve`, { method: 'PUT' }),
+
+  rejectSecretary: (secretaryId) =>
+    request(`/doctor/secretary-requests/${secretaryId}/reject`, { method: 'PUT' }),
+
+  getAppointments: () => request('/doctor/appointments'),
 };

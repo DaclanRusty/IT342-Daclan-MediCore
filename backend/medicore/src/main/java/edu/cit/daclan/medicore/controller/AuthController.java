@@ -2,19 +2,26 @@ package edu.cit.daclan.medicore.controller;
 
 import edu.cit.daclan.medicore.dto.request.*;
 import edu.cit.daclan.medicore.dto.response.*;
+import edu.cit.daclan.medicore.entity.Doctor;
+import edu.cit.daclan.medicore.repository.DoctorRepository;
 import edu.cit.daclan.medicore.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
+    private final DoctorRepository doctorRepository;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
+    public AuthController(AuthService authService, DoctorRepository doctorRepository) {
+        this.authService      = authService;
+        this.doctorRepository = doctorRepository;
     }
 
     @PostMapping("/register")
@@ -33,7 +40,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
-    // ── Google Sign-In: patient logs in with Google token ─────────────────
     @PostMapping("/google")
     public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(
             @RequestBody GoogleAuthRequest request) {
@@ -41,11 +47,28 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
-    // ── Verify Google token during registration (returns email) ───────────
     @PostMapping("/google/verify")
     public ResponseEntity<ApiResponse<String>> verifyGoogleToken(
             @RequestBody GoogleAuthRequest request) {
         String email = authService.verifyGoogleToken(request.getCredential());
         return ResponseEntity.ok(ApiResponse.success(email));
+    }
+
+    @GetMapping("/doctors/available")
+    public ResponseEntity<ApiResponse<List<AvailableDoctorResponse>>> getAvailableDoctors() {
+        List<AvailableDoctorResponse> doctors = doctorRepository.findAvailableDoctors()
+                .stream()
+                .map(doc -> {
+                    AvailableDoctorResponse r = new AvailableDoctorResponse();
+                    r.setDoctorId(doc.getDoctorId());
+                    r.setFirstname(doc.getUser().getFirstName());
+                    r.setLastname(doc.getUser().getLastName());
+                    r.setSpecialization(doc.getSpecialization());
+                    r.setEmail(doc.getUser().getEmail());
+                    return r;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(ApiResponse.success(doctors));
     }
 }
