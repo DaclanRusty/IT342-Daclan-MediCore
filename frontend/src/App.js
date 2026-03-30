@@ -9,20 +9,8 @@ import SecretaryRegisterPage from './pages/SecretaryRegisterPage';
 import SecretaryDashboard from './pages/SecretaryDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
+import PatientDashboard from './pages/PatientDashboard'; // ← real dashboard
 import AuthCallbackPage from './pages/AuthCallBackPage';
-
-function PatientDashboard() {
-  const { user, logout } = useAuth();
-  return (
-    <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-      <h2>Patient Dashboard</h2>
-      <p>Welcome, {user?.firstname} {user?.lastname}!</p>
-      <button onClick={logout} style={{ marginTop: 16, padding: '8px 20px', cursor: 'pointer' }}>
-        Logout
-      </button>
-    </div>
-  );
-}
 
 function ProtectedRoute({ children, requiredRole }) {
   const { user, isAuthenticated } = useAuth();

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:gravity="center_horizontal">
+
+        <!-- Navbar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="28dp">
+
+            <!-- Logo -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:text="M"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:background="@drawable/logo_bg"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MediCore"
+                    android:textColor="#0F172A"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- System Online badge -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/badge_bg"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp">
+                <View
+                    android:layout_width="7dp"
+                    android:layout_height="7dp"
+                    android:background="@drawable/dot_green"
+                    android:layout_marginEnd="6dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="System Online"
+                    android:textColor="#475569"
+                    android:textSize="11sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Account"
+            android:textColor="#2563EB"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Who are you registering as?"
+            android:textColor="#0F172A"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select your role to get started. Each role has its own registration form and access level."
+            android:textColor="#64748B"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:layout_marginBottom="28dp"/>
+
+        <!-- Patient Card -->
+        <LinearLayout
+            android:id="@+id/cardPatient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg_blue"
+            android:padding="20dp"
+            android:layout_marginBottom="14dp"
+            android:elevation="6dp">
+
+            <!-- Icon -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:text="👤"
+                    android:textSize="24sp"
+                    android:gravity="center"
+                    android:background="@drawable/icon_bg_white"
+                    android:elevation="2dp"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Patient"
+                android:textColor="#0F172A"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="6dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Book appointments and manage your health records"
+                android:textColor="#475569"
+                android:textSize="13sp"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#BFDBFE"
+                android:layout_marginBottom="14dp"/>
+
+            <Button
+                android:id="@+id/btnPatient"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="Register as Patient →"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/button_primary"
+                android:elevation="2dp"/>
+        </LinearLayout>
+
+        <!-- Secretary Card -->
+        <LinearLayout
+            android:id="@+id/cardSecretary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg_purple"
+            android:padding="20dp"
+            android:layout_marginBottom="14dp"
+            android:elevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:text="📋"
+                    android:textSize="24sp"
+                    android:gravity="center"
+                    android:background="@drawable/icon_bg_white"
+                    android:elevation="2dp"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Secretary"
+                android:textColor="#0F172A"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="6dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Manage appointments and assist your assigned doctor"
+                android:textColor="#475569"
+                android:textSize="13sp"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#DDD6FE"
+                android:layout_marginBottom="14dp"/>
+
+            <Button
+                android:id="@+id/btnSecretary"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="Register as Secretary →"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/button_purple"
+                android:elevation="2dp"/>
+        </LinearLayout>
+
+        <!-- Doctor Card -->
+        <LinearLayout
+            android:id="@+id/cardDoctor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg_green"
+            android:padding="20dp"
+            android:layout_marginBottom="24dp"
+            android:elevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:text="👨‍⚕️"
+                    android:textSize="24sp"
+                    android:gravity="center"
+                    android:background="@drawable/icon_bg_white"
+                    android:elevation="2dp"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Doctor"
+                android:textColor="#0F172A"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="6dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Manage your patients, schedule, and appointments"
+                android:textColor="#475569"
+                android:textSize="13sp"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#BBF7D0"
+                android:layout_marginBottom="14dp"/>
+
+            <Button
+                android:id="@+id/btnDoctor"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="Register as Doctor →"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/button_green"
+                android:elevation="2dp"/>
+        </LinearLayout>
+
+        <!-- Sign in link -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/badge_bg"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginBottom="32dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Already have an account?"
+                android:textColor="#64748B"
+                android:textSize="12sp"
+                android:layout_marginEnd="6dp"/>
+            <Button
+                android:id="@+id/btnBackToLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign in →"
+                android:textColor="#2563EB"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="@null"
+                android:padding="0dp"
+                android:minHeight="0dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

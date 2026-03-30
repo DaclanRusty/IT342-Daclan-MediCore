@@ -27,18 +27,21 @@ public class Patient {
 
     public Patient() {}
 
+    // ── Getters ──────────────────────────────
     public Long getPatientId()         { return patientId; }
     public User getUser()              { return user; }
     public LocalDate getDateOfBirth()  { return dateOfBirth; }
     public String getGender()          { return gender; }
     public String getAddress()         { return address; }
 
+    // ── Setters ──────────────────────────────
     public void setPatientId(Long patientId)       { this.patientId = patientId; }
     public void setUser(User user)                 { this.user = user; }
     public void setDateOfBirth(LocalDate d)        { this.dateOfBirth = d; }
     public void setGender(String gender)           { this.gender = gender; }
     public void setAddress(String address)         { this.address = address; }
 
+    // ── Builder ───────────────────────────────
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {

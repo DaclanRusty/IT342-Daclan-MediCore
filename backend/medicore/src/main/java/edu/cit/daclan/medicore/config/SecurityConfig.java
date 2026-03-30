@@ -3,11 +3,11 @@ package edu.cit.daclan.medicore.config;
 import edu.cit.daclan.medicore.security.JwtAuthFilter;
 import edu.cit.daclan.medicore.security.OAuth2LoginFailureHandler;
 import edu.cit.daclan.medicore.security.OAuth2LoginSuccessHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.authentication.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,7 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.*;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
@@ -41,44 +43,56 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // ── Session: STATELESS for JWT, but OAuth2 redirect needs a brief session ──
-                // We use IF_REQUIRED so Spring can maintain the OAuth2 state parameter
-                // during the Google redirect round-trip, then discard it immediately.
+                // IF_REQUIRED keeps OAuth2 redirect state working while staying
+                // effectively stateless for all JWT API calls
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
                 .authorizeHttpRequests(auth -> auth
-                        // ── Public endpoints ──────────────────────────────────────
+
+                        // ── Public endpoints ──────────────────────────────────────────
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        // ── OAuth2 redirect endpoints (must be public) ────────────
+
+                        // ── OAuth2 redirect endpoints ─────────────────────────────────
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
-                        // ── Admin only ────────────────────────────────────────────
+                        // ── Admin only ────────────────────────────────────────────────
                         .requestMatchers("/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
 
-                        // ── Doctor only ───────────────────────────────────────────
+                        // ── Doctor only ───────────────────────────────────────────────
                         .requestMatchers("/api/v1/doctor/**").hasAuthority("ROLE_DOCTOR")
 
-                        // ── Secretary only ────────────────────────────────────────
+                        // ── Secretary only ────────────────────────────────────────────
                         .requestMatchers("/api/v1/secretary/**").hasAuthority("ROLE_SECRETARY")
 
-                        // ── Patient only ──────────────────────────────────────────
+                        // ── Patient only ──────────────────────────────────────────────
                         .requestMatchers("/api/v1/patient/**").hasAuthority("ROLE_PATIENT")
 
-                        // ── Appointments — secretary + doctor + patient ───────────
+                        // ── Doctor directory — patients and admins only ───────────────
+                        // FIX: was missing, fell through to anyRequest().authenticated()
+                        // which allowed any role but gave no explicit access control
+                        .requestMatchers(HttpMethod.GET, "/api/v1/doctors").hasAnyAuthority(
+                                "ROLE_PATIENT", "ROLE_ADMIN")
+
+                        // ── Appointments — secretary + doctor + patient ───────────────
+                        .requestMatchers("/api/v1/appointments/**").hasAnyAuthority(
+                                "ROLE_SECRETARY", "ROLE_DOCTOR", "ROLE_PATIENT")
+
+                        // ── Appointments — secretary + doctor + patient ───────────────────────
+                        // Already in your config — no change needed for existing rule
                         .requestMatchers("/api/v1/appointments/**").hasAnyAuthority(
                                 "ROLE_SECRETARY", "ROLE_DOCTOR", "ROLE_PATIENT")
 
                         .anyRequest().authenticated()
                 )
 
-                // ── OAuth2 Login (professor's redirect flow) ──────────────────
+                // ── OAuth2 Login ──────────────────────────────────────────────────
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
                 )
 
-                // ── JWT filter for API calls ──────────────────────────────────
+                // ── JWT filter ────────────────────────────────────────────────────
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

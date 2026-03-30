@@ -29,6 +29,7 @@ public class Doctor {
 
     public Doctor() {}
 
+    // ── Getters ──────────────────────────────
     public Long getDoctorId()         { return doctorId; }
     public User getUser()             { return user; }
     public String getLicenseNumber()  { return licenseNumber; }
@@ -36,6 +37,7 @@ public class Doctor {
     public String getProfilePicture() { return profilePicture; }
     public String getStatus()         { return status; }
 
+    // ── Setters ──────────────────────────────
     public void setDoctorId(Long doctorId)         { this.doctorId = doctorId; }
     public void setUser(User user)                 { this.user = user; }
     public void setLicenseNumber(String l)         { this.licenseNumber = l; }
@@ -43,6 +45,7 @@ public class Doctor {
     public void setProfilePicture(String p)        { this.profilePicture = p; }
     public void setStatus(String status)           { this.status = status; }
 
+    // ── Builder ───────────────────────────────
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
