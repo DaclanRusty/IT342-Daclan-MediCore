@@ -23,10 +23,23 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
+    // ── Basic token (email + role only) ───────────────────────────────────
+    // Used by OAuth2LoginSuccessHandler — at that point we only have
+    // the User entity, so we call the enriched overload below instead.
     public String generateAccessToken(String email, String role) {
+        return generateAccessToken(email, role, "", "");
+    }
+
+    // ── Enriched token (email + role + name) ─────────────────────────────
+    // Always prefer this overload so AuthCallbackPage can read
+    // payload.firstname and payload.lastname without an extra API call.
+    public String generateAccessToken(String email, String role,
+                                      String firstname, String lastname) {
         return Jwts.builder()
                 .subject(email)
-                .claim("role", role)
+                .claim("role",      role)
+                .claim("firstname", firstname != null ? firstname : "")
+                .claim("lastname",  lastname  != null ? lastname  : "")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey())

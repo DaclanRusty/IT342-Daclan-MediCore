@@ -1,48 +1,52 @@
 package edu.cit.daclan.medicore.controller;
 
 import edu.cit.daclan.medicore.dto.response.ApiResponse;
-import edu.cit.daclan.medicore.dto.response.DoctorSummaryResponse;
-import edu.cit.daclan.medicore.service.DoctorApprovalService;
+import edu.cit.daclan.medicore.service.SecretaryApprovalService;
+import edu.cit.daclan.medicore.service.SecretaryApprovalService.SecretarySummaryResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.UUID;
 
+import java.util.List;
+
+/**
+ * Doctor-facing endpoints for managing their secretaries.
+ * The doctor is identified from the JWT token — no doctorId needed in the path.
+ *
+ * Endpoints match DoctorDashboard.jsx → doctorApi calls:
+ *   GET  /api/v1/doctor/secretary-requests        → getSecretaryRequests()
+ *   PUT  /api/v1/doctor/secretary-requests/{id}/approve  → approveSecretary(id)
+ *   PUT  /api/v1/doctor/secretary-requests/{id}/reject   → rejectSecretary(id)
+ */
 @RestController
-@RequestMapping("/api/v1/secretary")
+@RequestMapping("/api/v1/doctor/secretary-requests")
 public class SecretaryController {
 
-    private final DoctorApprovalService doctorApprovalService;
+    private final SecretaryApprovalService secretaryApprovalService;
 
-    public SecretaryController(DoctorApprovalService doctorApprovalService) {
-        this.doctorApprovalService = doctorApprovalService;
+    public SecretaryController(SecretaryApprovalService secretaryApprovalService) {
+        this.secretaryApprovalService = secretaryApprovalService;
     }
 
-    // GET all pending doctors
-    @GetMapping("/doctors/pending")
-    public ResponseEntity<ApiResponse<List<DoctorSummaryResponse>>> getPendingDoctors() {
-        return ResponseEntity.ok(ApiResponse.success(doctorApprovalService.getPendingDoctors()));
+    // GET all secretary requests (all statuses) for the logged-in doctor
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<SecretarySummaryResponse>>> getAll() {
+        return ResponseEntity.ok(
+                ApiResponse.success(secretaryApprovalService.getAllSecretaries()));
     }
 
-    // GET all doctors (all statuses)
-    @GetMapping("/doctors")
-    public ResponseEntity<ApiResponse<List<DoctorSummaryResponse>>> getAllDoctors() {
-        return ResponseEntity.ok(ApiResponse.success(doctorApprovalService.getAllDoctors()));
-    }
-
-    // PUT approve doctor
-    @PutMapping("/doctors/{doctorId}/approve")
-    public ResponseEntity<ApiResponse<DoctorSummaryResponse>> approveDoctor(
-            @PathVariable UUID doctorId) {
+    // PUT approve a secretary
+    @PutMapping("/{secretaryId}/approve")
+    public ResponseEntity<ApiResponse<SecretarySummaryResponse>> approve(
+            @PathVariable Long secretaryId) {
         return ResponseEntity.ok(ApiResponse.success(
-                doctorApprovalService.updateDoctorStatus(doctorId, "APPROVED")));
+                secretaryApprovalService.updateSecretaryStatus(secretaryId, "APPROVED")));
     }
 
-    // PUT reject doctor
-    @PutMapping("/doctors/{doctorId}/reject")
-    public ResponseEntity<ApiResponse<DoctorSummaryResponse>> rejectDoctor(
-            @PathVariable UUID doctorId) {
+    // PUT reject a secretary
+    @PutMapping("/{secretaryId}/reject")
+    public ResponseEntity<ApiResponse<SecretarySummaryResponse>> reject(
+            @PathVariable Long secretaryId) {
         return ResponseEntity.ok(ApiResponse.success(
-                doctorApprovalService.updateDoctorStatus(doctorId, "REJECTED")));
+                secretaryApprovalService.updateSecretaryStatus(secretaryId, "REJECTED")));
     }
 }
