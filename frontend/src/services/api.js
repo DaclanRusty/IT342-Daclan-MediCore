@@ -52,21 +52,13 @@ export const authApi = {
   registerPatient: (formData) =>
     request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({
-        ...formData,
-        role: 'PATIENT',
-        googleVerified: true,
-      }),
+      body: JSON.stringify({ ...formData, role: 'PATIENT', googleVerified: true }),
     }),
 
   registerDoctor: (formData) =>
     request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({
-        ...formData,
-        role: 'DOCTOR',
-        googleVerified: true,
-      }),
+      body: JSON.stringify({ ...formData, role: 'DOCTOR', googleVerified: true }),
     }),
 
   getAvailableDoctors: () => request('/auth/doctors/available'),
@@ -74,11 +66,7 @@ export const authApi = {
   registerSecretary: (formData) =>
     request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({
-        ...formData,
-        role: 'SECRETARY',
-        googleVerified: true,
-      }),
+      body: JSON.stringify({ ...formData, role: 'SECRETARY', googleVerified: true }),
     }),
 };
 
@@ -100,81 +88,56 @@ export const tokenStorage = {
 };
 
 export const adminApi = {
-  // ── Users ────────────────────────────────────────────────────────────────
-  getAllUsers: () => request('/admin/users'),
-
-  deleteUser: (userId) =>
-    request(`/admin/users/${userId}`, { method: 'DELETE' }),
-
-  updateUserRole: (userId, role) =>
-    request(`/admin/users/${userId}/role`, {
-      method: 'PUT',
-      body: JSON.stringify({ role }),
-    }),
-
-  // ── Block / Unblock ──────────────────────────────────────────────────────
-  blockUser: (userId) =>
-    request(`/admin/users/${userId}/block`, { method: 'PUT' }),
-
-  unblockUser: (userId) =>
-    request(`/admin/users/${userId}/unblock`, { method: 'PUT' }),
-
-  // ── Doctors ──────────────────────────────────────────────────────────────
-  getAllDoctors: () => request('/admin/doctors'),
-
-  approveDoctor: (doctorId) =>
-    request(`/admin/doctors/${doctorId}/approve`, { method: 'PUT' }),
-
-  rejectDoctor: (doctorId) =>
-    request(`/admin/doctors/${doctorId}/reject`, { method: 'PUT' }),
-
-  // ── Secretary Assignments ─────────────────────────────────────────────────
+  getAllUsers:    () => request('/admin/users'),
+  deleteUser:    (userId) => request(`/admin/users/${userId}`, { method: 'DELETE' }),
+  updateUserRole:(userId, role) => request(`/admin/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
+  blockUser:     (userId) => request(`/admin/users/${userId}/block`, { method: 'PUT' }),
+  unblockUser:   (userId) => request(`/admin/users/${userId}/unblock`, { method: 'PUT' }),
+  getAllDoctors:  () => request('/admin/doctors'),
+  approveDoctor: (doctorId) => request(`/admin/doctors/${doctorId}/approve`, { method: 'PUT' }),
+  rejectDoctor:  (doctorId) => request(`/admin/doctors/${doctorId}/reject`, { method: 'PUT' }),
   getSecretaryAssignments: () => request('/admin/secretary-assignments'),
 };
 
 export const doctorApi = {
-  getSecretaryRequests: () => request('/doctor/secretary-requests'),
 
+  getAppointments: () => request('/appointments/doctor'),
+
+  getSecretaryRequests: () => request('/doctor/secretary-requests'),
   approveSecretary: (secretaryId) =>
     request(`/doctor/secretary-requests/${secretaryId}/approve`, { method: 'PUT' }),
-
   rejectSecretary: (secretaryId) =>
     request(`/doctor/secretary-requests/${secretaryId}/reject`, { method: 'PUT' }),
-
-  getAppointments: () => request('/doctor/appointments'),
+  getProfile: () => request('/doctor/profile'),
+  updateProfile: (payload) =>
+    request('/doctor/profile', { method: 'PUT', body: JSON.stringify(payload) }),
 };
 
-// ── Patient ───────────────────────────────────────────────────────────────────
 export const patientApi = {
-  // GET /appointments/me
-  // Returns all appointments for the logged-in patient.
-  // Patient ID is resolved from the JWT on the backend — no body needed.
-  getMyAppointments: () => request('/appointments/me'),
-
-  // GET /appointments/{id}
-  // Returns full details of a single appointment.
+  getMyAppointments:  () => request('/appointments/me'),
   getAppointmentById: (id) => request(`/appointments/${id}`),
+  getAllDoctors:       () => request('/doctors/with-secretary'),
+  bookAppointment:    (payload) => request('/appointments', { method: 'POST', body: JSON.stringify(payload) }),
+  getProfile:         () => request('/patient/profile'),
+  updateProfile:      (payload) => request('/patient/profile', { method: 'PUT', body: JSON.stringify(payload) }),
+};
+export const secretaryApi = {
+  getAppointments: () => request('/appointments/secretary'),
 
-  // FIX: GET /doctors  ← this endpoint must exist on your backend.
-  // Returns List<DoctorSummaryResponse> for all APPROVED doctors.
-  // See PatientController.java below for the required backend implementation.
-  getAllDoctors: () => request('/doctors'),
+ 
+  approveAppointment: (id) =>
+    request(`/appointments/${id}/approve`, { method: 'PUT' }),
 
-  // POST /appointments
-  // Submits a new appointment request. Status is set to PENDING by the backend.
-  // payload shape: { doctor_id, requested_date, requested_time, reason_for_visit }
-  bookAppointment: (payload) =>
-    request('/appointments', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    }),
+  rejectAppointment: (id) =>
+    request(`/appointments/${id}/reject`, { method: 'PUT' }),
+
+  getProfile: () => request('/secretary/profile'),
+
+  updateProfile: (payload) =>
+    request('/secretary/profile', { method: 'PUT', body: JSON.stringify(payload) }),
 };
 
-// ── Health Tips ───────────────────────────────────────────────────────────────
 export const healthTipsApi = {
-  // GET /health-tips
-  // Spring Boot proxies an external public API.
-  // Normalises both [{ tip: "..." }] and ["..."] response shapes.
   getTips: async () => {
     const data = await request('/health-tips');
     if (!Array.isArray(data)) return [];

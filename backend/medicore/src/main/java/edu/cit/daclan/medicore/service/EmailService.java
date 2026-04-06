@@ -93,7 +93,7 @@ public class EmailService {
                   </p>
                 </div>
                 <div class="footer">
-                  © 2026 MediCore. All rights reserved.<br/>
+                  © 2026 MediCore.
                   Cebu City, Philippines
                 </div>
               </div>
