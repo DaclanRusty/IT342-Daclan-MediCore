@@ -1,27 +1,26 @@
 package edu.cit.daclan.medicore.repository;
 
 import edu.cit.daclan.medicore.entity.Appointment;
+import edu.cit.daclan.medicore.entity.AppointmentStatus;
 import edu.cit.daclan.medicore.entity.Doctor;
 import edu.cit.daclan.medicore.entity.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;  // ← ADD THIS
 
 import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
+    // Patient
     List<Appointment> findAllByPatient(Patient patient);
+    List<Appointment> findAllByPatientAndStatusIn(Patient patient, List<AppointmentStatus> statuses);
 
-    List<Appointment> findAllByDoctorAndStatus(Doctor doctor, String status);
-
-    // ↓ Added @Param — this was causing the runtime error
-    @Query("SELECT a FROM Appointment a WHERE a.doctor = :doctor AND a.status = 'PENDING'")
-    List<Appointment> findPendingByDoctor(@Param("doctor") Doctor doctor);
-
-    // ↓ Also add this — secretary needs to see ALL statuses to manage them
+    // Doctor
     List<Appointment> findAllByDoctor(Doctor doctor);
+    List<Appointment> findAllByDoctorAndStatus(Doctor doctor, AppointmentStatus status);
+    List<Appointment> findAllByDoctorAndStatusIn(Doctor doctor, List<AppointmentStatus> statuses);
 
-    boolean existsByDoctorAndRequestedDateAndRequestedTime(
-            Doctor doctor, String requestedDate, String requestedTime);
+    // Slot conflict check — excludes cancelled/rejected so those slots free up
+    boolean existsByDoctorAndRequestedDateAndRequestedTimeAndStatusIn(
+            Doctor doctor, String requestedDate, String requestedTime,
+            List<AppointmentStatus> statuses);
 }

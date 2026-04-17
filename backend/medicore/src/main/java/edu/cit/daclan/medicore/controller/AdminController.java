@@ -1,5 +1,6 @@
 package edu.cit.daclan.medicore.controller;
 
+import edu.cit.daclan.medicore.entity.AppointmentStatus;
 import edu.cit.daclan.medicore.dto.response.ApiResponse;
 import edu.cit.daclan.medicore.dto.response.DoctorSummaryResponse;
 import edu.cit.daclan.medicore.entity.Appointment;
@@ -22,19 +23,19 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/admin")
 public class AdminController {
 
-    private final DoctorApprovalService  doctorApprovalService;
-    private final SecretaryRepository    secretaryRepository;
-    private final UserRepository         userRepository;
-    private final AppointmentRepository  appointmentRepository;  // ← NEW
+    private final DoctorApprovalService doctorApprovalService;
+    private final SecretaryRepository   secretaryRepository;
+    private final UserRepository        userRepository;
+    private final AppointmentRepository appointmentRepository;
 
     public AdminController(DoctorApprovalService doctorApprovalService,
                            SecretaryRepository secretaryRepository,
                            UserRepository userRepository,
-                           AppointmentRepository appointmentRepository) {   // ← NEW
+                           AppointmentRepository appointmentRepository) {
         this.doctorApprovalService = doctorApprovalService;
         this.secretaryRepository   = secretaryRepository;
         this.userRepository        = userRepository;
-        this.appointmentRepository = appointmentRepository;                 // ← NEW
+        this.appointmentRepository = appointmentRepository;
     }
 
     // ── Users ─────────────────────────────────────────────────────────────
@@ -90,10 +91,10 @@ public class AdminController {
         return Map.of(
                 "userId",      u.getUserId(),
                 "firstName",   u.getFirstName()   != null ? u.getFirstName()   : "",
-                "lastName",    u.getLastName()    != null ? u.getLastName()    : "",
+                "lastName",    u.getLastName()     != null ? u.getLastName()    : "",
                 "email",       u.getEmail(),
-                "role",        u.getRole()        != null ? u.getRole()        : "",
-                "phoneNumber", u.getPhoneNumber() != null ? u.getPhoneNumber() : "",
+                "role",        u.getRole()         != null ? u.getRole()        : "",
+                "phoneNumber", u.getPhoneNumber()  != null ? u.getPhoneNumber() : "",
                 "status",      status
         );
     }
@@ -151,11 +152,6 @@ public class AdminController {
     }
 
     // ── Analytics ─────────────────────────────────────────────────────────
-    // GET /api/v1/admin/analytics
-    //
-    // Returns a single object with real counts for users, doctors,
-    // appointments (by status, daily this week, monthly this year), and
-    // secretary assignments — no placeholder data.
 
     @GetMapping("/analytics")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAnalytics() {
@@ -164,12 +160,12 @@ public class AdminController {
         List<User> allUsers = userRepository.findAll();
 
         Map<String, Object> usersMap = new LinkedHashMap<>();
-        usersMap.put("total",      (long) allUsers.size());
-        usersMap.put("patients",   allUsers.stream().filter(u -> "PATIENT".equalsIgnoreCase(u.getRole())).count());
-        usersMap.put("doctors",    allUsers.stream().filter(u -> "DOCTOR".equalsIgnoreCase(u.getRole())).count());
-        usersMap.put("secretaries",allUsers.stream().filter(u -> "SECRETARY".equalsIgnoreCase(u.getRole())).count());
-        usersMap.put("admins",     allUsers.stream().filter(u -> "ADMIN".equalsIgnoreCase(u.getRole())).count());
-        usersMap.put("blocked",    allUsers.stream().filter(u -> "BLOCKED".equalsIgnoreCase(u.getStatus())).count());
+        usersMap.put("total",       (long) allUsers.size());
+        usersMap.put("patients",    allUsers.stream().filter(u -> "PATIENT".equalsIgnoreCase(u.getRole())).count());
+        usersMap.put("doctors",     allUsers.stream().filter(u -> "DOCTOR".equalsIgnoreCase(u.getRole())).count());
+        usersMap.put("secretaries", allUsers.stream().filter(u -> "SECRETARY".equalsIgnoreCase(u.getRole())).count());
+        usersMap.put("admins",      allUsers.stream().filter(u -> "ADMIN".equalsIgnoreCase(u.getRole())).count());
+        usersMap.put("blocked",     allUsers.stream().filter(u -> "BLOCKED".equalsIgnoreCase(u.getStatus())).count());
 
         // ── 2. Doctors ────────────────────────────────────────────────────
         List<DoctorSummaryResponse> doctorSummaries = doctorApprovalService.getAllDoctors();
@@ -183,15 +179,16 @@ public class AdminController {
         // ── 3. Appointments ───────────────────────────────────────────────
         List<Appointment> allAppts = appointmentRepository.findAll();
 
-        long apptPending   = allAppts.stream().filter(a -> "PENDING".equalsIgnoreCase(a.getStatus())).count();
-        long apptApproved  = allAppts.stream().filter(a -> "APPROVED".equalsIgnoreCase(a.getStatus())).count();
-        long apptRejected  = allAppts.stream().filter(a -> "REJECTED".equalsIgnoreCase(a.getStatus())).count();
-        long apptCompleted = allAppts.stream().filter(a -> "COMPLETED".equalsIgnoreCase(a.getStatus())).count();
+        long apptPending   = allAppts.stream().filter(a -> AppointmentStatus.PENDING    == a.getStatus()).count();
+        long apptConfirmed = allAppts.stream().filter(a -> AppointmentStatus.CONFIRMED  == a.getStatus()).count();
+        long apptRejected  = allAppts.stream().filter(a -> AppointmentStatus.REJECTED   == a.getStatus()).count();
+        long apptCompleted = allAppts.stream().filter(a -> AppointmentStatus.COMPLETED  == a.getStatus()).count();
+        long apptCancelled = allAppts.stream().filter(a -> AppointmentStatus.CANCELLED  == a.getStatus()).count();
 
-        // Today's count (requestedDate is stored as "yyyy-MM-dd" String)
-        String    todayStr = LocalDate.now().toString();
-        LocalDate today    = LocalDate.now();
-        long todayTotal = allAppts.stream()
+        // Today's count
+        String    todayStr  = LocalDate.now().toString();
+        LocalDate today     = LocalDate.now();
+        long      todayTotal = allAppts.stream()
                 .filter(a -> todayStr.equals(a.getRequestedDate()))
                 .count();
 
@@ -227,12 +224,14 @@ public class AdminController {
             monthlyList.add(entry);
         }
 
+        // ← THIS was the missing declaration that caused the compile error
         Map<String, Object> appointmentsMap = new LinkedHashMap<>();
         appointmentsMap.put("total",     (long) allAppts.size());
         appointmentsMap.put("pending",   apptPending);
-        appointmentsMap.put("approved",  apptApproved);
+        appointmentsMap.put("confirmed", apptConfirmed);
         appointmentsMap.put("rejected",  apptRejected);
         appointmentsMap.put("completed", apptCompleted);
+        appointmentsMap.put("cancelled", apptCancelled);
         appointmentsMap.put("today",     todayTotal);
         appointmentsMap.put("weekly",    weeklyList);
         appointmentsMap.put("monthly",   monthlyList);
