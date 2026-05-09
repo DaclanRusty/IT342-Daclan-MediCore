@@ -1,7 +1,7 @@
   import React, { useState, useEffect } from 'react';
   import { useNavigate, useLocation } from 'react-router-dom';
-  import { authApi } from '../services/api';
-  import { useAuth } from '../context/AuthContext';
+  import { authApi } from '../shared/api';
+  import { useAuth } from '../auth/AuthContext';
 
   const BACKEND_URL = 'http://localhost:8081';
 

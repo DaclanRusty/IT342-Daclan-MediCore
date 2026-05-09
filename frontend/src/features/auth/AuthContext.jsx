@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { tokenStorage } from '../services/api';
+import { tokenStorage } from '../shared/api';
 
 const AuthContext = createContext(null);
 

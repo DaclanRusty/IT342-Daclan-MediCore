@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { tokenStorage } from '../services/api';
+import { useAuth } from '../auth/AuthContext';
+import { tokenStorage } from '../shared/api';
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();

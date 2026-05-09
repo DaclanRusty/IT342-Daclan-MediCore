@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { doctorApi } from '../services/api';
+import { useAuth } from '../auth/AuthContext';
+import { doctorApi } from '../shared/api';
 
 // ── Global Styles ────────────────────────────────────────────────────────
 const GlobalStyles = () => (

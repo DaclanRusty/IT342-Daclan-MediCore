@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { secretaryApi } from "../services/api";
+import { useAuth } from "../auth/AuthContext";
+import { secretaryApi } from "../shared/api";
 
 const GlobalStyles = () => (
   <>

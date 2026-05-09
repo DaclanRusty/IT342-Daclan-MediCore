@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authApi } from '../services/api';
+import { authApi } from '../shared/api';
 import { useGoogleLogin } from '@react-oauth/google';
 
 export default function SecretaryRegisterPage() {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authApi } from '../services/api';
+import { authApi } from '../shared/api';
 import { useGoogleLogin } from '@react-oauth/google';
 
 const GENDERS = ['Male', 'Female', 'Other'];

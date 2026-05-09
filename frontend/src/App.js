@@ -1,65 +1,59 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterRolePage from './pages/RegisterRolePage';
-import PatientRegisterPage from './pages/PatientRegisterPage';
-import DoctorRegisterPage from './pages/DoctorRegisterPage';
-import SecretaryRegisterPage from './pages/SecretaryRegisterPage';
-import SecretaryDashboard from './pages/SecretaryDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import DoctorDashboard from './pages/DoctorDashboard';
-import PatientDashboard from './pages/PatientDashboard'; // ← real dashboard
-import AuthCallbackPage from './pages/AuthCallBackPage';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-function ProtectedRoute({ children, requiredRole }) {
-  const { user, isAuthenticated } = useAuth();
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (requiredRole && user?.role?.toLowerCase() !== requiredRole) {
-    return <Navigate to={`/dashboard/${user?.role?.toLowerCase()}`} replace />;
-  }
-  return children;
-}
+// ─── Auth Feature ─────────────────────────────────────────────────────────────
+import { AuthProvider } from './features/auth/AuthContext';
+import LoginPage from './features/auth/LoginPage';
+import RegisterRolePage from './features/auth/RegisterRolePage';
+import PatientRegisterPage from './features/auth/PatientRegisterPage';
+import DoctorRegisterPage from './features/auth/DoctorRegisterPage';
+import SecretaryRegisterPage from './features/auth/SecretaryRegisterPage';
+import AuthCallBackPage from './features/auth/AuthCallBackPage';
 
-function AppRoutes() {
+// ─── Admin Feature ────────────────────────────────────────────────────────────
+import AdminDashboard from './features/admin/AdminDashboard';
+
+// ─── Doctor Feature ───────────────────────────────────────────────────────────
+import DoctorDashboard from './features/doctor/DoctorDashboard';
+
+// ─── Patient Feature ──────────────────────────────────────────────────────────
+import PatientDashboard from './features/patient/PatientDashboard';
+
+// ─── Secretary Feature ────────────────────────────────────────────────────────
+import SecretaryDashboard from './features/secretary/SecretaryDashboard';
+
+// ─── Shared ───────────────────────────────────────────────────────────────────
+import LandingPage from './features/shared/LandingPage';
+
+function App() {
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Shared */}
+          <Route path="/" element={<LandingPage />} />
 
-      {/* Registration */}
-      <Route path="/register" element={<RegisterRolePage />} />
-      <Route path="/register/patient" element={<PatientRegisterPage />} />
-      <Route path="/register/doctor" element={<DoctorRegisterPage />} />
-      <Route path="/register/secretary" element={<SecretaryRegisterPage />} />
+          {/* Auth */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterRolePage />} />
+          <Route path="/register/patient" element={<PatientRegisterPage />} />
+          <Route path="/register/doctor" element={<DoctorRegisterPage />} />
+          <Route path="/register/secretary" element={<SecretaryRegisterPage />} />
+          <Route path="/auth/callback" element={<AuthCallBackPage />} />
 
-      {/* Protected Dashboards */}
-      <Route path="/dashboard/patient" element={
-        <ProtectedRoute requiredRole="patient"><PatientDashboard /></ProtectedRoute>
-      } />
-      <Route path="/dashboard/doctor" element={
-        <ProtectedRoute requiredRole="doctor"><DoctorDashboard /></ProtectedRoute>
-      } />
-      <Route path="/dashboard/secretary" element={
-        <ProtectedRoute requiredRole="secretary"><SecretaryDashboard /></ProtectedRoute>
-      } />
-      <Route path="/dashboard/admin" element={
-        <ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>
-      } />
-
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+          {/* Dashboards - both old and new paths */}
+          <Route path="/admin/*" element={<AdminDashboard />} />
+          <Route path="/dashboard/admin/*" element={<AdminDashboard />} />
+          <Route path="/doctor/*" element={<DoctorDashboard />} />
+          <Route path="/dashboard/doctor/*" element={<DoctorDashboard />} />
+          <Route path="/patient/*" element={<PatientDashboard />} />
+          <Route path="/dashboard/patient/*" element={<PatientDashboard />} />
+          <Route path="/secretary/*" element={<SecretaryDashboard />} />
+          <Route path="/dashboard/secretary/*" element={<SecretaryDashboard />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
-  );
-}
+export default App;
