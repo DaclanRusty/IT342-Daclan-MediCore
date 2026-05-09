@@ -1,4 +1,4 @@
-package com.daclan.mobile.network
+package com.daclan.mobile.shared.network
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

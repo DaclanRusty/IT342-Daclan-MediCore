@@ -1,6 +1,8 @@
-package com.daclan.mobile
+package com.daclan.mobile.feature.auth
 
 import android.content.Intent
+import com.daclan.mobile.feature.dashboard.DashboardActivity
+import com.daclan.mobile.R
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -9,8 +11,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.daclan.mobile.network.LoginRequest
-import com.daclan.mobile.network.RetrofitClient
+import com.daclan.mobile.shared.network.LoginRequest
+import com.daclan.mobile.shared.network.RetrofitClient
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {

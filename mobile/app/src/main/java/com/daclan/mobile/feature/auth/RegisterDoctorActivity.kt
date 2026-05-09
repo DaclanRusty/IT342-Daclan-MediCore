@@ -1,79 +1,57 @@
-package com.daclan.mobile
+package com.daclan.mobile.feature.auth
 
 import android.content.Intent
+import com.daclan.mobile.R
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.daclan.mobile.network.AvailableDoctor
-import com.daclan.mobile.network.RegisterRequest
-import com.daclan.mobile.network.RetrofitClient
+import com.daclan.mobile.shared.network.RegisterRequest
+import com.daclan.mobile.shared.network.RetrofitClient
 import kotlinx.coroutines.launch
 
-class RegisterSecretaryActivity : AppCompatActivity() {
+class RegisterDoctorActivity : AppCompatActivity() {
 
     private lateinit var etFirstName: EditText
     private lateinit var etLastName: EditText
     private lateinit var etEmail: EditText
     private lateinit var etPhone: EditText
+    private lateinit var spinnerSpec: Spinner
+    private lateinit var etLicense: EditText
     private lateinit var etPassword: EditText
     private lateinit var etConfirmPassword: EditText
-    private lateinit var spinnerDoctor: Spinner
-    private lateinit var tvDoctorLoading: TextView
     private lateinit var btnRegister: Button
     private lateinit var btnBack: Button
     private lateinit var tvError: TextView
 
-    private var availableDoctors: List<AvailableDoctor> = emptyList()
+    private val specializations = listOf(
+        "Select Specialization","General Medicine","Cardiology","Dermatology",
+        "Endocrinology","Gastroenterology","Neurology","Obstetrics & Gynecology",
+        "Oncology","Ophthalmology","Orthopedics","Pediatrics","Psychiatry",
+        "Pulmonology","Radiology","Surgery","Urology","Other"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_register_secretary)
+        setContentView(R.layout.activity_register_doctor)
 
         etFirstName       = findViewById(R.id.etFirstName)
         etLastName        = findViewById(R.id.etLastName)
         etEmail           = findViewById(R.id.etEmail)
         etPhone           = findViewById(R.id.etPhone)
+        spinnerSpec       = findViewById(R.id.spinnerSpecialization)
+        etLicense         = findViewById(R.id.etLicenseNumber)
         etPassword        = findViewById(R.id.etPassword)
         etConfirmPassword = findViewById(R.id.etConfirmPassword)
-        spinnerDoctor     = findViewById(R.id.spinnerDoctor)
-        tvDoctorLoading   = findViewById(R.id.tvDoctorLoading)
         btnRegister       = findViewById(R.id.btnRegister)
         btnBack           = findViewById(R.id.btnBack)
         tvError           = findViewById(R.id.tvError)
 
+        spinnerSpec.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, specializations)
+
         btnBack.setOnClickListener { finish() }
         btnRegister.setOnClickListener { handleRegister() }
-
-        loadDoctors()
-    }
-
-    private fun loadDoctors() {
-        tvDoctorLoading.text = "Loading available doctors..."
-        lifecycleScope.launch {
-            try {
-                val response = RetrofitClient.instance.getAvailableDoctors()
-                if (response.isSuccessful) {
-                    availableDoctors = response.body()?.data ?: emptyList()
-                    val names = mutableListOf("Select a Doctor")
-                    names.addAll(availableDoctors.map {
-                        "Dr. ${it.firstname} ${it.lastname} — ${it.specialization}"
-                    })
-                    spinnerDoctor.adapter = ArrayAdapter(
-                        this@RegisterSecretaryActivity,
-                        android.R.layout.simple_spinner_dropdown_item,
-                        names
-                    )
-                    tvDoctorLoading.text = if (availableDoctors.isEmpty())
-                        "No available doctors at this time" else ""
-                } else {
-                    tvDoctorLoading.text = "Failed to load doctors"
-                }
-            } catch (e: Exception) {
-                tvDoctorLoading.text = "Connection error loading doctors"
-            }
-        }
     }
 
     private fun handleRegister() {
@@ -81,9 +59,10 @@ class RegisterSecretaryActivity : AppCompatActivity() {
         val lastName        = etLastName.text.toString().trim()
         val email           = etEmail.text.toString().trim()
         val phone           = etPhone.text.toString().trim()
+        val specialization  = spinnerSpec.selectedItem.toString()
+        val license         = etLicense.text.toString().trim()
         val password        = etPassword.text.toString().trim()
         val confirmPassword = etConfirmPassword.text.toString().trim()
-        val doctorIndex     = spinnerDoctor.selectedItemPosition
 
         when {
             firstName.isEmpty()  -> { showError("First name is required"); return }
@@ -91,13 +70,12 @@ class RegisterSecretaryActivity : AppCompatActivity() {
             email.isEmpty()      -> { showError("Email is required"); return }
             !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
             -> { showError("Enter a valid email address"); return }
+            specialization == "Select Specialization" -> { showError("Please select a specialization"); return }
+            license.isEmpty()    -> { showError("License number is required"); return }
             password.length < 8  -> { showError("Password must be at least 8 characters"); return }
             password != confirmPassword -> { showError("Passwords do not match"); return }
-            doctorIndex == 0 || availableDoctors.isEmpty()
-            -> { showError("Please select a doctor"); return }
         }
 
-        val selectedDoctor = availableDoctors[doctorIndex - 1]
         hideError()
         setLoading(true)
 
@@ -110,16 +88,17 @@ class RegisterSecretaryActivity : AppCompatActivity() {
                         email          = email,
                         password       = password,
                         phoneNumber    = phone,
-                        role           = "SECRETARY",
+                        role           = "DOCTOR",
                         googleVerified = true,
-                        doctorId       = selectedDoctor.doctorId
+                        specialization = specialization,
+                        licenseNumber  = license
                     )
                 )
 
                 if (response.isSuccessful) {
                     val msg = response.body()?.data?.message
-                        ?: "Registration submitted! Please wait for the doctor to approve."
-                    val intent = Intent(this@RegisterSecretaryActivity, LoginActivity::class.java)
+                        ?: "Registration submitted! Please wait for admin approval."
+                    val intent = Intent(this@RegisterDoctorActivity, LoginActivity::class.java)
                     intent.putExtra("success_message", msg)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                     startActivity(intent)
@@ -127,7 +106,7 @@ class RegisterSecretaryActivity : AppCompatActivity() {
                 } else {
                     val msg = response.body()?.message
                         ?: when (response.code()) {
-                            409  -> "Email already registered"
+                            409  -> "Email or license number already registered"
                             400  -> "Invalid details. Please check your inputs."
                             else -> "Registration failed (${response.code()})"
                         }
@@ -145,6 +124,6 @@ class RegisterSecretaryActivity : AppCompatActivity() {
     private fun hideError() { tvError.visibility = View.GONE }
     private fun setLoading(loading: Boolean) {
         btnRegister.isEnabled = !loading
-        btnRegister.text = if (loading) "Submitting…" else "Submit Registration Request →"
+        btnRegister.text = if (loading) "Submitting…" else "Create Doctor Account →"
     }
 }

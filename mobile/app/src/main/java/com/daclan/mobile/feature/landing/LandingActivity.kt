@@ -1,6 +1,9 @@
-package com.daclan.mobile
+package com.daclan.mobile.feature.landing
 
 import android.content.Intent
+import com.daclan.mobile.feature.auth.LoginActivity
+import com.daclan.mobile.feature.auth.RegisterChooseActivity
+import com.daclan.mobile.R
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity

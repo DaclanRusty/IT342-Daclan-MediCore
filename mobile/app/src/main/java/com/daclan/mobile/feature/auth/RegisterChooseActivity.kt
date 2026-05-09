@@ -1,6 +1,7 @@
-package com.daclan.mobile
+package com.daclan.mobile.feature.auth
 
 import android.content.Intent
+import com.daclan.mobile.R
 import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout

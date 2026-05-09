@@ -1,4 +1,4 @@
-package com.daclan.mobile
+package com.daclan.mobile.shared
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
