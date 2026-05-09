@@ -197,7 +197,8 @@ const TABS=[
   {key:"profile",      label:"Profile",      icon:<UserIcon/>},
 ];
 
-const Navbar = ({active,onTab,onLogout,user}) => {
+// ── Navbar — shows profile picture from patientProfile prop ──────────────
+const Navbar = ({active,onTab,onLogout,user,patientProfile}) => {
   const fn = user?.firstname||user?.firstName||"";
   const ln = user?.lastname||user?.lastName||"";
   return (
@@ -216,8 +217,12 @@ const Navbar = ({active,onTab,onLogout,user}) => {
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
           <div style={{display:"flex",alignItems:"center",gap:9}}>
-            <div style={{width:34,height:34,borderRadius:"50%",background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:13,boxShadow:`0 3px 10px rgba(37,99,235,.3)`}}>
-              {getInitials(fn,ln)||"P"}
+            {/* Navbar avatar — shows profile picture, no upload here */}
+            <div style={{width:34,height:34,borderRadius:"50%",background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:13,boxShadow:`0 3px 10px rgba(37,99,235,.3)`,overflow:"hidden"}}>
+              {patientProfile?.profilePicture
+                ? <img src={patientProfile.profilePicture} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                : getInitials(fn,ln)||"P"
+              }
             </div>
             <div style={{lineHeight:1.2}}>
               <div style={{fontSize:10.5,color:C.slateXL,fontWeight:600}}>Patient</div>
@@ -258,11 +263,7 @@ const PageBanner = ({tab}) => {
   );
 };
 
-// ── Time slot helpers ─────────────────────────────────────────────────────
-const ALL_SLOTS = [
-  "08:00 AM","09:00 AM","10:00 AM","11:00 AM",
-  "01:00 PM","02:00 PM","03:00 PM","04:00 PM",
-];
+const ALL_SLOTS = ["08:00 AM","09:00 AM","10:00 AM","11:00 AM","01:00 PM","02:00 PM","03:00 PM","04:00 PM"];
 
 function slotToMinutes(slot) {
   const parts = slot.trim().split(" ");
@@ -273,7 +274,6 @@ function slotToMinutes(slot) {
   return h * 60 + m;
 }
 
-// ── BookModal ─────────────────────────────────────────────────────────────
 const BookModal = ({doctors, onSuccess, onClose, preselectedDoctor = null}) => {
   const [step,       setStep]       = useState(preselectedDoctor ? 2 : 1);
   const [sel,        setSel]        = useState(preselectedDoctor);
@@ -284,24 +284,16 @@ const BookModal = ({doctors, onSuccess, onClose, preselectedDoctor = null}) => {
   const [err,        setErr]        = useState("");
   const [takenSlots, setTakenSlots] = useState([]);
   const [loadSlots,  setLoadSlots]  = useState(false);
-
   const today = new Date().toISOString().split("T")[0];
-
   const normalize = (s) => s?.trim().replace(/\s+/g," ").toUpperCase() || "";
 
-  // Fetch taken slots whenever doctor + date change
   useEffect(() => {
     if (!sel || !date) { setTakenSlots([]); return; }
     (async () => {
       setLoadSlots(true);
-      try {
-        const taken = await patientApi.getTakenSlots(docId(sel), date);
-        setTakenSlots(Array.isArray(taken) ? taken : []);
-      } catch {
-        setTakenSlots([]);
-      } finally {
-        setLoadSlots(false);
-      }
+      try { const taken = await patientApi.getTakenSlots(docId(sel), date); setTakenSlots(Array.isArray(taken) ? taken : []); }
+      catch { setTakenSlots([]); }
+      finally { setLoadSlots(false); }
     })();
   }, [sel, date]);
 
@@ -310,40 +302,26 @@ const BookModal = ({doctors, onSuccess, onClose, preselectedDoctor = null}) => {
     if (takenSlots.some(t => normalize(t) === slotNorm)) return "taken";
     if (date === today) {
       const now = new Date();
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
-      if (slotToMinutes(slot) <= nowMinutes) return "past";
+      if (slotToMinutes(slot) <= now.getHours() * 60 + now.getMinutes()) return "past";
     }
     return "available";
   };
 
-  // Clear selected time if it becomes unavailable
-  useEffect(() => {
-    if (time && getSlotState(time) !== "available") setTime("");
-  }, [takenSlots, date]);
+  useEffect(() => { if (time && getSlotState(time) !== "available") setTime(""); }, [takenSlots, date]);
 
   const submit = async () => {
-    if (!sel || !date || !time || !reason.trim()) {
-      setErr("Please fill in all required fields."); return;
-    }
+    if (!sel || !date || !time || !reason.trim()) { setErr("Please fill in all required fields."); return; }
     setBusy(true); setErr("");
     try {
-      await patientApi.bookAppointment({
-        doctor_id:        docId(sel),
-        requested_date:   date,
-        requested_time:   time,
-        reason_for_visit: reason.trim(),
-      });
+      await patientApi.bookAppointment({ doctor_id:docId(sel), requested_date:date, requested_time:time, reason_for_visit:reason.trim() });
       onSuccess("Appointment submitted! Status: Pending — awaiting secretary approval.");
-    } catch(e) {
-      setErr(e.message || "Failed to submit appointment. Please try again.");
-    } finally { setBusy(false); }
+    } catch(e) { setErr(e.message || "Failed to submit appointment. Please try again."); }
+    finally { setBusy(false); }
   };
 
   return (
     <div className="modal-bg" style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(15,23,42,.48)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)",padding:16}}>
       <div className="modal-box" style={{background:"#fff",borderRadius:24,padding:32,maxWidth:540,width:"100%",boxShadow:"0 32px 80px rgba(0,0,0,.22)",maxHeight:"90vh",overflowY:"auto"}}>
-
-        {/* Header */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
           <div>
             <h2 style={{fontFamily:"'Sora',sans-serif",fontSize:20,fontWeight:900,color:C.slate}}>Book an Appointment</h2>
@@ -351,17 +329,10 @@ const BookModal = ({doctors, onSuccess, onClose, preselectedDoctor = null}) => {
           </div>
           <button className="btn-ghost" onClick={onClose} style={{padding:"7px",flexShrink:0}}><XIcon/></button>
         </div>
-
-        {/* Progress bar */}
         <div style={{display:"flex",gap:8,marginBottom:20}}>
-          {[1,2].map(s=>(
-            <div key={s} style={{flex:1,height:4,borderRadius:99,background:step>=s?`linear-gradient(90deg,${C.blue},${C.purple})`:"rgba(226,232,240,.7)",transition:"background .3s"}}/>
-          ))}
+          {[1,2].map(s=>(<div key={s} style={{flex:1,height:4,borderRadius:99,background:step>=s?`linear-gradient(90deg,${C.blue},${C.purple})`:"rgba(226,232,240,.7)",transition:"background .3s"}}/>))}
         </div>
-
         {err && <ErrBanner msg={err}/>}
-
-        {/* Step 1 — Select Doctor */}
         {step===1 && (
           <>
             <p style={{fontSize:13.5,fontWeight:700,color:C.slateM,marginBottom:12}}>Select a Doctor</p>
@@ -369,11 +340,8 @@ const BookModal = ({doctors, onSuccess, onClose, preselectedDoctor = null}) => {
               ? <div style={{padding:24,textAlign:"center",color:C.slateXL,fontSize:13}}>No doctors available at the moment.</div>
               : <div style={{display:"flex",flexDirection:"column",gap:10,maxHeight:340,overflowY:"auto",paddingRight:4}}>
                   {doctors.map(doc=>{
-                    const fn=doc.firstName||doc.firstname||"";
-                    const ln=doc.lastName||doc.lastname||"";
-                    const id=docId(doc);
-                    const color=docColor(id);
-                    const isSelected = sel && docId(sel)===id;
+                    const fn=doc.firstName||doc.firstname||""; const ln=doc.lastName||doc.lastname||"";
+                    const id=docId(doc); const color=docColor(id); const isSelected = sel && docId(sel)===id;
                     return (
                       <div key={id} onClick={()=>{setSel(doc);setDate("");setTime("");setTakenSlots([]);}}
                         style={{display:"flex",alignItems:"center",gap:14,padding:"13px 16px",borderRadius:14,border:`2px solid ${isSelected?C.blue:"rgba(226,232,240,.7)"}`,background:isSelected?C.blueLt:"rgba(248,250,252,.8)",cursor:"pointer",transition:"all .18s"}}>
@@ -394,8 +362,6 @@ const BookModal = ({doctors, onSuccess, onClose, preselectedDoctor = null}) => {
             </div>
           </>
         )}
-
-        {/* Step 2 — Date, Time, Reason */}
         {step===2 && (
           <>
             {sel && (
@@ -408,90 +374,40 @@ const BookModal = ({doctors, onSuccess, onClose, preselectedDoctor = null}) => {
                 <button onClick={()=>{setSel(null);setStep(1);setDate("");setTime("");setTakenSlots([]);}} style={{fontSize:12,color:C.blue,background:"none",border:"none",cursor:"pointer",fontWeight:700,fontFamily:"'DM Sans',sans-serif"}}>Change</button>
               </div>
             )}
-
             <div style={{display:"flex",flexDirection:"column",gap:15}}>
-              {/* Date */}
               <div>
-                <label style={{fontSize:13,fontWeight:700,color:C.slateM,display:"block",marginBottom:6}}>
-                  Requested Date <span style={{color:C.red}}>*</span>
-                </label>
-                <input type="date" className="input-field" min={today} value={date}
-                  onChange={e=>{ setDate(e.target.value); setTime(""); }}/>
+                <label style={{fontSize:13,fontWeight:700,color:C.slateM,display:"block",marginBottom:6}}>Requested Date <span style={{color:C.red}}>*</span></label>
+                <input type="date" className="input-field" min={today} value={date} onChange={e=>{ setDate(e.target.value); setTime(""); }}/>
               </div>
-
-              {/* Time slots */}
               <div>
-                <label style={{fontSize:13,fontWeight:700,color:C.slateM,display:"block",marginBottom:8}}>
-                  Requested Time <span style={{color:C.red}}>*</span>
-                </label>
+                <label style={{fontSize:13,fontWeight:700,color:C.slateM,display:"block",marginBottom:8}}>Requested Time <span style={{color:C.red}}>*</span></label>
                 {!date ? (
-                  <div style={{fontSize:13,color:C.slateXL,padding:"8px 0",fontStyle:"italic"}}>
-                    Please select a date first.
-                  </div>
+                  <div style={{fontSize:13,color:C.slateXL,padding:"8px 0",fontStyle:"italic"}}>Please select a date first.</div>
                 ) : loadSlots ? (
-                  <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 0",color:C.slateL,fontSize:13}}>
-                    <Spinner size={16} color={C.blue}/> Checking availability…
-                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 0",color:C.slateL,fontSize:13}}><Spinner size={16} color={C.blue}/> Checking availability…</div>
                 ) : (
                   <>
                     <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
                       {ALL_SLOTS.map(slot=>{
-                        const state      = getSlotState(slot);
-                        const isSelected = time === slot;
-                        const isUnavailable = state === "taken" || state === "past";
-
-                        const bg     = isSelected     ? C.blue    : isUnavailable ? "#f1f5f9" : "#fff";
-                        const border = isSelected     ? C.blue    : isUnavailable ? "#e2e8f0" : "#d1d5db";
-                        const color  = isSelected     ? "#fff"    : isUnavailable ? "#cbd5e1" : C.slateM;
-                        const cursor = isUnavailable  ? "not-allowed" : "pointer";
-
+                        const state=getSlotState(slot); const isSelected=time===slot; const isUnavailable=state==="taken"||state==="past";
                         return (
-                          <button
-                            key={slot}
-                            type="button"
-                            disabled={isUnavailable}
-                            onClick={()=>!isUnavailable && setTime(slot)}
-                            className={isUnavailable ? "" : "slot-btn"}
-                            style={{
-                              padding:"11px 4px",
-                              borderRadius:10,
-                              border:`1.5px solid ${border}`,
-                              background:bg,
-                              color,
-                              fontSize:12.5,
-                              fontWeight:isSelected ? 700 : 500,
-                              cursor,
-                              fontFamily:"'DM Sans',sans-serif",
-                              opacity:isUnavailable ? 0.45 : 1,
-                              pointerEvents:isUnavailable ? "none" : "auto",
-                            }}
-                          >
+                          <button key={slot} type="button" disabled={isUnavailable} onClick={()=>!isUnavailable&&setTime(slot)} className={isUnavailable?"":"slot-btn"}
+                            style={{padding:"11px 4px",borderRadius:10,border:`1.5px solid ${isSelected?C.blue:isUnavailable?"#e2e8f0":"#d1d5db"}`,background:isSelected?C.blue:isUnavailable?"#f1f5f9":"#fff",color:isSelected?"#fff":isUnavailable?"#cbd5e1":C.slateM,fontSize:12.5,fontWeight:isSelected?700:500,cursor:isUnavailable?"not-allowed":"pointer",fontFamily:"'DM Sans',sans-serif",opacity:isUnavailable?0.45:1,pointerEvents:isUnavailable?"none":"auto"}}>
                             {slot}
                           </button>
                         );
                       })}
                     </div>
-                    {!time && (
-                      <p style={{fontSize:12,color:C.amber,marginTop:8,fontWeight:600}}>
-                        ⚠️ Please select an available time slot.
-                      </p>
-                    )}
+                    {!time&&<p style={{fontSize:12,color:C.amber,marginTop:8,fontWeight:600}}>⚠️ Please select an available time slot.</p>}
                   </>
                 )}
               </div>
-
-              {/* Reason */}
               <div>
-                <label style={{fontSize:13,fontWeight:700,color:C.slateM,display:"block",marginBottom:6}}>
-                  Reason for Visit <span style={{color:C.red}}>*</span>
-                </label>
-                <textarea className="input-field" rows={4} maxLength={500}
-                  placeholder="Please describe your symptoms or reason for visit…"
-                  value={reason} onChange={e=>setReason(e.target.value)}/>
+                <label style={{fontSize:13,fontWeight:700,color:C.slateM,display:"block",marginBottom:6}}>Reason for Visit <span style={{color:C.red}}>*</span></label>
+                <textarea className="input-field" rows={4} maxLength={500} placeholder="Please describe your symptoms or reason for visit…" value={reason} onChange={e=>setReason(e.target.value)}/>
                 <p style={{fontSize:11.5,color:reason.length>450?C.amber:C.slateXL,marginTop:4,textAlign:"right"}}>{reason.length}/500</p>
               </div>
             </div>
-
             <div style={{display:"flex",gap:10,marginTop:20}}>
               <button className="btn-ghost" onClick={()=>{setErr("");setStep(1);}} style={{flex:1,justifyContent:"center",padding:"11px"}}>← Back</button>
               <button className="btn-primary" onClick={submit} disabled={busy||!date||!time||!reason.trim()} style={{flex:1,justifyContent:"center",gap:8}}>
@@ -505,40 +421,27 @@ const BookModal = ({doctors, onSuccess, onClose, preselectedDoctor = null}) => {
   );
 };
 
-// ── Doctor Profile Modal ──────────────────────────────────────────────────
 const DoctorProfileModal = ({ doc, onClose, onBook }) => {
   if (!doc) return null;
-  const fn    = doc.firstName || doc.firstname || "";
-  const ln    = doc.lastName  || doc.lastname  || "";
-  const id    = docId(doc);
-  const color = docColor(id);
-  const yoe   = doc.yearsOfExperience || doc.years_of_experience;
-  const bio   = doc.bio || doc.biography;
-
+  const fn=doc.firstName||doc.firstname||""; const ln=doc.lastName||doc.lastname||"";
+  const id=docId(doc); const color=docColor(id);
+  const yoe=doc.yearsOfExperience||doc.years_of_experience; const bio=doc.bio||doc.biography;
   return (
     <div className="modal-bg" style={{position:"fixed",inset:0,zIndex:1001,background:"rgba(15,23,42,.5)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)",padding:16}}>
       <div className="modal-box" style={{background:"#fff",borderRadius:24,maxWidth:480,width:"100%",boxShadow:"0 32px 80px rgba(0,0,0,.22)",overflow:"hidden",maxHeight:"90vh",display:"flex",flexDirection:"column"}}>
-
-        {/* Banner */}
         <div style={{background:`linear-gradient(135deg,${color},${color}cc)`,padding:"28px 28px 24px",position:"relative"}}>
-          <button onClick={onClose} style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,.2)",border:"none",borderRadius:"50%",width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}>
-            <XIcon/>
-          </button>
+          <button onClick={onClose} style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,.2)",border:"none",borderRadius:"50%",width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#fff"}}><XIcon/></button>
           <div style={{display:"flex",alignItems:"center",gap:16}}>
             <DoctorAvatar firstname={fn} lastname={ln} color={color} size={68} profilePicture={doc.profilePicture}/>
             <div>
               <div style={{color:"rgba(255,255,255,.75)",fontSize:11,fontWeight:700,letterSpacing:.8,marginBottom:3}}>DOCTOR PROFILE</div>
               <div style={{color:"#fff",fontFamily:"'Sora',sans-serif",fontWeight:900,fontSize:20,lineHeight:1.2}}>Dr. {fn} {ln}</div>
-              <div style={{color:"rgba(255,255,255,.85)",fontSize:13,marginTop:4,fontWeight:600}}>{doc.specialization || "General Practitioner"}</div>
+              <div style={{color:"rgba(255,255,255,.85)",fontSize:13,marginTop:4,fontWeight:600}}>{doc.specialization||"General Practitioner"}</div>
             </div>
           </div>
         </div>
-
-        {/* Body */}
         <div style={{padding:"24px 28px",overflowY:"auto",flex:1}}>
-
-          {/* Stats row */}
-          {yoe && (
+          {yoe&&(
             <div style={{display:"flex",gap:12,marginBottom:20}}>
               <div style={{flex:1,background:C.blueLt,borderRadius:12,padding:"12px 16px",border:`1px solid ${C.blueBdr}`}}>
                 <div style={{fontSize:11,fontWeight:700,color:C.blue,marginBottom:3}}>EXPERIENCE</div>
@@ -546,29 +449,21 @@ const DoctorProfileModal = ({ doc, onClose, onBook }) => {
               </div>
               <div style={{flex:1,background:C.greenLt,borderRadius:12,padding:"12px 16px",border:`1px solid ${C.greenBdr}`}}>
                 <div style={{fontSize:11,fontWeight:700,color:C.green,marginBottom:3}}>SPECIALIZATION</div>
-                <div style={{fontSize:13,fontWeight:700,color:C.slate,lineHeight:1.3}}>{doc.specialization || "—"}</div>
+                <div style={{fontSize:13,fontWeight:700,color:C.slate,lineHeight:1.3}}>{doc.specialization||"—"}</div>
               </div>
             </div>
           )}
-
-          {/* Bio */}
-          {bio ? (
+          {bio?(
             <div style={{marginBottom:20}}>
               <div style={{fontSize:11.5,fontWeight:700,color:C.slateXL,letterSpacing:.6,marginBottom:8}}>ABOUT</div>
               <p style={{fontSize:14,color:C.slateM,lineHeight:1.75,fontWeight:400}}>{bio}</p>
             </div>
-          ) : (
+          ):(
             <div style={{marginBottom:20,padding:"16px",background:"#f8fafc",borderRadius:12,textAlign:"center"}}>
               <p style={{fontSize:13.5,color:C.slateXL,fontStyle:"italic"}}>No biography provided.</p>
             </div>
           )}
-
-          {/* Book button */}
-          <button
-            className="btn-primary"
-            onClick={()=>{ onClose(); onBook(doc); }}
-            style={{width:"100%",justifyContent:"center",padding:"13px",fontSize:15}}
-          >
+          <button className="btn-primary" onClick={()=>{ onClose(); onBook(doc); }} style={{width:"100%",justifyContent:"center",padding:"13px",fontSize:15}}>
             <PlusIcon/> Book Appointment
           </button>
         </div>
@@ -591,12 +486,7 @@ const HomeTab = ({user,appts,apptLoad,apptErr,onBook,onGoTo,onRetryAppts,tips,ti
   const [tipKey,setTipKey] = useState(0);
   const nextTip = () => { setTipIdx(i=>(i+1)%(tips.length||1)); setTipKey(k=>k+1); };
   const upcoming = appts.filter(a=>["PENDING","CONFIRMED"].includes(apptStatus(a))).slice(0,4);
-  const counts = {
-    total:     appts.length,
-    confirmed: appts.filter(a=>apptStatus(a)==="CONFIRMED").length,
-    pending:   appts.filter(a=>apptStatus(a)==="PENDING").length,
-    completed: appts.filter(a=>apptStatus(a)==="COMPLETED").length,
-  };
+  const counts = { total:appts.length, confirmed:appts.filter(a=>apptStatus(a)==="CONFIRMED").length, pending:appts.filter(a=>apptStatus(a)==="PENDING").length, completed:appts.filter(a=>apptStatus(a)==="COMPLETED").length };
   const name = user?.firstname||user?.firstName||"there";
   const statCards = [
     { label:"Total Appointments",     val:counts.total,     grad:`linear-gradient(135deg,${C.blue},${C.blueDk})`,  icon:<StatClipboardIcon/> },
@@ -620,12 +510,8 @@ const HomeTab = ({user,appts,apptLoad,apptErr,onBook,onGoTo,onRetryAppts,tips,ti
       <div className="four-col au2" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:24}}>
         {statCards.map((s,i)=>(
           <div key={i} className="stat-card" style={{animationDelay:`${i*.06}s`}}>
-            <div style={{width:44,height:44,borderRadius:13,background:s.grad,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14,boxShadow:"0 3px 12px rgba(0,0,0,.12)"}}>
-              {s.icon}
-            </div>
-            <div style={{fontFamily:"'Sora',sans-serif",fontSize:32,fontWeight:900,color:C.slate,lineHeight:1,marginBottom:6}}>
-              {apptLoad ? <Spinner size={22}/> : s.val}
-            </div>
+            <div style={{width:44,height:44,borderRadius:13,background:s.grad,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14,boxShadow:"0 3px 12px rgba(0,0,0,.12)"}}>{s.icon}</div>
+            <div style={{fontFamily:"'Sora',sans-serif",fontSize:32,fontWeight:900,color:C.slate,lineHeight:1,marginBottom:6}}>{apptLoad?<Spinner size={22}/>:s.val}</div>
             <div style={{fontSize:12.5,color:C.slateL,fontWeight:600}}>{s.label}</div>
           </div>
         ))}
@@ -638,16 +524,16 @@ const HomeTab = ({user,appts,apptLoad,apptErr,onBook,onGoTo,onRetryAppts,tips,ti
           </div>
           <button onClick={()=>onGoTo("appointments")} style={{fontSize:12,color:C.amberDk,background:C.amberLt,border:`1px solid ${C.amberBdr}`,padding:"5px 14px",borderRadius:100,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>View all →</button>
         </div>
-        {apptErr && <ErrBanner msg={apptErr} onRetry={onRetryAppts}/>}
-        {apptLoad ? (
+        {apptErr&&<ErrBanner msg={apptErr} onRetry={onRetryAppts}/>}
+        {apptLoad?(
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:40,gap:10,color:C.slateL,fontSize:14,fontWeight:600}}><Spinner/> Loading appointments…</div>
-        ) : upcoming.length===0 ? (
+        ):upcoming.length===0?(
           <div className="glass" style={{padding:40,textAlign:"center",color:C.slateXL,fontSize:14}}>
             <div style={{fontSize:36,marginBottom:10}}>📭</div>
             No upcoming appointments.{" "}
             <button onClick={()=>onBook(null)} style={{color:C.blue,background:"none",border:"none",cursor:"pointer",fontWeight:700,fontSize:14,fontFamily:"'DM Sans',sans-serif"}}>Book one now →</button>
           </div>
-        ) : (
+        ):(
           <div className="two-col" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14}}>
             {upcoming.map(a=>{
               const color=docColor(a.doctor?.doctorId??a.doctor?.id??0);
@@ -662,12 +548,8 @@ const HomeTab = ({user,appts,apptLoad,apptErr,onBook,onGoTo,onRetryAppts,tips,ti
                     <StatusBadge status={a.status}/>
                   </div>
                   <div style={{display:"flex",gap:16,marginBottom:14,flexWrap:"wrap"}}>
-                    <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}>
-                      <DateIcon/>{apptDate(a)?new Date(apptDate(a)).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}):"—"}
-                    </span>
-                    <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}>
-                      <TimeIcon/>{apptTime(a)||"—"}
-                    </span>
+                    <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><DateIcon/>{apptDate(a)?new Date(apptDate(a)).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}):"—"}</span>
+                    <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><TimeIcon/>{apptTime(a)||"—"}</span>
                   </div>
                   <button className="btn-primary" onClick={()=>onGoTo("appointments")} style={{width:"100%",justifyContent:"center",padding:"9px",fontSize:13}}>View Details</button>
                 </div>
@@ -682,33 +564,48 @@ const HomeTab = ({user,appts,apptLoad,apptErr,onBook,onGoTo,onRetryAppts,tips,ti
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{width:44,height:44,borderRadius:14,background:`linear-gradient(135deg,${C.green},#047857)`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",boxShadow:`0 4px 14px rgba(5,150,105,.28)`}}><LightIcon/></div>
               <div>
-                <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:15,color:C.slate}}>Health Tip of the Day</div>
-                <div style={{fontSize:12,color:C.slateL}}>Daily nutrition and wellness advice</div>
+                <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:15,color:C.slate}}>Exercise & Fitness Tip</div>
+                <div style={{fontSize:12,color:C.slateL}}>Daily exercise and fitness tips</div>
               </div>
             </div>
-            {tips.length>0&&<button className="btn-ghost" onClick={nextTip} disabled={tipsLoad} style={{display:"flex",alignItems:"center",gap:6,fontSize:12.5,color:C.green,background:C.greenLt,border:`1px solid ${C.greenBdr}`,padding:"7px 14px"}}><RefreshIcon/> New Tip</button>}
+            {tips.length>0&&<button className="btn-ghost" onClick={nextTip} disabled={tipsLoad} style={{display:"flex",alignItems:"center",gap:6,fontSize:12.5,color:C.green,background:C.greenLt,border:`1px solid ${C.greenBdr}`,padding:"7px 14px"}}><RefreshIcon/> New Exercise</button>}
           </div>
-          {tipsLoad ? (
-            <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",color:C.slateL,fontSize:13}}><Spinner size={16} color={C.green}/> Loading health tips…</div>
-          ) : tipsErr ? (
+          {tipsLoad?(
+            <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",color:C.slateL,fontSize:13}}><Spinner size={16} color={C.green}/> Loading tips…</div>
+          ):tipsErr?(
             <div style={{borderLeft:`3px solid ${C.amber}`,paddingLeft:16}}>
-              <p style={{fontSize:13.5,color:C.slateL}}>Unable to load health tips right now.</p>
+              <p style={{fontSize:13.5,color:C.slateL}}>Unable to load exercise tips right now.</p>
               <button className="btn-ghost" onClick={onRetryTips} style={{marginTop:8,fontSize:12,color:C.amber,borderColor:C.amberBdr,padding:"5px 12px"}}><RefreshIcon/> Retry</button>
             </div>
-          ) : tips.length>0 ? (
+          ):tips.length>0?(
             <>
               <div className="tip-anim" key={tipKey} style={{borderLeft:`3px solid ${C.green}`,paddingLeft:16}}>
-                <p style={{fontSize:14.5,color:C.slateM,lineHeight:1.7,fontWeight:500}}>{tips[tipIdx]}</p>
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                  <p style={{fontSize:15,fontWeight:800,color:C.slate,lineHeight:1.5}}>{tips[tipIdx].split("—")[0]}</p>
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                    {tips[tipIdx].split("—")[1]?.split("|")[0]?.split(",").map((detail,i)=>(
+                      <span key={i} style={{background:i===0?C.blueLt:i===1?C.greenLt:C.purpleLt,color:i===0?C.blue:i===1?C.green:C.purple,border:`1px solid ${i===0?C.blueBdr:i===1?C.greenBdr:C.purpleBdr}`,borderRadius:100,padding:"4px 12px",fontSize:12,fontWeight:700}}>{detail.trim()}</span>
+                    ))}
+                  </div>
+                  {tips[tipIdx].includes("|")&&(
+                    <div style={{marginTop:6,padding:"14px 16px",background:"#f8fafc",borderRadius:12,border:"1px solid #e2e8f0"}}>
+                      <div style={{fontSize:11.5,fontWeight:700,color:C.slateXL,marginBottom:10}}>📋 HOW TO DO IT</div>
+                      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                        {tips[tipIdx].split("|")[1]?.trim().split(". ").filter(s=>s.trim().length>0).slice(0,5).map((sentence,i)=>(
+                          <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                            <div style={{minWidth:22,height:22,borderRadius:"50%",background:`linear-gradient(135deg,${C.green},#047857)`,color:"#fff",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>{i+1}</div>
+                            <p style={{fontSize:13,color:C.slateM,lineHeight:1.7,fontWeight:400,margin:0}}>{sentence.trim().endsWith(".")?sentence.trim():sentence.trim()+"."}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div style={{fontSize:11.5,color:C.slateXL,marginTop:10}}>Powered by external Health Tips API</div>
-              <div style={{display:"flex",gap:5,marginTop:8}}>
-                {tips.slice(0,8).map((_,i)=>(
-                  <div key={i} onClick={()=>{setTipIdx(i);setTipKey(k=>k+1);}} style={{width:i===tipIdx?20:6,height:6,borderRadius:99,background:i===tipIdx?C.green:"rgba(5,150,105,.2)",cursor:"pointer",transition:"all .3s"}}/>
-                ))}
-              </div>
+              <div style={{fontSize:11.5,color:C.slateXL,marginTop:10}}>Powered by API Ninjas — Exercise & Fitness API</div>
             </>
-          ) : (
-            <p style={{fontSize:13.5,color:C.slateXL,fontStyle:"italic"}}>No health tips available.</p>
+          ):(
+            <p style={{fontSize:13.5,color:C.slateXL,fontStyle:"italic"}}>No tips available.</p>
           )}
         </div>
       </div>
@@ -727,16 +624,15 @@ const AppointmentsTab = ({appts,loading,error,onBook,onRetry}) => {
         ))}
         <button className="btn-primary" onClick={()=>onBook(null)} style={{marginLeft:"auto",padding:"8px 18px",fontSize:13}}><PlusIcon/> Book New</button>
       </div>
-      {error && <ErrBanner msg={error} onRetry={onRetry}/>}
-      {loading ? (
+      {error&&<ErrBanner msg={error} onRetry={onRetry}/>}
+      {loading?(
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:60,gap:10,color:C.slateL,fontSize:14,fontWeight:600}}><Spinner/> Loading appointments…</div>
-      ) : list.length===0 ? (
+      ):list.length===0?(
         <div className="glass" style={{padding:56,textAlign:"center",color:C.slateXL,fontSize:14}}><div style={{fontSize:36,marginBottom:10}}>📭</div>No {filter==="ALL"?"":filter.toLowerCase()} appointments found.</div>
-      ) : (
+      ):(
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
           {list.map((a,i)=>{
-            const color=docColor(a.doctor?.doctorId??a.doctor?.id??0);
-            const st=apptStatus(a);
+            const color=docColor(a.doctor?.doctorId??a.doctor?.id??0); const st=apptStatus(a);
             return (
               <div key={a.id} className="appt-card au3" style={{padding:"18px 22px",display:"flex",alignItems:"center",gap:16,flexWrap:"wrap",animationDelay:`${i*.05}s`}}>
                 <DoctorAvatar firstname={apptDoctorFn(a)} lastname={apptDoctorLn(a)} color={color} size={50} profilePicture={apptDoctorPic(a)}/>
@@ -744,32 +640,19 @@ const AppointmentsTab = ({appts,loading,error,onBook,onRetry}) => {
                   <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:15.5,color:C.slate}}>Dr. {apptDoctorFn(a)} {apptDoctorLn(a)}</div>
                   <div style={{fontSize:13,color:C.slateL,marginTop:2}}>{apptDoctorSpec(a)}</div>
                   <div style={{display:"flex",gap:16,marginTop:6,flexWrap:"wrap"}}>
-                    <span style={{fontSize:12.5,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}>
-                      <DateIcon/>{apptDate(a)?new Date(apptDate(a)).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}):"—"}
-                    </span>
-                    <span style={{fontSize:12.5,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}>
-                      <TimeIcon/>{apptTime(a)||"—"}
-                    </span>
+                    <span style={{fontSize:12.5,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><DateIcon/>{apptDate(a)?new Date(apptDate(a)).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}):"—"}</span>
+                    <span style={{fontSize:12.5,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><TimeIcon/>{apptTime(a)||"—"}</span>
                   </div>
-                  {apptReason(a)&&(
-                    <div style={{fontSize:12,color:C.slateXL,marginTop:5,display:"flex",gap:5,alignItems:"flex-start"}}>
-                      <NoteIcon/>
-                      <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:320}}>{apptReason(a)}</span>
-                    </div>
-                  )}
+                  {apptReason(a)&&<div style={{fontSize:12,color:C.slateXL,marginTop:5,display:"flex",gap:5,alignItems:"flex-start"}}><NoteIcon/><span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:320}}>{apptReason(a)}</span></div>}
                 </div>
                 <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
                   <StatusBadge status={a.status}/>
-                  {st==="PENDING"   &&<span style={{fontSize:11.5,color:C.amber,fontWeight:600,background:C.amberLt,border:`1px solid ${C.amberBdr}`,padding:"4px 10px",borderRadius:8}}>⏳ Awaiting secretary approval</span>}
-                  {st==="CONFIRMED" &&<span style={{fontSize:11.5,color:C.green,fontWeight:600,background:C.greenLt,border:`1px solid ${C.greenBdr}`,padding:"4px 10px",borderRadius:8}}>✓ Appointment confirmed</span>}
-                  {st==="COMPLETED" &&<span style={{fontSize:11.5,color:C.blue,fontWeight:600,background:C.blueLt,border:`1px solid ${C.blueBdr}`,padding:"4px 10px",borderRadius:8}}>✓ Consultation completed</span>}
-                  {st==="CANCELLED" &&<span style={{fontSize:11.5,color:C.slateL,fontWeight:600,background:"#f1f5f9",border:"1px solid #cbd5e1",padding:"4px 10px",borderRadius:8}}>✗ Appointment cancelled{a.cancelReason?` — ${a.cancelReason}`:""}</span>}
-                  {st==="REJECTED"  &&<span style={{fontSize:11.5,color:"#991b1b",fontWeight:600,background:C.redLt,border:`1px solid ${C.redBdr}`,padding:"4px 10px",borderRadius:8}}>✗ Not approved{a.rejectedReason?` — ${a.rejectedReason}`:""}</span>}
-                  {st==="COMPLETED"&&a.doctorNotes&&(
-                    <div style={{fontSize:11.5,color:C.slateL,background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:8,padding:"4px 10px",maxWidth:260}}>
-                      📝 {a.doctorNotes}
-                    </div>
-                  )}
+                  {st==="PENDING"  &&<span style={{fontSize:11.5,color:C.amber,fontWeight:600,background:C.amberLt,border:`1px solid ${C.amberBdr}`,padding:"4px 10px",borderRadius:8}}>⏳ Awaiting secretary approval</span>}
+                  {st==="CONFIRMED"&&<span style={{fontSize:11.5,color:C.green,fontWeight:600,background:C.greenLt,border:`1px solid ${C.greenBdr}`,padding:"4px 10px",borderRadius:8}}>✓ Appointment confirmed</span>}
+                  {st==="COMPLETED"&&<span style={{fontSize:11.5,color:C.blue,fontWeight:600,background:C.blueLt,border:`1px solid ${C.blueBdr}`,padding:"4px 10px",borderRadius:8}}>✓ Consultation completed</span>}
+                  {st==="CANCELLED"&&<span style={{fontSize:11.5,color:C.slateL,fontWeight:600,background:"#f1f5f9",border:"1px solid #cbd5e1",padding:"4px 10px",borderRadius:8}}>✗ Appointment cancelled{a.cancelReason?` — ${a.cancelReason}`:""}</span>}
+                  {st==="REJECTED" &&<span style={{fontSize:11.5,color:"#991b1b",fontWeight:600,background:C.redLt,border:`1px solid ${C.redBdr}`,padding:"4px 10px",borderRadius:8}}>✗ Not approved{a.rejectedReason?` — ${a.rejectedReason}`:""}</span>}
+                  {st==="COMPLETED"&&a.doctorNotes&&<div style={{fontSize:11.5,color:C.slateL,background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:8,padding:"4px 10px",maxWidth:260}}>📝 {a.doctorNotes}</div>}
                 </div>
               </div>
             );
@@ -780,30 +663,13 @@ const AppointmentsTab = ({appts,loading,error,onBook,onRetry}) => {
   );
 };
 
-// ── UPDATED DoctorsTab: click card → open profile modal ──────────────────
 const DoctorsTab = ({doctors,loading,error,onBook,onRetry}) => {
-  const [search,   setSearch]   = useState("");
-  const [spec,     setSpec]     = useState("All");
-  const [viewDoc,  setViewDoc]  = useState(null);
-
-  const specs = ["All",...new Set(doctors.map(d=>d.specialization).filter(Boolean))];
-  const list  = doctors.filter(d=>{
-    const fn=d.firstName||d.firstname||"";
-    const ln=d.lastName||d.lastname||"";
-    return (spec==="All"||d.specialization===spec) && `${fn} ${ln}`.toLowerCase().includes(search.toLowerCase());
-  });
-
+  const [search,setSearch]=useState(""); const [spec,setSpec]=useState("All"); const [viewDoc,setViewDoc]=useState(null);
+  const specs=["All",...new Set(doctors.map(d=>d.specialization).filter(Boolean))];
+  const list=doctors.filter(d=>{const fn=d.firstName||d.firstname||"";const ln=d.lastName||d.lastname||"";return(spec==="All"||d.specialization===spec)&&`${fn} ${ln}`.toLowerCase().includes(search.toLowerCase());});
   return (
     <>
-      {/* Doctor profile modal */}
-      {viewDoc && (
-        <DoctorProfileModal
-          doc={viewDoc}
-          onClose={()=>setViewDoc(null)}
-          onBook={(doc)=>{ setViewDoc(null); onBook(doc); }}
-        />
-      )}
-
+      {viewDoc&&<DoctorProfileModal doc={viewDoc} onClose={()=>setViewDoc(null)} onBook={(doc)=>{setViewDoc(null);onBook(doc);}}/>}
       <div className="pw" style={{padding:"24px 32px 56px",maxWidth:1120,margin:"0 auto"}}>
         <div className="au2" style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
           <div style={{position:"relative",flex:"1 1 220px",maxWidth:320}}>
@@ -811,63 +677,37 @@ const DoctorsTab = ({doctors,loading,error,onBook,onRetry}) => {
             <input className="input-field" placeholder="Search doctors…" value={search} onChange={e=>setSearch(e.target.value)} style={{paddingLeft:36}}/>
           </div>
           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-            {specs.map(s=>(
-              <button key={s} className="filter-pill" onClick={()=>setSpec(s)} style={{borderColor:spec===s?C.blue:"rgba(226,232,240,.8)",background:spec===s?C.blueLt:"rgba(255,255,255,.72)",color:spec===s?C.blue:C.slateL,fontSize:12}}>{s}</button>
-            ))}
+            {specs.map(s=>(<button key={s} className="filter-pill" onClick={()=>setSpec(s)} style={{borderColor:spec===s?C.blue:"rgba(226,232,240,.8)",background:spec===s?C.blueLt:"rgba(255,255,255,.72)",color:spec===s?C.blue:C.slateL,fontSize:12}}>{s}</button>))}
           </div>
         </div>
-        {error && <ErrBanner msg={error} onRetry={onRetry}/>}
-        {loading ? (
+        {error&&<ErrBanner msg={error} onRetry={onRetry}/>}
+        {loading?(
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:60,gap:10,color:C.slateL,fontSize:14,fontWeight:600}}><Spinner/> Loading doctors…</div>
-        ) : (
+        ):(
           <div className="doc-grid au3" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
             {list.map((doc,i)=>{
-              const fn=doc.firstName||doc.firstname||"";
-              const ln=doc.lastName||doc.lastname||"";
-              const id=docId(doc);
-              const color=docColor(id);
-              const yoe = doc.yearsOfExperience || doc.years_of_experience;
-              const bio = doc.bio || doc.biography;
+              const fn=doc.firstName||doc.firstname||""; const ln=doc.lastName||doc.lastname||"";
+              const id=docId(doc); const color=docColor(id); const yoe=doc.yearsOfExperience||doc.years_of_experience; const bio=doc.bio||doc.biography;
               return (
-                <div key={id} className="doc-card" style={{animationDelay:`${i*.05}s`}}
-                  onClick={()=>setViewDoc(doc)}>
+                <div key={id} className="doc-card" style={{animationDelay:`${i*.05}s`}} onClick={()=>setViewDoc(doc)}>
                   <div style={{display:"flex",alignItems:"flex-start",gap:13,marginBottom:12}}>
                     <DoctorAvatar firstname={fn} lastname={ln} color={color} size={50} profilePicture={doc.profilePicture}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:14.5,color:C.slate,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>Dr. {fn} {ln}</div>
                       <div style={{fontSize:12.5,color:C.slateL,marginTop:2}}>{doc.specialization||"General Practitioner"}</div>
-                      {yoe&&(
-                        <div style={{fontSize:11.5,color:C.slateXL,marginTop:5,display:"flex",alignItems:"center",gap:5}}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={11} height={11}>
-                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                          </svg>
-                          <span>{yoe} yr{yoe!==1?"s":""} experience</span>
-                        </div>
-                      )}
+                      {yoe&&<div style={{fontSize:11.5,color:C.slateXL,marginTop:5,display:"flex",alignItems:"center",gap:5}}><svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={11} height={11}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{yoe} yr{yoe!==1?"s":""} experience</span></div>}
                     </div>
                   </div>
-                  {bio?(
-                    <p style={{fontSize:12.5,color:C.slateM,lineHeight:1.65,marginBottom:14,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden",flexGrow:1}}>{bio}</p>
-                  ):(
-                    <div style={{flexGrow:1}}/>
-                  )}
+                  {bio?(<p style={{fontSize:12.5,color:C.slateM,lineHeight:1.65,marginBottom:14,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden",flexGrow:1}}>{bio}</p>):(<div style={{flexGrow:1}}/>)}
                   {doc.status&&doc.status!=="APPROVED"&&<div style={{marginBottom:10}}><StatusBadge status={doc.status}/></div>}
                   <div style={{display:"flex",gap:8,marginTop:"auto"}}>
-                    <button className="btn-ghost" onClick={e=>{e.stopPropagation();setViewDoc(doc);}} style={{flex:1,justifyContent:"center",padding:"9px",fontSize:13}}>
-                      View Profile
-                    </button>
-                    <button className="btn-primary" onClick={e=>{e.stopPropagation();onBook(doc);}} style={{flex:1,justifyContent:"center",padding:"9px",fontSize:13}}>
-                      Book
-                    </button>
+                    <button className="btn-ghost" onClick={e=>{e.stopPropagation();setViewDoc(doc);}} style={{flex:1,justifyContent:"center",padding:"9px",fontSize:13}}>View Profile</button>
+                    <button className="btn-primary" onClick={e=>{e.stopPropagation();onBook(doc);}} style={{flex:1,justifyContent:"center",padding:"9px",fontSize:13}}>Book</button>
                   </div>
                 </div>
               );
             })}
-            {list.length===0&&!loading&&(
-              <div className="glass" style={{gridColumn:"1/-1",padding:40,textAlign:"center",color:C.slateXL,fontSize:14}}>
-                <div style={{fontSize:32,marginBottom:8}}>🔍</div>No doctors found.
-              </div>
-            )}
+            {list.length===0&&!loading&&<div className="glass" style={{gridColumn:"1/-1",padding:40,textAlign:"center",color:C.slateXL,fontSize:14}}><div style={{fontSize:32,marginBottom:8}}>🔍</div>No doctors found.</div>}
           </div>
         )}
       </div>
@@ -875,7 +715,8 @@ const DoctorsTab = ({doctors,loading,error,onBook,onRetry}) => {
   );
 };
 
-const ProfileTab = ({ user }) => {
+// ── Profile Tab — with profile picture upload ────────────────────────────
+const ProfileTab = ({ user, onPictureUpdate }) => {
   const [profile, setProfile]   = useState(null);
   const [loading, setLoading]   = useState(true);
   const [fetchErr, setFetchErr] = useState("");
@@ -883,11 +724,7 @@ const ProfileTab = ({ user }) => {
   const [saving,  setSaving]    = useState(false);
   const [saveErr, setSaveErr]   = useState("");
   const [saveOk,  setSaveOk]    = useState(false);
-  const [form, setForm] = useState({
-    firstName:"", lastName:"", phoneNumber:"",
-    dateOfBirth:"", gender:"", address:"",
-    currentPassword:"", newPassword:"", confirmPassword:"",
-  });
+  const [form, setForm] = useState({ firstName:"", lastName:"", phoneNumber:"", dateOfBirth:"", gender:"", address:"", currentPassword:"", newPassword:"", confirmPassword:"" });
   const [showPw, setShowPw] = useState({ cur:false, new:false, con:false });
 
   useEffect(() => {
@@ -896,12 +733,7 @@ const ProfileTab = ({ user }) => {
       try {
         const data = await patientApi.getProfile();
         setProfile(data);
-        setForm({
-          firstName: data.firstName||"", lastName: data.lastName||"",
-          phoneNumber: data.phoneNumber||"", dateOfBirth: data.dateOfBirth||"",
-          gender: data.gender||"", address: data.address||"",
-          currentPassword:"", newPassword:"", confirmPassword:"",
-        });
+        setForm({ firstName:data.firstName||"", lastName:data.lastName||"", phoneNumber:data.phoneNumber||"", dateOfBirth:data.dateOfBirth||"", gender:data.gender||"", address:data.address||"", currentPassword:"", newPassword:"", confirmPassword:"" });
       } catch(e) { setFetchErr(e.message||"Failed to load profile."); }
       finally { setLoading(false); }
     })();
@@ -959,7 +791,38 @@ const ProfileTab = ({ user }) => {
       {saveOk&&<div className="au1" style={{background:C.greenLt,border:`1.5px solid ${C.greenBdr}`,borderRadius:14,padding:"12px 18px",display:"flex",alignItems:"center",gap:10,marginBottom:16,color:"#166534",fontWeight:700,fontSize:13.5}}>✅ Profile updated successfully!</div>}
       <div className="glass au2" style={{padding:"28px 32px",marginBottom:18}}>
         <div style={{display:"flex",alignItems:"center",gap:20,marginBottom:24,flexWrap:"wrap"}}>
-          <div style={{width:78,height:78,borderRadius:"50%",background:`linear-gradient(135deg,${C.blue},${C.purple})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"'Sora',sans-serif",fontWeight:900,fontSize:26,boxShadow:`0 6px 20px rgba(37,99,235,.28)`,flexShrink:0}}>{getInitials(fn,ln)||"P"}</div>
+
+          {/* ── Avatar with Camera Upload ── */}
+          <div style={{position:"relative",flexShrink:0}}>
+            <div style={{width:78,height:78,borderRadius:"50%",background:`linear-gradient(135deg,${C.blue},${C.purple})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"'Sora',sans-serif",fontWeight:900,fontSize:26,boxShadow:`0 6px 20px rgba(37,99,235,.28)`,overflow:"hidden"}}>
+              {profile?.profilePicture
+                ? <img src={profile.profilePicture} alt="Profile" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                : getInitials(fn,ln)||"P"
+              }
+            </div>
+            <label style={{position:"absolute",bottom:0,right:0,width:26,height:26,borderRadius:"50%",background:C.blue,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",boxShadow:"0 2px 8px rgba(0,0,0,.2)",border:"2px solid #fff"}}>
+              <input type="file" accept="image/*" style={{display:"none"}} onChange={async(e)=>{
+                const file = e.target.files[0];
+                if (!file) return;
+                if (file.size > 2 * 1024 * 1024) { setSaveErr("Image must be under 2MB."); return; }
+                const reader = new FileReader();
+                reader.onload = async(ev) => {
+                  try {
+                    const updated = await patientApi.uploadProfilePicture(ev.target.result);
+                    setProfile(updated);
+                    if (onPictureUpdate) onPictureUpdate();
+                    setSaveOk(true);
+                    setTimeout(()=>setSaveOk(false),3500);
+                  } catch(err) { setSaveErr(err.message||"Failed to upload picture."); }
+                };
+                reader.readAsDataURL(file);
+              }}/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" width={12} height={12}>
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+              </svg>
+            </label>
+          </div>
+
           <div style={{flex:1,minWidth:160}}>
             <div style={{fontFamily:"'Sora',sans-serif",fontSize:21,fontWeight:900,color:C.slate}}>{fn} {ln}</div>
             <div style={{fontSize:13.5,color:C.slateL,marginTop:2}}>{profile?.email}</div>
@@ -1054,6 +917,7 @@ const ProfileTab = ({ user }) => {
   );
 };
 
+// ── Main Export ──────────────────────────────────────────────────────────
 export default function PatientDashboard() {
   const navigate         = useNavigate();
   const { user, logout } = useAuth();
@@ -1061,6 +925,7 @@ export default function PatientDashboard() {
   const [tab,setTab]               = useState("home");
   const [toast,setToast]           = useState(null);
   const [bookDoctor,setBookDoctor] = useState(null);
+  const [patientProfile,setPatientProfile] = useState(null);
 
   const [appts,setAppts]       = useState([]);
   const [apptLoad,setApptLoad] = useState(true);
@@ -1097,7 +962,14 @@ export default function PatientDashboard() {
     finally { setTipsLoad(false); }
   },[]);
 
-  useEffect(() => { fetchAppts(); fetchDoctors(); fetchTips(); },[fetchAppts,fetchDoctors,fetchTips]);
+  const fetchPatientProfile = useCallback(async () => {
+    try { const d = await patientApi.getProfile(); setPatientProfile(d); }
+    catch { setPatientProfile(null); }
+  },[]);
+
+  useEffect(() => {
+    fetchAppts(); fetchDoctors(); fetchTips(); fetchPatientProfile();
+  },[fetchAppts,fetchDoctors,fetchTips,fetchPatientProfile]);
 
   const handleBookSuccess = (msg) => { setBookDoctor(null); showToast(msg); fetchAppts(); };
   const handleLogout = async () => { try { await logout(); } catch {} finally { navigate("/login"); } };
@@ -1122,22 +994,17 @@ export default function PatientDashboard() {
         <div className="float-a" style={{position:"absolute",width:36,height:36,borderRadius:"50%",background:"rgba(124,58,237,.15)",top:"42%",left:"4%",border:"1px solid rgba(255,255,255,.35)",animationDelay:"3s"}}/>
       </div>
       <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",minHeight:"100vh"}}>
-        <Navbar active={tab} onTab={setTab} onLogout={handleLogout} user={user}/>
+        <Navbar active={tab} onTab={setTab} onLogout={handleLogout} user={user} patientProfile={patientProfile}/>
         <Toast toast={toast}/>
         {bookDoctor!==null&&(
-          <BookModal
-            doctors={doctors}
-            preselectedDoctor={bookDoctor===true?null:bookDoctor}
-            onSuccess={handleBookSuccess}
-            onClose={closeBook}
-          />
+          <BookModal doctors={doctors} preselectedDoctor={bookDoctor===true?null:bookDoctor} onSuccess={handleBookSuccess} onClose={closeBook}/>
         )}
         <div style={{flex:1}}>
           <PageBanner tab={tab}/>
           {tab==="home"&&<HomeTab user={user} appts={appts} apptLoad={apptLoad} apptErr={apptErr} onBook={openBook} onGoTo={setTab} onRetryAppts={fetchAppts} tips={tips} tipsLoad={tipsLoad} tipsErr={tipsErr} onRetryTips={fetchTips}/>}
           {tab==="appointments"&&<AppointmentsTab appts={appts} loading={apptLoad} error={apptErr} onBook={openBook} onRetry={fetchAppts}/>}
           {tab==="doctors"&&<DoctorsTab doctors={doctors} loading={docLoad} error={docErr} onBook={openBook} onRetry={fetchDoctors}/>}
-          {tab==="profile"&&<ProfileTab user={user}/>}
+          {tab==="profile"&&<ProfileTab user={user} onPictureUpdate={fetchPatientProfile}/>}
         </div>
       </div>
     </div>

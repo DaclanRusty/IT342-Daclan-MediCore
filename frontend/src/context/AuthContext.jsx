@@ -5,17 +5,28 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => tokenStorage.getUser());
+
   const login = useCallback((userData, accessToken, refreshToken) => {
     tokenStorage.save(accessToken, refreshToken);
     tokenStorage.saveUser(userData);
     setUser(userData);
   }, []);
+
   const logout = useCallback(() => {
     tokenStorage.clear();
     setUser(null);
   }, []);
+
+  const updateUser = useCallback((updatedFields) => {
+    setUser(prev => {
+      const merged = { ...prev, ...updatedFields };
+      tokenStorage.saveUser(merged);
+      return merged;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

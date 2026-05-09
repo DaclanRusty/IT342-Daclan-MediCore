@@ -53,7 +53,7 @@ public class AppointmentController {
         di.setFirstName(a.getDoctor().getUser().getFirstName());
         di.setLastName(a.getDoctor().getUser().getLastName());
         di.setSpecialization(a.getDoctor().getSpecialization());
-        di.setProfilePicture(a.getDoctor().getProfilePicture());
+        di.setProfilePicture(a.getDoctor().getUser().getProfilePicture());
 
         AppointmentResponse.PatientInfo pi = new AppointmentResponse.PatientInfo();
         pi.setPatientId(a.getPatient().getPatientId());

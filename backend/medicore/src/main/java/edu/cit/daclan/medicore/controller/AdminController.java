@@ -67,8 +67,7 @@ public class AdminController {
     }
 
     @PutMapping("/users/{userId}/block")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> blockUser(
-            @PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> blockUser(@PathVariable Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         user.setStatus("BLOCKED");
@@ -77,8 +76,7 @@ public class AdminController {
     }
 
     @PutMapping("/users/{userId}/unblock")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> unblockUser(
-            @PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> unblockUser(@PathVariable Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         user.setStatus("ACTIVE");
@@ -86,17 +84,19 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(toUserMap(user)));
     }
 
+    // ── toUserMap — now includes profilePicture ───────────────────────────
     private Map<String, Object> toUserMap(User u) {
         String status = u.getStatus() != null ? u.getStatus() : "ACTIVE";
-        return Map.of(
-                "userId",      u.getUserId(),
-                "firstName",   u.getFirstName()   != null ? u.getFirstName()   : "",
-                "lastName",    u.getLastName()     != null ? u.getLastName()    : "",
-                "email",       u.getEmail(),
-                "role",        u.getRole()         != null ? u.getRole()        : "",
-                "phoneNumber", u.getPhoneNumber()  != null ? u.getPhoneNumber() : "",
-                "status",      status
-        );
+        Map<String, Object> map = new java.util.LinkedHashMap<>();
+        map.put("userId",         u.getUserId());
+        map.put("firstName",      u.getFirstName()    != null ? u.getFirstName()    : "");
+        map.put("lastName",       u.getLastName()     != null ? u.getLastName()     : "");
+        map.put("email",          u.getEmail());
+        map.put("role",           u.getRole()         != null ? u.getRole()         : "");
+        map.put("phoneNumber",    u.getPhoneNumber()  != null ? u.getPhoneNumber()  : "");
+        map.put("status",         status);
+        map.put("profilePicture", u.getProfilePicture() != null ? u.getProfilePicture() : ""); // 👈 added
+        return map;
     }
 
     // ── Doctors ───────────────────────────────────────────────────────────
@@ -112,20 +112,18 @@ public class AdminController {
     }
 
     @PutMapping("/doctors/{doctorId}/approve")
-    public ResponseEntity<ApiResponse<DoctorSummaryResponse>> approveDoctor(
-            @PathVariable Long doctorId) {
+    public ResponseEntity<ApiResponse<DoctorSummaryResponse>> approveDoctor(@PathVariable Long doctorId) {
         return ResponseEntity.ok(ApiResponse.success(
                 doctorApprovalService.updateDoctorStatus(doctorId, "APPROVED")));
     }
 
     @PutMapping("/doctors/{doctorId}/reject")
-    public ResponseEntity<ApiResponse<DoctorSummaryResponse>> rejectDoctor(
-            @PathVariable Long doctorId) {
+    public ResponseEntity<ApiResponse<DoctorSummaryResponse>> rejectDoctor(@PathVariable Long doctorId) {
         return ResponseEntity.ok(ApiResponse.success(
                 doctorApprovalService.updateDoctorStatus(doctorId, "REJECTED")));
     }
 
-    // ── Secretary Assignments ─────────────────────────────────────────────
+    // ── Secretary Assignments — now includes profile pictures ─────────────
 
     @GetMapping("/secretary-assignments")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getSecretaryAssignments() {
@@ -135,16 +133,18 @@ public class AdminController {
                 .map(s -> {
                     var docUser = s.getDoctor().getUser();
                     var secUser = s.getUser();
-                    return Map.<String, Object>of(
-                            "secretaryId",    s.getSecretaryId(),
-                            "secretaryName",  secUser.getFirstName() + " " + secUser.getLastName(),
-                            "secretaryEmail", secUser.getEmail(),
-                            "doctorId",       s.getDoctor().getDoctorId(),
-                            "doctorName",     "Dr. " + docUser.getFirstName() + " " + docUser.getLastName(),
-                            "doctorEmail",    docUser.getEmail(),
-                            "specialization", s.getDoctor().getSpecialization(),
-                            "assignedSince",  s.getRequestedAt() != null ? s.getRequestedAt().toString() : ""
-                    );
+                    Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("secretaryId",           s.getSecretaryId());
+                    m.put("secretaryName",         secUser.getFirstName() + " " + secUser.getLastName());
+                    m.put("secretaryEmail",        secUser.getEmail());
+                    m.put("secretaryProfilePicture", secUser.getProfilePicture() != null ? secUser.getProfilePicture() : ""); // 👈 added
+                    m.put("doctorId",              s.getDoctor().getDoctorId());
+                    m.put("doctorName",            "Dr. " + docUser.getFirstName() + " " + docUser.getLastName());
+                    m.put("doctorEmail",           docUser.getEmail());
+                    m.put("doctorProfilePicture",  docUser.getProfilePicture() != null ? docUser.getProfilePicture() : "");   // 👈 added
+                    m.put("specialization",        s.getDoctor().getSpecialization());
+                    m.put("assignedSince",         s.getRequestedAt() != null ? s.getRequestedAt().toString() : "");
+                    return m;
                 })
                 .collect(Collectors.toList());
 
@@ -156,7 +156,6 @@ public class AdminController {
     @GetMapping("/analytics")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAnalytics() {
 
-        // ── 1. Users ──────────────────────────────────────────────────────
         List<User> allUsers = userRepository.findAll();
 
         Map<String, Object> usersMap = new LinkedHashMap<>();
@@ -167,7 +166,6 @@ public class AdminController {
         usersMap.put("admins",      allUsers.stream().filter(u -> "ADMIN".equalsIgnoreCase(u.getRole())).count());
         usersMap.put("blocked",     allUsers.stream().filter(u -> "BLOCKED".equalsIgnoreCase(u.getStatus())).count());
 
-        // ── 2. Doctors ────────────────────────────────────────────────────
         List<DoctorSummaryResponse> doctorSummaries = doctorApprovalService.getAllDoctors();
 
         Map<String, Object> doctorsMap = new LinkedHashMap<>();
@@ -176,31 +174,24 @@ public class AdminController {
         doctorsMap.put("pending",  doctorSummaries.stream().filter(d -> "PENDING".equalsIgnoreCase(d.getStatus())).count());
         doctorsMap.put("rejected", doctorSummaries.stream().filter(d -> "REJECTED".equalsIgnoreCase(d.getStatus())).count());
 
-        // ── 3. Appointments ───────────────────────────────────────────────
         List<Appointment> allAppts = appointmentRepository.findAll();
 
-        long apptPending   = allAppts.stream().filter(a -> AppointmentStatus.PENDING    == a.getStatus()).count();
-        long apptConfirmed = allAppts.stream().filter(a -> AppointmentStatus.CONFIRMED  == a.getStatus()).count();
-        long apptRejected  = allAppts.stream().filter(a -> AppointmentStatus.REJECTED   == a.getStatus()).count();
-        long apptCompleted = allAppts.stream().filter(a -> AppointmentStatus.COMPLETED  == a.getStatus()).count();
-        long apptCancelled = allAppts.stream().filter(a -> AppointmentStatus.CANCELLED  == a.getStatus()).count();
+        long apptPending   = allAppts.stream().filter(a -> AppointmentStatus.PENDING   == a.getStatus()).count();
+        long apptConfirmed = allAppts.stream().filter(a -> AppointmentStatus.CONFIRMED == a.getStatus()).count();
+        long apptRejected  = allAppts.stream().filter(a -> AppointmentStatus.REJECTED  == a.getStatus()).count();
+        long apptCompleted = allAppts.stream().filter(a -> AppointmentStatus.COMPLETED == a.getStatus()).count();
+        long apptCancelled = allAppts.stream().filter(a -> AppointmentStatus.CANCELLED == a.getStatus()).count();
 
-        // Today's count
-        String    todayStr  = LocalDate.now().toString();
-        LocalDate today     = LocalDate.now();
-        long      todayTotal = allAppts.stream()
-                .filter(a -> todayStr.equals(a.getRequestedDate()))
-                .count();
+        String    todayStr   = LocalDate.now().toString();
+        LocalDate today      = LocalDate.now();
+        long      todayTotal = allAppts.stream().filter(a -> todayStr.equals(a.getRequestedDate())).count();
 
-        // This week Mon–Sun
         LocalDate weekStart = today.with(DayOfWeek.MONDAY);
         List<Map<String, Object>> weeklyList = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             LocalDate day    = weekStart.plusDays(i);
             String    dayStr = day.toString();
-            long count = allAppts.stream()
-                    .filter(a -> dayStr.equals(a.getRequestedDate()))
-                    .count();
+            long count = allAppts.stream().filter(a -> dayStr.equals(a.getRequestedDate())).count();
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("label", day.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
             entry.put("date",  dayStr);
@@ -208,14 +199,12 @@ public class AdminController {
             weeklyList.add(entry);
         }
 
-        // This year Jan–Dec
         int currentYear = today.getYear();
         List<Map<String, Object>> monthlyList = new ArrayList<>();
         for (int m = 1; m <= 12; m++) {
             String monthPrefix = String.format("%d-%02d-", currentYear, m);
             long count = allAppts.stream()
-                    .filter(a -> a.getRequestedDate() != null
-                            && a.getRequestedDate().startsWith(monthPrefix))
+                    .filter(a -> a.getRequestedDate() != null && a.getRequestedDate().startsWith(monthPrefix))
                     .count();
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("label", Month.of(m).getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
@@ -224,7 +213,6 @@ public class AdminController {
             monthlyList.add(entry);
         }
 
-        // ← THIS was the missing declaration that caused the compile error
         Map<String, Object> appointmentsMap = new LinkedHashMap<>();
         appointmentsMap.put("total",     (long) allAppts.size());
         appointmentsMap.put("pending",   apptPending);
@@ -236,12 +224,10 @@ public class AdminController {
         appointmentsMap.put("weekly",    weeklyList);
         appointmentsMap.put("monthly",   monthlyList);
 
-        // ── 4. Secretary assignments ──────────────────────────────────────
         long assignedSecretaries = secretaryRepository.findAll().stream()
                 .filter(s -> "APPROVED".equalsIgnoreCase(s.getStatus()))
                 .count();
 
-        // ── 5. Assemble ───────────────────────────────────────────────────
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("users",               usersMap);
         result.put("doctors",             doctorsMap);

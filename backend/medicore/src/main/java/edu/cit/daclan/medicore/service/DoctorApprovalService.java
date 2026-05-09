@@ -52,8 +52,10 @@ public class DoctorApprovalService {
                 .phoneNumber(d.getUser().getPhoneNumber())
                 .specialization(d.getSpecialization())
                 .licenseNumber(d.getLicenseNumber())
-                .profilePicture(d.getProfilePicture())
+                .profilePicture(d.getUser().getProfilePicture())
                 .status(d.getStatus())
+                .yearsOfExperience(d.getYearsOfExperience())
+                .bio(d.getBio())
                 .build();
     }
 }

@@ -7,6 +7,7 @@ import edu.cit.daclan.medicore.dto.response.PatientProfileResponse;
 import edu.cit.daclan.medicore.entity.Doctor;
 import edu.cit.daclan.medicore.entity.User;
 import edu.cit.daclan.medicore.repository.DoctorRepository;
+import edu.cit.daclan.medicore.repository.UserRepository;
 import edu.cit.daclan.medicore.service.PatientService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,14 +24,17 @@ public class PatientController {
 
     private final DoctorRepository doctorRepository;
     private final PatientService   patientService;
+    private final UserRepository   userRepository;  // 👈 added
 
     public PatientController(DoctorRepository doctorRepository,
-                             PatientService patientService) {
+                             PatientService patientService,
+                             UserRepository userRepository) {  // 👈 added
         this.doctorRepository = doctorRepository;
         this.patientService   = patientService;
+        this.userRepository   = userRepository;  // 👈 added
     }
 
-    // ── GET /api/v1/doctors — all approved doctors ────────────────────────────
+    // ── GET /api/v1/doctors ───────────────────────────────────────────────────
     @GetMapping("/doctors")
     public ResponseEntity<ApiResponse<List<DoctorSummaryResponse>>> getApprovedDoctors() {
         List<DoctorSummaryResponse> doctors = doctorRepository
@@ -57,9 +61,6 @@ public class PatientController {
     }
 
     // ── GET /api/v1/doctors/with-secretary ────────────────────────────────────
-    // Only approved doctors who have an APPROVED secretary assigned.
-    // Patients use this endpoint for booking — guarantees every appointment
-    // booked through here can be managed by a secretary.
     @GetMapping("/doctors/with-secretary")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getDoctorsWithSecretary() {
         List<Map<String, Object>> result = doctorRepository
@@ -75,7 +76,6 @@ public class PatientController {
     @GetMapping("/patient/profile")
     public ResponseEntity<ApiResponse<PatientProfileResponse>> getProfile(
             @AuthenticationPrincipal UserDetails userDetails) {
-
         PatientProfileResponse profile =
                 patientService.getProfile(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success(profile));
@@ -86,10 +86,21 @@ public class PatientController {
     public ResponseEntity<ApiResponse<PatientProfileResponse>> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody PatientProfileRequest request) {
-
         PatientProfileResponse updated =
                 patientService.updateProfile(userDetails.getUsername(), request);
         return ResponseEntity.ok(ApiResponse.success(updated));
+    }
+
+    // ── PUT /api/v1/patient/profile/picture ──────────────────────────────────
+    @PutMapping("/patient/profile/picture")
+    public ResponseEntity<ApiResponse<PatientProfileResponse>> uploadProfilePicture(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, String> body) {
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setProfilePicture(body.get("profilePicture"));
+        userRepository.save(user);
+        return getProfile(userDetails);
     }
 
     // ── Private helper ────────────────────────────────────────────────────────
@@ -102,7 +113,7 @@ public class PatientController {
         m.put("phoneNumber",       d.getUser().getPhoneNumber());
         m.put("specialization",    d.getSpecialization());
         m.put("licenseNumber",     d.getLicenseNumber());
-        m.put("profilePicture",    d.getProfilePicture());
+        m.put("profilePicture",    d.getUser().getProfilePicture());  // ✅ from users table
         m.put("yearsOfExperience", d.getYearsOfExperience());
         m.put("bio",               d.getBio());
         m.put("status",            d.getStatus());

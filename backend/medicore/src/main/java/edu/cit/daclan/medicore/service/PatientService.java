@@ -39,12 +39,10 @@ public class PatientService {
         User    user    = findUserByEmail(email);
         Patient patient = findPatientByUser(user);
 
-        // ── User fields ───────────────────────────────────────────────────────
         if (isPresent(req.getFirstName()))   user.setFirstName(req.getFirstName().trim());
         if (isPresent(req.getLastName()))    user.setLastName(req.getLastName().trim());
         if (req.getPhoneNumber() != null)    user.setPhoneNumber(req.getPhoneNumber().trim());
 
-        // ── Password change (only when both fields supplied) ──────────────────
         if (isPresent(req.getCurrentPassword()) && isPresent(req.getNewPassword())) {
             if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
                 throw new IllegalArgumentException("Current password is incorrect.");
@@ -55,7 +53,6 @@ public class PatientService {
             user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         }
 
-        // ── Patient-specific fields ───────────────────────────────────────────
         if (req.getDateOfBirth() != null)   patient.setDateOfBirth(req.getDateOfBirth());
         if (isPresent(req.getGender()))     patient.setGender(req.getGender().trim());
         if (isPresent(req.getAddress()))    patient.setAddress(req.getAddress().trim());
@@ -83,7 +80,6 @@ public class PatientService {
 
     private PatientProfileResponse toResponse(User user, Patient patient) {
         return PatientProfileResponse.builder()
-                // User fields
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
@@ -92,7 +88,7 @@ public class PatientService {
                 .role(user.getRole())
                 .status(user.getStatus())
                 .createdAt(user.getCreatedAt())
-                // Patient fields
+                .profilePicture(user.getProfilePicture())  // 👈 added
                 .patientId(patient.getPatientId())
                 .dateOfBirth(patient.getDateOfBirth())
                 .gender(patient.getGender())

@@ -10,4 +10,6 @@ public interface DoctorService {
 
     /** Updates editable profile fields for the currently logged-in doctor. */
     DoctorProfileResponse updateMyProfile(String email, DoctorProfileUpdateRequest request);
+
+    DoctorProfileResponse updateProfilePicture(String email, String base64Image);
 }

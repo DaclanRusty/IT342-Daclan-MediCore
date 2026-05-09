@@ -30,13 +30,14 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-    // ── NEW: account status for block/unblock feature ──────────────────────
-    // "ACTIVE" = normal, "BLOCKED" = admin has blocked this user
     @Column(nullable = false)
     private String status = "ACTIVE";
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "profile_picture", columnDefinition = "TEXT")
+    private String profilePicture;
 
     @PrePersist
     protected void onCreate() {
@@ -60,26 +61,28 @@ public class User {
     }
 
     // Getters
-    public Long getUserId()            { return userId; }
-    public String getEmail()           { return email; }
-    public String getPassword()        { return password; }
-    public String getFirstName()       { return firstName; }
-    public String getLastName()        { return lastName; }
-    public String getPhoneNumber()     { return phoneNumber; }
-    public String getRole()            { return role; }
-    public String getStatus()          { return status != null ? status : "ACTIVE"; }
-    public LocalDateTime getCreatedAt(){ return createdAt; }
+    public Long getUserId()             { return userId; }
+    public String getEmail()            { return email; }
+    public String getPassword()         { return password; }
+    public String getFirstName()        { return firstName; }
+    public String getLastName()         { return lastName; }
+    public String getPhoneNumber()      { return phoneNumber; }
+    public String getRole()             { return role; }
+    public String getStatus()           { return status != null ? status : "ACTIVE"; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public String getProfilePicture()   { return profilePicture; }
 
     // Setters
-    public void setUserId(Long userId)             { this.userId = userId; }
-    public void setEmail(String email)             { this.email = email; }
-    public void setPassword(String password)       { this.password = password; }
-    public void setFirstName(String firstName)     { this.firstName = firstName; }
-    public void setLastName(String lastName)       { this.lastName = lastName; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
-    public void setRole(String role)               { this.role = role; }
-    public void setStatus(String status)           { this.status = status; }
-    public void setCreatedAt(LocalDateTime c)      { this.createdAt = c; }
+    public void setUserId(Long userId)                       { this.userId = userId; }
+    public void setEmail(String email)                       { this.email = email; }
+    public void setPassword(String password)                 { this.password = password; }
+    public void setFirstName(String firstName)               { this.firstName = firstName; }
+    public void setLastName(String lastName)                 { this.lastName = lastName; }
+    public void setPhoneNumber(String phoneNumber)           { this.phoneNumber = phoneNumber; }
+    public void setRole(String role)                         { this.role = role; }
+    public void setStatus(String status)                     { this.status = status; }
+    public void setCreatedAt(LocalDateTime c)                { this.createdAt = c; }
+    public void setProfilePicture(String profilePicture)     { this.profilePicture = profilePicture; }
 
     // Builder
     public static Builder builder() { return new Builder(); }
@@ -100,14 +103,14 @@ public class User {
 
         public User build() {
             User u = new User();
-            u.userId      = this.userId;
-            u.email       = this.email;
-            u.password    = this.password;
-            u.firstName   = this.firstName;
-            u.lastName    = this.lastName;
-            u.phoneNumber = this.phoneNumber;
-            u.role        = this.role;
-            u.status      = this.status != null ? this.status : "ACTIVE";
+            u.userId        = this.userId;
+            u.email         = this.email;
+            u.password      = this.password;
+            u.firstName     = this.firstName;
+            u.lastName      = this.lastName;
+            u.phoneNumber   = this.phoneNumber;
+            u.role          = this.role;
+            u.status        = this.status != null ? this.status : "ACTIVE";
             return u;
         }
     }

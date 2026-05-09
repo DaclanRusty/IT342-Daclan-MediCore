@@ -21,7 +21,7 @@ public class Doctor {
     @Column(nullable = false)
     private String specialization;
 
-    @Column(name = "profile_picture")
+    @Column(name = "profile_picture", columnDefinition = "TEXT")
     private String profilePicture;
 
     @Column(nullable = false)

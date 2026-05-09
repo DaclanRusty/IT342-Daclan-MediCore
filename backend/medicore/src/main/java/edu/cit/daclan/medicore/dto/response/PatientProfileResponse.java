@@ -14,6 +14,7 @@ public class PatientProfileResponse {
     private String role;
     private String status;
     private LocalDateTime createdAt;
+    private String profilePicture;  // 👈 added
 
     // ── From Patient ──────────────────────────────────────────────────────
     private Long patientId;
@@ -32,6 +33,7 @@ public class PatientProfileResponse {
     public String getRole()              { return role; }
     public String getStatus()            { return status; }
     public LocalDateTime getCreatedAt()  { return createdAt; }
+    public String getProfilePicture()    { return profilePicture; }  // 👈 added
     public Long getPatientId()           { return patientId; }
     public LocalDate getDateOfBirth()    { return dateOfBirth; }
     public String getGender()            { return gender; }
@@ -46,6 +48,7 @@ public class PatientProfileResponse {
     public void setRole(String role)                     { this.role = role; }
     public void setStatus(String status)                 { this.status = status; }
     public void setCreatedAt(LocalDateTime createdAt)    { this.createdAt = createdAt; }
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }  // 👈 added
     public void setPatientId(Long patientId)             { this.patientId = patientId; }
     public void setDateOfBirth(LocalDate dateOfBirth)    { this.dateOfBirth = dateOfBirth; }
     public void setGender(String gender)                 { this.gender = gender; }
@@ -56,7 +59,8 @@ public class PatientProfileResponse {
 
     public static class Builder {
         private Long userId, patientId;
-        private String email, firstName, lastName, phoneNumber, role, status, gender, address;
+        private String email, firstName, lastName, phoneNumber, role, status;
+        private String gender, address, profilePicture;  // 👈 added profilePicture
         private LocalDateTime createdAt;
         private LocalDate dateOfBirth;
 
@@ -72,21 +76,23 @@ public class PatientProfileResponse {
         public Builder dateOfBirth(LocalDate v)    { this.dateOfBirth = v; return this; }
         public Builder gender(String v)            { this.gender = v; return this; }
         public Builder address(String v)           { this.address = v; return this; }
+        public Builder profilePicture(String v)    { this.profilePicture = v; return this; }  // 👈 added
 
         public PatientProfileResponse build() {
             PatientProfileResponse r = new PatientProfileResponse();
-            r.userId      = this.userId;
-            r.patientId   = this.patientId;
-            r.email       = this.email;
-            r.firstName   = this.firstName;
-            r.lastName    = this.lastName;
-            r.phoneNumber = this.phoneNumber;
-            r.role        = this.role;
-            r.status      = this.status;
-            r.createdAt   = this.createdAt;
-            r.dateOfBirth = this.dateOfBirth;
-            r.gender      = this.gender;
-            r.address     = this.address;
+            r.userId         = this.userId;
+            r.patientId      = this.patientId;
+            r.email          = this.email;
+            r.firstName      = this.firstName;
+            r.lastName       = this.lastName;
+            r.phoneNumber    = this.phoneNumber;
+            r.role           = this.role;
+            r.status         = this.status;
+            r.createdAt      = this.createdAt;
+            r.dateOfBirth    = this.dateOfBirth;
+            r.gender         = this.gender;
+            r.address        = this.address;
+            r.profilePicture = this.profilePicture;  // 👈 added
             return r;
         }
     }
