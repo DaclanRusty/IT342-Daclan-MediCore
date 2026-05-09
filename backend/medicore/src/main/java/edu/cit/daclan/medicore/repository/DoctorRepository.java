@@ -33,4 +33,16 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
         )
     """)
     List<Doctor> findAvailableDoctors();
+
+
+    @Query("""
+    SELECT d FROM Doctor d
+    WHERE d.status = 'APPROVED'
+    AND d.user IS NOT NULL
+    AND d.doctorId IN (
+        SELECT s.doctor.doctorId FROM Secretary s
+        WHERE s.status = 'APPROVED'
+    )
+""")
+    List<Doctor> findDoctorsWithApprovedSecretary();
 }

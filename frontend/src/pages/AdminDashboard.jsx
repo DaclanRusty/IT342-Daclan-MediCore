@@ -132,7 +132,7 @@ const GlobalStyles = () => (
   </>
 );
 
-// ── Cloud SVG (identical to landing page) ────────────────────────────────
+// ── Cloud SVG ─────────────────────────────────────────────────────────────
 const Cloud = ({ style }) => (
   <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={style}>
     <path d="M170 60H45C28 60 15 47 15 30C15 15 26 4 40 4C42 4 44 4 46 5C50 -1 58 -2 65 2C70 -4 80 -5 88 1C93 -3 101 -3 107 2C114 -2 124 0 128 8C140 6 152 14 154 26C162 26 170 34 170 43V60Z" fill="white" fillOpacity="0.55"/>
@@ -172,7 +172,7 @@ const TABS = [
   { key:"dashboard",   label:"Dashboard",             icon:<GridIcon />  },
   { key:"doctors",     label:"Doctor Registrations",  icon:<ClipIcon />  },
   { key:"secretaries", label:"Secretary Assignments", icon:<LinkIcon />  },
-  { key:"users",       label:"Manage Users",           icon:<PeopleIcon />},
+  { key:"users",       label:"Manage Users",          icon:<PeopleIcon />},
   { key:"analytics",   label:"Analytics",             icon:<ChartIcon /> },
 ];
 
@@ -191,7 +191,11 @@ const BS = {
 };
 const StatusBadge = ({ status }) => {
   const [bg, color, border] = BS[status] || BS.INACTIVE;
-  return <span style={{ background:bg, color, border:`1px solid ${border}`, borderRadius:100, padding:"3px 11px", fontSize:11.5, fontWeight:700, letterSpacing:".02em", whiteSpace:"nowrap" }}>{status}</span>;
+  return (
+    <span style={{ background:bg, color, border:`1px solid ${border}`, borderRadius:100, padding:"3px 11px", fontSize:11.5, fontWeight:700, letterSpacing:".02em", whiteSpace:"nowrap" }}>
+      {status}
+    </span>
+  );
 };
 
 // ── Avatar ────────────────────────────────────────────────────────────────
@@ -234,15 +238,11 @@ const DeleteModal = ({user,onConfirm,onCancel}) => <ConfirmModal icon={<svg view
 const Navbar = ({ activeTab, onTabChange, onLogout, pendingCount }) => (
   <>
     <nav style={{ position:"sticky", top:0, zIndex:100, height:64, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", background:"rgba(255,255,255,0.72)", backdropFilter:"blur(22px)", WebkitBackdropFilter:"blur(22px)", borderBottom:"1px solid rgba(255,255,255,0.78)", boxShadow:"0 1px 0 rgba(37,99,235,.06), 0 4px 24px rgba(37,99,235,.05)" }}>
-
-      {/* Logo */}
       <div style={{ display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
         <div style={{ width:36, height:36, borderRadius:11, background:`linear-gradient(135deg,${C.blue},${C.blueDk})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontFamily:"'Sora',sans-serif", fontWeight:900, fontSize:17, boxShadow:`0 4px 14px rgba(37,99,235,.32)` }}>M</div>
         <span style={{ fontFamily:"'Sora',sans-serif", fontWeight:800, fontSize:17, color:C.slate, letterSpacing:"-.3px" }}>Medi<span style={{color:C.blue}}>Core</span></span>
         <span style={{ background:`linear-gradient(135deg,${C.amberLt},#fff7ed)`, border:`1px solid ${C.amberBdr}`, color:C.amberDk, fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:100, marginLeft:4, letterSpacing:".04em" }}>ADMIN</span>
       </div>
-
-      {/* Tab pills — desktop */}
       <div className="top-nav-tabs" style={{ display:"flex", gap:4, alignItems:"center" }}>
         {TABS.map(t => (
           <button key={t.key} className={`tab-btn ${activeTab===t.key?"active":""}`} onClick={()=>onTabChange(t.key)} style={{ color:activeTab===t.key?C.blue:C.slateL }}>
@@ -253,8 +253,6 @@ const Navbar = ({ activeTab, onTabChange, onLogout, pendingCount }) => (
           </button>
         ))}
       </div>
-
-      {/* Admin identity + logout */}
       <div style={{ display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
         <div style={{ display:"flex", alignItems:"center", gap:9 }}>
           <div style={{ width:34, height:34, borderRadius:"50%", background:`linear-gradient(135deg,${C.amber},${C.amberDk})`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", boxShadow:`0 3px 10px rgba(245,158,11,.3)` }}>
@@ -270,8 +268,6 @@ const Navbar = ({ activeTab, onTabChange, onLogout, pendingCount }) => (
         </button>
       </div>
     </nav>
-
-    {/* Mobile tab bar */}
     <div className="mobile-tab-bar" style={{ display:"none", gap:4, padding:"8px 12px", background:"rgba(255,255,255,0.72)", backdropFilter:"blur(20px)", borderBottom:"1px solid rgba(255,255,255,0.7)", overflowX:"auto" }}>
       {TABS.map(t => (
         <button key={t.key} className={`tab-btn ${activeTab===t.key?"active":""}`} onClick={()=>onTabChange(t.key)} style={{ color:activeTab===t.key?C.blue:C.slateL, fontSize:12, padding:"8px 12px", flexShrink:0 }}>
@@ -284,11 +280,11 @@ const Navbar = ({ activeTab, onTabChange, onLogout, pendingCount }) => (
 
 // ── Page Banner ───────────────────────────────────────────────────────────
 const META = {
-  dashboard:   { title:"Dashboard",             sub:"System overview at a glance",         emoji:"🏥" },
-  doctors:     { title:"Doctor Registrations",  sub:"Review and approve pending requests", emoji:"🩺" },
-  secretaries: { title:"Secretary Assignments", sub:"All secretary–doctor links",          emoji:"🔗" },
-  users:       { title:"Manage Users",           sub:"Block, unblock, or remove accounts", emoji:"👥" },
-  analytics:   { title:"Analytics & Reports",   sub:"Appointment trends and status breakdown", emoji:"📊" },
+  dashboard:   { title:"Dashboard",             sub:"System overview at a glance",             emoji:"🏥" },
+  doctors:     { title:"Doctor Registrations",  sub:"Review and approve pending requests",     emoji:"🩺" },
+  secretaries: { title:"Secretary Assignments", sub:"All secretary–doctor links",              emoji:"🔗" },
+  users:       { title:"Manage Users",          sub:"Block, unblock, or remove accounts",      emoji:"👥" },
+  analytics:   { title:"Analytics & Reports",   sub:"Live data from your system",              emoji:"📊" },
 };
 const PageBanner = ({ tab }) => {
   const m = META[tab];
@@ -344,42 +340,37 @@ const EmptyState = ({ text }) => (
 );
 
 // ── Dashboard Tab ─────────────────────────────────────────────────────────
-const DashboardTab = ({ users, doctors, assignments, onGoTo }) => {
-  const si = d => <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={22} height={22}><path d={d}/></svg>;
-  return (
-    <div className="page-pad" style={{ padding:"24px 32px 56px", maxWidth:1120, margin:"0 auto" }}>
-      <div className="stats-grid au3" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:26 }}>
-        <StatCard label="Total Users"      value={users.length}                            gradient={`linear-gradient(135deg,${C.blue},${C.blueDk})`}   border={C.blueBdr}   icon={<svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" width={22} height={22}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>} delay=".04s"/>
-        <StatCard label="Total Doctors"    value={doctors.length}                          gradient={`linear-gradient(135deg,${C.green},#047857)`}        border={C.greenBdr}  icon={si("M22 12h-4l-3 9L9 3l-3 9H2")} tag="All" delay=".1s"/>
-        <StatCard label="Pending Review"   value={doctors.filter(d=>d.status==="PENDING").length} gradient={`linear-gradient(135deg,${C.amber},${C.amberDk})`} border={C.amberBdr}  icon={si("M9 12h6M9 16h6M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z")} tag="Review" delay=".16s"/>
-        <StatCard label="Approved Doctors" value={doctors.filter(d=>d.status==="APPROVED").length} gradient={`linear-gradient(135deg,${C.purple},#7e22ce)`}  border={C.purpleBdr} icon={<svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" width={22} height={22}><polyline points="20 6 9 17 4 12"/></svg>} delay=".22s"/>
-      </div>
-
-      <div className="preview-2col au4" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:18, marginBottom:18 }}>
-        <PreviewCard title="Pending Registrations" onViewAll={()=>onGoTo("doctors")} empty={doctors.filter(d=>d.status==="PENDING").length===0} emptyText="No pending registrations">
-          {doctors.filter(d=>d.status==="PENDING").slice(0,3).map(doc=>(
-            <PreviewRow key={doc.doctorId} grad={`linear-gradient(135deg,${C.green},#047857)`} icon={<DoctorIcon/>} title={`Dr. ${doc.firstName} ${doc.lastName}`} sub={doc.specialization} badge={<StatusBadge status="PENDING"/>}/>
-          ))}
-        </PreviewCard>
-        <PreviewCard title="Secretary Assignments" onViewAll={()=>onGoTo("secretaries")} empty={assignments.length===0} emptyText="No assignments yet">
-          {assignments.slice(0,3).map(a=>(
-            <PreviewRow key={a.secretaryId} grad={`linear-gradient(135deg,${C.purple},#7e22ce)`} icon={<UserIcon/>} title={a.secretaryName} sub={a.doctorName} badge={<span style={{background:C.greenLt,color:C.green,border:`1px solid ${C.greenBdr}`,borderRadius:100,padding:"3px 10px",fontSize:11,fontWeight:700}}>● Assigned</span>}/>
-          ))}
-        </PreviewCard>
-      </div>
-
-      <div className="au5">
-        <PreviewCard title="Recent Users" onViewAll={()=>onGoTo("users")} empty={users.length===0} emptyText="No users yet">
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))" }}>
-            {users.slice(0,6).map(u=>(
-              <PreviewRow key={u.userId} grad={`linear-gradient(135deg,${C.blue},${C.blueDk})`} icon={<UserIcon/>} title={`${u.firstName} ${u.lastName}`} sub={u.email} badge={<StatusBadge status={(u.role||"PATIENT").toUpperCase()}/>}/>
-            ))}
-          </div>
-        </PreviewCard>
-      </div>
+const DashboardTab = ({ users, doctors, assignments, onGoTo }) => (
+  <div className="page-pad" style={{ padding:"24px 32px 56px", maxWidth:1120, margin:"0 auto" }}>
+    <div className="stats-grid au3" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:26 }}>
+      <StatCard label="Total Users"      value={users.length}   gradient={`linear-gradient(135deg,${C.blue},${C.blueDk})`}   border={C.blueBdr}   icon={<svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" width={22} height={22}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>} delay=".04s"/>
+      <StatCard label="Total Doctors"    value={doctors.length} gradient={`linear-gradient(135deg,${C.green},#047857)`}        border={C.greenBdr}  icon={<svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" width={22} height={22}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>} tag="All" delay=".1s"/>
+      <StatCard label="Pending Review"   value={doctors.filter(d=>d.status==="PENDING").length} gradient={`linear-gradient(135deg,${C.amber},${C.amberDk})`} border={C.amberBdr} icon={<svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" width={22} height={22}><path d="M9 12h6M9 16h6M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>} tag="Review" delay=".16s"/>
+      <StatCard label="Approved Doctors" value={doctors.filter(d=>d.status==="APPROVED").length} gradient={`linear-gradient(135deg,${C.purple},#7e22ce)`} border={C.purpleBdr} icon={<svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" width={22} height={22}><polyline points="20 6 9 17 4 12"/></svg>} delay=".22s"/>
     </div>
-  );
-};
+    <div className="preview-2col au4" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:18, marginBottom:18 }}>
+      <PreviewCard title="Pending Registrations" onViewAll={()=>onGoTo("doctors")} empty={doctors.filter(d=>d.status==="PENDING").length===0} emptyText="No pending registrations">
+        {doctors.filter(d=>d.status==="PENDING").slice(0,3).map(doc=>(
+          <PreviewRow key={doc.doctorId} grad={`linear-gradient(135deg,${C.green},#047857)`} icon={<DoctorIcon/>} title={`Dr. ${doc.firstName} ${doc.lastName}`} sub={doc.specialization} badge={<StatusBadge status="PENDING"/>}/>
+        ))}
+      </PreviewCard>
+      <PreviewCard title="Secretary Assignments" onViewAll={()=>onGoTo("secretaries")} empty={assignments.length===0} emptyText="No assignments yet">
+        {assignments.slice(0,3).map(a=>(
+          <PreviewRow key={a.secretaryId} grad={`linear-gradient(135deg,${C.purple},#7e22ce)`} icon={<UserIcon/>} title={a.secretaryName} sub={a.doctorName} badge={<span style={{background:C.greenLt,color:C.green,border:`1px solid ${C.greenBdr}`,borderRadius:100,padding:"3px 10px",fontSize:11,fontWeight:700}}>● Assigned</span>}/>
+        ))}
+      </PreviewCard>
+    </div>
+    <div className="au5">
+      <PreviewCard title="Recent Users" onViewAll={()=>onGoTo("users")} empty={users.length===0} emptyText="No users yet">
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))" }}>
+          {users.slice(0,6).map(u=>(
+            <PreviewRow key={u.userId} grad={`linear-gradient(135deg,${C.blue},${C.blueDk})`} icon={<UserIcon/>} title={`${u.firstName} ${u.lastName}`} sub={u.email} badge={<StatusBadge status={(u.role||"PATIENT").toUpperCase()}/>}/>
+          ))}
+        </div>
+      </PreviewCard>
+    </div>
+  </div>
+);
 
 // ── Doctor Registrations Tab ──────────────────────────────────────────────
 const DoctorRegistrationsTab = ({ doctors, onApprove, onReject, loading }) => {
@@ -467,14 +458,12 @@ const ManageUsersTab = ({ users, onDelete, onBlock, onUnblock, loading }) => {
     <div className="page-pad" style={{ padding:"24px 32px 56px", maxWidth:1200, margin:"0 auto" }}>
       {blockTarget && <BlockModal  user={blockTarget} onConfirm={()=>{onBlock(blockTarget.userId);   setBlockTarget(null);}} onCancel={()=>setBlockTarget(null)}/>}
       {delTarget   && <DeleteModal user={delTarget}   onConfirm={()=>{onDelete(delTarget.userId);    setDelTarget(null);}}  onCancel={()=>setDelTarget(null)}/>}
-
       <div className="au2" style={{ display:"flex", gap:8, marginBottom:20, flexWrap:"wrap", alignItems:"center" }}>
         {["ALL","ADMIN","DOCTOR","SECRETARY","PATIENT"].map(r=>(
           <button key={r} className="filter-pill action-btn" onClick={()=>setFilter(r)} style={{ borderColor:filter===r?C.blue:"rgba(226,232,240,0.8)", background:filter===r?C.blueLt:"rgba(255,255,255,0.72)", color:filter===r?C.blue:C.slateL }}>{r}</button>
         ))}
         <span style={{ marginLeft:"auto", fontSize:13, color:C.slateL, fontWeight:500 }}>{filtered.length} user{filtered.length!==1?"s":""}</span>
       </div>
-
       <div className="glass-card au3" style={{ overflow:"hidden" }}>
         <div className="users-grid" style={{ display:"grid", gridTemplateColumns:"2fr 2fr 1.2fr 1.1fr auto auto", padding:"11px 22px", background:"rgba(248,250,252,0.75)", borderBottom:"1px solid rgba(226,232,240,0.55)", gap:12 }}>
           {[["Name",""],["Email","users-col-email"],["Role","users-col-role"],["Status",""],["Access",""],["Remove",""]].map(([h,cls])=>(
@@ -508,109 +497,77 @@ const ManageUsersTab = ({ users, onDelete, onBlock, onUnblock, loading }) => {
   );
 };
 
-// ── Analytics Tab ─────────────────────────────────────────────────────────
-// Placeholder data — swap with real API calls when backend is ready
-const APPT_PLACEHOLDER = {
-  todayTotal: 24,
-  todayDone:  14,   // completed so far today
-  weekly: [8, 15, 22, 18, 24, 11, 6],   // Mon–Sun appointment counts
-  weekLabels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-  statuses: [
-    { key:"PENDING",   label:"Pending",   count:38, color:"#f59e0b", light:"#fffbeb", border:"#fde68a" },
-    { key:"APPROVED",  label:"Approved",  count:121, color:"#059669", light:"#f0fdf4", border:"#bbf7d0" },
-    { key:"REJECTED",  label:"Rejected",  count:14,  color:"#ef4444", light:"#fef2f2", border:"#fecaca" },
-    { key:"COMPLETED", label:"Completed", count:284, color:"#2563eb", light:"#eff6ff", border:"#bfdbfe" },
-  ],
-  monthly: [42,58,71,65,88,74,91,103,96,87,112,108],
-  monthLabels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-};
-
-// SVG Donut Chart (pure, no library)
+// ── Analytics: SVG Donut Chart ────────────────────────────────────────────
 const DonutChart = ({ data }) => {
-  const total = data.reduce((s,d)=>s+d.count,0);
-  const cx=110, cy=110, R=82, r=50;
+  const total = data.reduce((s, d) => s + d.count, 0);
+  const cx = 110, cy = 110, R = 82;
   const circumference = 2 * Math.PI * R;
   let offset = 0;
-
-  // Build segments
   const segments = data.map(d => {
-    const pct   = d.count / total;
-    const dash  = pct * circumference;
-    const gap   = circumference - dash;
-    const seg   = { ...d, dash, gap, offset, pct };
+    const dash = total > 0 ? (d.count / total) * circumference : 0;
+    const gap  = circumference - dash;
+    const seg  = { ...d, dash, gap, offset };
     offset += dash;
     return seg;
   });
-
-  // rotation so first segment starts at top (−90°)
-  const startRot = -90;
-
   return (
     <div style={{ display:"flex", alignItems:"center", gap:28, flexWrap:"wrap" }}>
-      {/* Chart */}
       <div style={{ position:"relative", flexShrink:0 }}>
         <svg width={220} height={220} viewBox="0 0 220 220">
-          {/* Track */}
           <circle cx={cx} cy={cy} r={R} fill="none" stroke="rgba(226,232,240,0.6)" strokeWidth={32}/>
-          {/* Segments */}
-          {segments.map((s,i) => {
-            const rotDeg = startRot + (s.offset / circumference) * 360;
+          {segments.map((s, i) => {
+            const rotDeg = -90 + (s.offset / circumference) * 360;
             return (
-              <circle key={i} cx={cx} cy={cy} r={R}
-                fill="none"
-                stroke={s.color}
-                strokeWidth={32}
+              <circle key={i} cx={cx} cy={cy} r={R} fill="none" stroke={s.color} strokeWidth={32}
                 strokeDasharray={`${s.dash} ${s.gap}`}
-                strokeDashoffset={0}
                 transform={`rotate(${rotDeg} ${cx} ${cy})`}
                 style={{ filter:`drop-shadow(0 2px 4px ${s.color}40)` }}
               />
             );
           })}
-          {/* Centre hole overlay */}
-          <circle cx={cx} cy={cy} r={r} fill="rgba(255,255,255,0.85)"/>
-          {/* Centre label */}
-          <text x={cx} y={cy-8} textAnchor="middle" style={{ fontFamily:"'Sora',sans-serif", fontSize:26, fontWeight:900, fill:"#0f172a" }}>{total}</text>
-          <text x={cx} y={cy+14} textAnchor="middle" style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:600, fill:"#94a3b8", letterSpacing:"0.08em" }}>TOTAL</text>
+          <circle cx={cx} cy={cy} r={50} fill="rgba(255,255,255,0.85)"/>
+          <text x={cx} y={cy - 8} textAnchor="middle" style={{ fontFamily:"'Sora',sans-serif", fontSize:26, fontWeight:900, fill:"#0f172a" }}>{total}</text>
+          <text x={cx} y={cy + 14} textAnchor="middle" style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:600, fill:"#94a3b8", letterSpacing:"0.08em" }}>TOTAL</text>
         </svg>
       </div>
-
-      {/* Legend */}
       <div style={{ display:"flex", flexDirection:"column", gap:12, flex:1, minWidth:160 }}>
-        {segments.map((s,i) => (
-          <div key={i} style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ width:12, height:12, borderRadius:3, background:s.color, flexShrink:0, boxShadow:`0 2px 6px ${s.color}50` }}/>
-            <div style={{ flex:1 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:4 }}>
-                <span style={{ fontSize:13, fontWeight:600, color:"#334155" }}>{s.label}</span>
-                <span style={{ fontSize:13, fontWeight:800, color:"#0f172a" }}>{s.count}</span>
+        {segments.map((s, i) => {
+          const pct = total > 0 ? ((s.count / total) * 100).toFixed(1) : "0.0";
+          return (
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <div style={{ width:12, height:12, borderRadius:3, background:s.color, flexShrink:0 }}/>
+              <div style={{ flex:1 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:4 }}>
+                  <span style={{ fontSize:13, fontWeight:600, color:"#334155" }}>{s.label}</span>
+                  <span style={{ fontSize:13, fontWeight:800, color:"#0f172a" }}>{s.count}</span>
+                </div>
+                <div style={{ height:5, borderRadius:99, background:"rgba(226,232,240,0.6)", overflow:"hidden" }}>
+                  <div style={{ height:"100%", width:`${pct}%`, borderRadius:99, background:s.color, transition:"width 1s cubic-bezier(.22,1,.36,1)" }}/>
+                </div>
               </div>
-              <div style={{ height:5, borderRadius:99, background:"rgba(226,232,240,0.6)", overflow:"hidden" }}>
-                <div style={{ height:"100%", width:`${(s.pct*100).toFixed(1)}%`, borderRadius:99, background:s.color, transition:"width 1s cubic-bezier(.22,1,.36,1)" }}/>
-              </div>
+              <span style={{ fontSize:11.5, color:"#94a3b8", fontWeight:600, minWidth:34, textAlign:"right" }}>{pct}%</span>
             </div>
-            <span style={{ fontSize:11.5, color:"#94a3b8", fontWeight:600, minWidth:34, textAlign:"right" }}>{(s.pct*100).toFixed(0)}%</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 };
 
-// Bar Chart (weekly)
-const BarChart = ({ values, labels, color, peak }) => {
-  const max = Math.max(...values);
+// ── Analytics: Bar Chart (weekly) ─────────────────────────────────────────
+const BarChart = ({ values, labels, color }) => {
+  const max = Math.max(...values, 1);
+  const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
   return (
     <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:100, paddingTop:8 }}>
-      {values.map((v,i) => {
-        const h = max > 0 ? (v/max)*88 : 4;
-        const isToday = i === new Date().getDay() === 0 ? 6 : new Date().getDay()-1;
-        const highlight = i === (new Date().getDay() === 0 ? 6 : new Date().getDay()-1);
+      {values.map((v, i) => {
+        const h = (v / max) * 88;
+        const highlight = i === todayIdx;
         return (
           <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:5 }}>
-            <span style={{ fontSize:10, fontWeight:700, color: highlight ? color : "#94a3b8", marginBottom:2 }}>{v}</span>
-            <div style={{ width:"100%", borderRadius:"6px 6px 0 0", height:h, background: highlight ? color : `${color}55`, transition:"height 1s cubic-bezier(.22,1,.36,1)", boxShadow: highlight ? `0 4px 12px ${color}40` : "none" }}/>
-            <span style={{ fontSize:10, fontWeight: highlight ? 700 : 500, color: highlight ? color : "#94a3b8" }}>{labels[i]}</span>
+            <span style={{ fontSize:10, fontWeight:700, color:highlight?color:"#94a3b8", marginBottom:2 }}>{v}</span>
+            <div style={{ width:"100%", borderRadius:"6px 6px 0 0", height:Math.max(h, 3), background:highlight?color:`${color}55`, transition:"height 1s cubic-bezier(.22,1,.36,1)", boxShadow:highlight?`0 4px 12px ${color}40`:"none" }}/>
+            <span style={{ fontSize:10, fontWeight:highlight?700:500, color:highlight?color:"#94a3b8" }}>{labels[i]}</span>
           </div>
         );
       })}
@@ -618,16 +575,16 @@ const BarChart = ({ values, labels, color, peak }) => {
   );
 };
 
-// Monthly sparkline
+// ── Analytics: Sparkline (monthly) ────────────────────────────────────────
 const Sparkline = ({ values, color }) => {
-  const max = Math.max(...values), min = Math.min(...values);
-  const W=260, H=52, pad=4;
-  const pts = values.map((v,i)=>{
-    const x = pad + (i/(values.length-1))*(W-pad*2);
-    const y = H-pad - ((v-min)/(max-min||1))*(H-pad*2);
+  const max = Math.max(...values, 1), min = Math.min(...values, 0);
+  const W = 260, H = 52, pad = 4;
+  const pts = values.map((v, i) => {
+    const x = pad + (i / (values.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((v - min) / (max - min || 1)) * (H - pad * 2);
     return `${x},${y}`;
   }).join(" ");
-  const areaClose = `${W-pad},${H} ${pad},${H}`;
+  const lastPt = pts.split(" ").pop().split(",");
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow:"visible" }}>
       <defs>
@@ -636,24 +593,53 @@ const Sparkline = ({ values, color }) => {
           <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
         </linearGradient>
       </defs>
-      <polygon points={`${pts} ${areaClose}`} fill="url(#spark-grad)"/>
+      <polygon points={`${pts} ${W - pad},${H} ${pad},${H}`} fill="url(#spark-grad)"/>
       <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      {/* End dot */}
-      {(() => { const last=pts.split(" ").pop().split(","); return <circle cx={last[0]} cy={last[1]} r="4" fill={color} stroke="#fff" strokeWidth="2"/>; })()}
+      <circle cx={lastPt[0]} cy={lastPt[1]} r="4" fill={color} stroke="#fff" strokeWidth="2"/>
     </svg>
   );
 };
 
-const AnalyticsTab = () => {
-  const d = APPT_PLACEHOLDER;
-  const todayPct = Math.round((d.todayDone/d.todayTotal)*100);
+// ── Analytics Tab (LIVE DATA) ─────────────────────────────────────────────
+const AnalyticsTab = ({ analytics }) => {
+  if (!analytics) {
+    return (
+      <div style={{ padding:"80px 32px", textAlign:"center", color:C.slateXL, fontSize:14 }}>
+        <div style={{ fontSize:36, marginBottom:12 }}>⏳</div>
+        Loading analytics…
+      </div>
+    );
+  }
 
-  // Mini stat tiles
+  const u  = analytics.users        || {};
+  const d  = analytics.doctors      || {};
+  const a  = analytics.appointments || {};
+  const weekly  = a.weekly  || [];
+  const monthly = a.monthly || [];
+
+  const weeklyValues  = weekly.map(w  => Number(w.count));
+  const weeklyLabels  = weekly.map(w  => w.label);
+  const monthlyValues = monthly.map(m => Number(m.count));
+  const monthlyLabels = monthly.map(m => m.label);
+
+  const apptTotal = a.total || 0;
+  const yearTotal = monthlyValues.reduce((acc, v) => acc + v, 0);
+  const completionPct = apptTotal > 0
+    ? Math.round(((a.completed || 0) / apptTotal) * 100)
+    : 0;
+
+  const donutData = [
+    { label:"Pending",   count: a.pending   || 0, color:"#f59e0b", light:"#fffbeb", border:"#fde68a" },
+    { label:"Approved",  count: a.approved  || 0, color:"#059669", light:"#f0fdf4", border:"#bbf7d0" },
+    { label:"Rejected",  count: a.rejected  || 0, color:"#ef4444", light:"#fef2f2", border:"#fecaca" },
+    { label:"Completed", count: a.completed || 0, color:"#2563eb", light:"#eff6ff", border:"#bfdbfe" },
+  ];
+
   const tiles = [
-    { label:"Today's Appointments", value:d.todayTotal, sub:`${d.todayDone} completed so far`, grad:`linear-gradient(135deg,${C.blue},${C.blueDk})`, border:C.blueBdr, icon:"📅" },
-    { label:"Total This Month",     value:d.monthly.reduce((a,b)=>a+b,0), sub:"Across all statuses", grad:`linear-gradient(135deg,${C.purple},#7e22ce)`, border:C.purpleBdr, icon:"📆" },
-    { label:"Completion Rate",      value:`${Math.round((d.statuses.find(s=>s.key==="COMPLETED").count / d.statuses.reduce((a,s)=>a+s.count,0))*100)}%`, sub:"Of all appointments", grad:`linear-gradient(135deg,${C.green},#047857)`, border:C.greenBdr, icon:"✅" },
-    { label:"Pending Review",       value:d.statuses.find(s=>s.key==="PENDING").count, sub:"Awaiting action", grad:`linear-gradient(135deg,${C.amber},${C.amberDk})`, border:C.amberBdr, icon:"⏳" },
+    { label:"Today's Appointments", value: a.today || 0,   sub:`${u.total || 0} total users in system`,    grad:`linear-gradient(135deg,${C.blue},${C.blueDk})`,   border:C.blueBdr,   icon:"📅" },
+    { label:"Total This Year",      value: yearTotal,       sub:`${apptTotal} all-time appointments`,        grad:`linear-gradient(135deg,${C.purple},#7e22ce)`,      border:C.purpleBdr, icon:"📆" },
+    { label:"Approved Doctors",     value: d.approved || 0, sub:`${d.pending || 0} pending review`,          grad:`linear-gradient(135deg,${C.green},#047857)`,       border:C.greenBdr,  icon:"✅" },
+    { label:"Pending Appointments", value: a.pending  || 0, sub:`${analytics.assignedSecretaries || 0} secretaries assigned`, grad:`linear-gradient(135deg,${C.amber},${C.amberDk})`, border:C.amberBdr, icon:"⏳" },
   ];
 
   return (
@@ -661,8 +647,8 @@ const AnalyticsTab = () => {
 
       {/* ── Top stat tiles ── */}
       <div className="stats-grid au3" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:24 }}>
-        {tiles.map((t,i) => (
-          <div key={i} className="stat-card" style={{ animationDelay:`${i*.06}s` }}>
+        {tiles.map((t, i) => (
+          <div key={i} className="stat-card" style={{ animationDelay:`${i * .06}s` }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:16 }}>
               <div style={{ width:46, height:46, borderRadius:14, background:t.grad, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, boxShadow:"0 4px 16px rgba(0,0,0,.12)" }}>{t.icon}</div>
               <span style={{ background:"rgba(255,255,255,0.7)", color:C.slateM, fontSize:10, fontWeight:700, padding:"3px 9px", borderRadius:100, border:`1px solid ${t.border}`, letterSpacing:".04em" }}>LIVE</span>
@@ -674,80 +660,57 @@ const AnalyticsTab = () => {
         ))}
       </div>
 
-      {/* ── Today's progress + donut row ── */}
+      {/* ── User breakdown + Donut ── */}
       <div className="preview-2col au4" style={{ display:"grid", gridTemplateColumns:"1fr 1.5fr", gap:18, marginBottom:18 }}>
 
-        {/* Today's appointments detail */}
+        {/* User role breakdown */}
         <div className="glass-card" style={{ padding:"22px 24px" }}>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
-            <div>
-              <div style={{ fontFamily:"'Sora',sans-serif", fontSize:15, fontWeight:800, color:C.slate, marginBottom:3 }}>Today's Appointments</div>
-              <div style={{ fontSize:12.5, color:C.slateL }}>
-                {new Date().toLocaleDateString("en-PH",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}
-              </div>
-            </div>
-            <div style={{ textAlign:"right" }}>
-              <div style={{ fontFamily:"'Sora',sans-serif", fontSize:28, fontWeight:900, color:C.blue, lineHeight:1 }}>{d.todayTotal}</div>
-              <div style={{ fontSize:11, color:C.slateXL, fontWeight:600 }}>scheduled</div>
-            </div>
+          <div style={{ marginBottom:20 }}>
+            <div style={{ fontFamily:"'Sora',sans-serif", fontSize:15, fontWeight:800, color:C.slate, marginBottom:3 }}>User Breakdown</div>
+            <div style={{ fontSize:12.5, color:C.slateL }}>Total registered users by role</div>
           </div>
-
-          {/* Progress ring */}
-          <div style={{ display:"flex", alignItems:"center", gap:20, marginBottom:22 }}>
-            <div style={{ position:"relative", flexShrink:0 }}>
-              <svg width={80} height={80} viewBox="0 0 80 80">
-                <circle cx={40} cy={40} r={32} fill="none" stroke="rgba(226,232,240,0.6)" strokeWidth={10}/>
-                <circle cx={40} cy={40} r={32} fill="none" stroke={C.blue} strokeWidth={10}
-                  strokeDasharray={`${(todayPct/100)*201} 201`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 40 40)"
-                  style={{ transition:"stroke-dasharray 1.2s cubic-bezier(.22,1,.36,1)" }}
-                />
-                <text x={40} y={44} textAnchor="middle" style={{ fontFamily:"'Sora',sans-serif", fontSize:14, fontWeight:900, fill:C.blue }}>{todayPct}%</text>
-              </svg>
-            </div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:13, color:C.slateL, marginBottom:8 }}>Progress today</div>
-              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
-                <span style={{ fontSize:12.5, fontWeight:600, color:C.green }}>✓ {d.todayDone} completed</span>
-                <span style={{ fontSize:12.5, fontWeight:600, color:C.amber }}>{d.todayTotal-d.todayDone} remaining</span>
-              </div>
-            </div>
+          <div style={{ display:"flex", alignItems:"baseline", gap:8, marginBottom:20 }}>
+            <span style={{ fontFamily:"'Sora',sans-serif", fontSize:42, fontWeight:900, color:C.slate, lineHeight:1 }}>{u.total || 0}</span>
+            <span style={{ fontSize:13, color:C.slateL, fontWeight:600 }}>total users</span>
           </div>
-
-          {/* Per-status mini bars for today (simulated) */}
           {[
-            { label:"Completed",  val:d.todayDone,             color:C.green },
-            { label:"Pending",    val:Math.round(d.todayTotal*.17), color:C.amber },
-            { label:"Approved",   val:Math.round(d.todayTotal*.21), color:C.blue },
-            { label:"Rejected",   val:Math.round(d.todayTotal*.04), color:C.red },
-          ].map((row,i) => (
-            <div key={i} style={{ marginBottom:8 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
-                <span style={{ fontSize:12, color:C.slateL, fontWeight:600 }}>{row.label}</span>
-                <span style={{ fontSize:12, color:C.slateM, fontWeight:700 }}>{row.val}</span>
+            { label:"Patients",    value: u.patients    || 0, color: C.blue   },
+            { label:"Doctors",     value: u.doctors     || 0, color: C.green  },
+            { label:"Secretaries", value: u.secretaries || 0, color: C.purple },
+            { label:"Admins",      value: u.admins      || 0, color: C.amber  },
+            { label:"Blocked",     value: u.blocked     || 0, color: C.red    },
+          ].map((row, i) => {
+            const pct = u.total > 0 ? ((row.value / u.total) * 100).toFixed(0) : 0;
+            return (
+              <div key={i} style={{ marginBottom:12 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:7 }}>
+                    <div style={{ width:8, height:8, borderRadius:2, background:row.color }}/>
+                    <span style={{ fontSize:13, color:C.slateM, fontWeight:600 }}>{row.label}</span>
+                  </div>
+                  <span style={{ fontSize:13, fontWeight:800, color:C.slate }}>{row.value}</span>
+                </div>
+                <div style={{ height:6, borderRadius:99, background:"rgba(226,232,240,0.6)", overflow:"hidden" }}>
+                  <div style={{ height:"100%", width:`${pct}%`, borderRadius:99, background:row.color, transition:"width 1s cubic-bezier(.22,1,.36,1)" }}/>
+                </div>
               </div>
-              <div style={{ height:6, borderRadius:99, background:"rgba(226,232,240,0.6)", overflow:"hidden" }}>
-                <div style={{ height:"100%", width:`${(row.val/d.todayTotal*100).toFixed(0)}%`, borderRadius:99, background:row.color, boxShadow:`0 1px 4px ${row.color}50` }}/>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Appointment Status Overview — donut */}
+        {/* Donut */}
         <div className="glass-card" style={{ padding:"22px 24px" }}>
           <div style={{ marginBottom:20 }}>
             <div style={{ fontFamily:"'Sora',sans-serif", fontSize:15, fontWeight:800, color:C.slate, marginBottom:3 }}>Appointment Status Overview</div>
             <div style={{ fontSize:12.5, color:C.slateL }}>All-time breakdown across all statuses</div>
           </div>
-          <DonutChart data={d.statuses}/>
+          <DonutChart data={donutData}/>
         </div>
       </div>
 
-      {/* ── Weekly bar chart + monthly trend ── */}
+      {/* ── Weekly + Monthly ── */}
       <div className="preview-2col au5" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:18 }}>
 
-        {/* Weekly activity */}
         <div className="glass-card" style={{ padding:"22px 24px" }}>
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:18 }}>
             <div>
@@ -756,68 +719,67 @@ const AnalyticsTab = () => {
             </div>
             <span style={{ background:C.blueLt, color:C.blue, border:`1px solid ${C.blueBdr}`, borderRadius:100, padding:"4px 12px", fontSize:11.5, fontWeight:700 }}>Weekly</span>
           </div>
-          <BarChart values={d.weekly} labels={d.weekLabels} color={C.blue}/>
+          {weeklyValues.some(v => v > 0)
+            ? <BarChart values={weeklyValues} labels={weeklyLabels} color={C.blue}/>
+            : <div style={{ textAlign:"center", color:C.slateXL, padding:"24px 0", fontSize:13 }}>No appointments this week</div>
+          }
           <div style={{ display:"flex", justifyContent:"space-between", marginTop:16, paddingTop:14, borderTop:"1px solid rgba(226,232,240,0.55)" }}>
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontFamily:"'Sora',sans-serif", fontSize:18, fontWeight:900, color:C.slate }}>{Math.round(d.weekly.reduce((a,b)=>a+b,0)/d.weekly.length)}</div>
-              <div style={{ fontSize:11, color:C.slateXL, fontWeight:600 }}>Daily avg</div>
-            </div>
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontFamily:"'Sora',sans-serif", fontSize:18, fontWeight:900, color:C.slate }}>{Math.max(...d.weekly)}</div>
-              <div style={{ fontSize:11, color:C.slateXL, fontWeight:600 }}>Peak day</div>
-            </div>
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontFamily:"'Sora',sans-serif", fontSize:18, fontWeight:900, color:C.slate }}>{d.weekly.reduce((a,b)=>a+b,0)}</div>
-              <div style={{ fontSize:11, color:C.slateXL, fontWeight:600 }}>This week</div>
-            </div>
+            {[
+              { label:"Daily avg", value: weeklyValues.length ? Math.round(weeklyValues.reduce((a,b)=>a+b,0)/7) : 0 },
+              { label:"Peak day",  value: weeklyValues.length ? Math.max(...weeklyValues) : 0 },
+              { label:"This week", value: weeklyValues.reduce((a,b)=>a+b,0) },
+            ].map((s,i) => (
+              <div key={i} style={{ textAlign:"center" }}>
+                <div style={{ fontFamily:"'Sora',sans-serif", fontSize:18, fontWeight:900, color:C.slate }}>{s.value}</div>
+                <div style={{ fontSize:11, color:C.slateXL, fontWeight:600 }}>{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Monthly trend */}
         <div className="glass-card" style={{ padding:"22px 24px" }}>
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:12 }}>
             <div>
               <div style={{ fontFamily:"'Sora',sans-serif", fontSize:15, fontWeight:800, color:C.slate, marginBottom:3 }}>Monthly Trend</div>
               <div style={{ fontSize:12.5, color:C.slateL }}>Appointment volume across 12 months</div>
             </div>
-            <span style={{ background:C.purpleLt, color:C.purple, border:`1px solid ${C.purpleBdr}`, borderRadius:100, padding:"4px 12px", fontSize:11.5, fontWeight:700 }}>2025</span>
+            <span style={{ background:C.purpleLt, color:C.purple, border:`1px solid ${C.purpleBdr}`, borderRadius:100, padding:"4px 12px", fontSize:11.5, fontWeight:700 }}>{new Date().getFullYear()}</span>
           </div>
-          <Sparkline values={d.monthly} color={C.purple}/>
+          {monthlyValues.some(v => v > 0)
+            ? <Sparkline values={monthlyValues} color={C.purple}/>
+            : <div style={{ textAlign:"center", color:C.slateXL, padding:"24px 0", fontSize:13 }}>No appointments this year yet</div>
+          }
           <div style={{ display:"flex", gap:6, marginTop:8, overflowX:"auto", paddingBottom:2 }}>
-            {d.monthLabels.map((m,i)=>(
+            {monthlyLabels.map((m, i) => (
               <div key={i} style={{ flex:1, textAlign:"center" }}>
                 <div style={{ fontSize:10, color:C.slateXL, fontWeight:500, marginBottom:2 }}>{m}</div>
-                <div style={{ fontFamily:"'Sora',sans-serif", fontSize:11, fontWeight:700, color:i===new Date().getMonth()?C.purple:C.slateM }}>{d.monthly[i]}</div>
+                <div style={{ fontFamily:"'Sora',sans-serif", fontSize:11, fontWeight:700, color:i===new Date().getMonth()?C.purple:C.slateM }}>{monthlyValues[i]||0}</div>
               </div>
             ))}
           </div>
           <div style={{ display:"flex", justifyContent:"space-between", marginTop:16, paddingTop:14, borderTop:"1px solid rgba(226,232,240,0.55)" }}>
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontFamily:"'Sora',sans-serif", fontSize:18, fontWeight:900, color:C.slate }}>{Math.round(d.monthly.reduce((a,b)=>a+b,0)/12)}</div>
-              <div style={{ fontSize:11, color:C.slateXL, fontWeight:600 }}>Monthly avg</div>
-            </div>
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontFamily:"'Sora',sans-serif", fontSize:18, fontWeight:900, color:C.slate }}>{Math.max(...d.monthly)}</div>
-              <div style={{ fontSize:11, color:C.slateXL, fontWeight:600 }}>Best month</div>
-            </div>
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontFamily:"'Sora',sans-serif", fontSize:18, fontWeight:900, color:C.slate }}>{d.monthly.reduce((a,b)=>a+b,0)}</div>
-              <div style={{ fontSize:11, color:C.slateXL, fontWeight:600 }}>YTD total</div>
-            </div>
+            {[
+              { label:"Monthly avg", value: Math.round(yearTotal / 12) },
+              { label:"Best month",  value: monthlyValues.length ? Math.max(...monthlyValues) : 0 },
+              { label:"YTD total",   value: yearTotal },
+            ].map((s,i) => (
+              <div key={i} style={{ textAlign:"center" }}>
+                <div style={{ fontFamily:"'Sora',sans-serif", fontSize:18, fontWeight:900, color:C.slate }}>{s.value}</div>
+                <div style={{ fontSize:11, color:C.slateXL, fontWeight:600 }}>{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ── Status breakdown cards ── */}
+      {/* ── Appointment status breakdown ── */}
       <div className="au5" style={{ marginTop:18 }}>
-        <div style={{ fontFamily:"'Sora',sans-serif", fontSize:15, fontWeight:800, color:C.slate, marginBottom:14 }}>Status Breakdown</div>
+        <div style={{ fontFamily:"'Sora',sans-serif", fontSize:15, fontWeight:800, color:C.slate, marginBottom:14 }}>Appointment Status Breakdown</div>
         <div className="stats-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14 }}>
-          {d.statuses.map((s,i) => {
-            const total = d.statuses.reduce((a,b)=>a+b.count,0);
-            const pct = ((s.count/total)*100).toFixed(1);
+          {donutData.map((s, i) => {
+            const pct = apptTotal > 0 ? ((s.count / apptTotal) * 100).toFixed(1) : "0.0";
             return (
               <div key={i} className="glass-card" style={{ padding:"20px 20px 16px", position:"relative", overflow:"hidden" }}>
-                {/* Accent stripe */}
                 <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background:s.color, borderRadius:"20px 20px 0 0" }}/>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
                   <div style={{ width:38, height:38, borderRadius:12, background:s.light, border:`1.5px solid ${s.border}`, display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -836,10 +798,26 @@ const AnalyticsTab = () => {
         </div>
       </div>
 
-      {/* Placeholder note */}
-      <div className="au5" style={{ marginTop:20, background:"rgba(37,99,235,.06)", border:"1.5px solid rgba(37,99,235,.12)", borderRadius:14, padding:"12px 18px", display:"flex", alignItems:"center", gap:10 }}>
-        <span style={{ fontSize:16 }}>ℹ️</span>
-        <span style={{ fontSize:13, color:C.blue, fontWeight:600 }}>This section currently displays placeholder data. Connect <code style={{background:"rgba(37,99,235,.1)",padding:"1px 6px",borderRadius:5,fontFamily:"monospace"}}>adminApi.getAppointmentStats()</code> to populate with live figures.</span>
+      {/* ── Doctor registration breakdown ── */}
+      <div className="au5" style={{ marginTop:18 }}>
+        <div style={{ fontFamily:"'Sora',sans-serif", fontSize:15, fontWeight:800, color:C.slate, marginBottom:14 }}>Doctor Registrations</div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:14 }}>
+          {[
+            { label:"Approved", value: d.approved || 0, color: C.green,  light: C.greenLt,  border: C.greenBdr  },
+            { label:"Pending",  value: d.pending  || 0, color: C.amber,  light: C.amberLt,  border: C.amberBdr  },
+            { label:"Rejected", value: d.rejected || 0, color: C.red,    light: C.redLt,    border: C.redBdr    },
+          ].map((s, i) => (
+            <div key={i} className="glass-card" style={{ padding:"18px 20px", display:"flex", alignItems:"center", gap:14 }}>
+              <div style={{ width:44, height:44, borderRadius:12, background:s.light, border:`1.5px solid ${s.border}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <div style={{ width:14, height:14, borderRadius:4, background:s.color }}/>
+              </div>
+              <div>
+                <div style={{ fontFamily:"'Sora',sans-serif", fontSize:26, fontWeight:900, color:C.slate, lineHeight:1 }}>{s.value}</div>
+                <div style={{ fontSize:13, color:C.slateL, fontWeight:600, marginTop:2 }}>{s.label} Doctors</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -850,56 +828,66 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const [tab, setTab]                   = useState("dashboard");
-  const [users, setUsers]               = useState([]);
-  const [doctors, setDoctors]           = useState([]);
-  const [assignments, setAssignments]   = useState([]);
-  const [loadingAction, setLoading]     = useState(false);
-  const [toast, setToast]               = useState(null);
+  const [tab,          setTab]          = useState("dashboard");
+  const [users,        setUsers]        = useState([]);
+  const [doctors,      setDoctors]      = useState([]);
+  const [assignments,  setAssignments]  = useState([]);
+  const [analytics,    setAnalytics]    = useState(null);   // ← NEW
+  const [loadingAction,setLoading]      = useState(false);
+  const [toast,        setToast]        = useState(null);
 
-  const showToast = (msg, type="success") => { setToast({msg,type}); setTimeout(()=>setToast(null),3500); };
+  const showToast = (msg, type="success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
-  const fetchUsers       = useCallback(async()=>{ try{const d=await adminApi.getAllUsers();            setUsers(Array.isArray(d)?d:[]);}      catch{setUsers([]);}       },[]);
-  const fetchDoctors     = useCallback(async()=>{ try{const d=await adminApi.getAllDoctors();          setDoctors(Array.isArray(d)?d:[]);}    catch{setDoctors([]);}     },[]);
-  const fetchAssignments = useCallback(async()=>{ try{const d=await adminApi.getSecretaryAssignments();setAssignments(Array.isArray(d)?d:[]);}catch{setAssignments([]);} },[]);
+  const fetchUsers       = useCallback(async () => { try { const d = await adminApi.getAllUsers();             setUsers(Array.isArray(d) ? d : []);       } catch { setUsers([]); }       }, []);
+  const fetchDoctors     = useCallback(async () => { try { const d = await adminApi.getAllDoctors();           setDoctors(Array.isArray(d) ? d : []);     } catch { setDoctors([]); }     }, []);
+  const fetchAssignments = useCallback(async () => { try { const d = await adminApi.getSecretaryAssignments();setAssignments(Array.isArray(d) ? d : []); } catch { setAssignments([]); } }, []);
+  const fetchAnalytics   = useCallback(async () => { try { const d = await adminApi.getAnalytics();           setAnalytics(d || null);                   } catch { setAnalytics(null); } }, []); // ← NEW
 
-  useEffect(()=>{ fetchUsers(); fetchDoctors(); fetchAssignments(); },[fetchUsers,fetchDoctors,fetchAssignments]);
+  useEffect(() => {
+    fetchUsers();
+    fetchDoctors();
+    fetchAssignments();
+    fetchAnalytics();   // ← NEW
+  }, [fetchUsers, fetchDoctors, fetchAssignments, fetchAnalytics]);
 
-  const act = async(fn,msg)=>{ setLoading(true); try{await fn();showToast(msg);}catch(e){showToast(e.message,"error");}finally{setLoading(false);} };
+  const act = async (fn, msg) => {
+    setLoading(true);
+    try { await fn(); showToast(msg); }
+    catch (e) { showToast(e.message, "error"); }
+    finally { setLoading(false); }
+  };
 
-  const handleApprove  = id => act(()=>adminApi.approveDoctor(id).then(fetchDoctors), "Doctor approved successfully!");
-  const handleReject   = id => act(()=>adminApi.rejectDoctor(id).then(fetchDoctors),  "Doctor registration rejected.");
-  const handleDelete   = id => act(()=>adminApi.deleteUser(id).then(fetchUsers),       "User removed successfully.");
-  const handleBlock    = id => act(()=>adminApi.blockUser(id).then(fetchUsers),        "Account has been blocked.");
-  const handleUnblock  = id => act(()=>adminApi.unblockUser(id).then(fetchUsers),      "User has been unblocked.");
-  const handleLogout   = () => { logout(); navigate("/login"); };
+  const handleApprove = id => act(() => adminApi.approveDoctor(id).then(fetchDoctors), "Doctor approved successfully!");
+  const handleReject  = id => act(() => adminApi.rejectDoctor(id).then(fetchDoctors),  "Doctor registration rejected.");
+  const handleDelete  = id => act(() => adminApi.deleteUser(id).then(fetchUsers),      "User removed successfully.");
+  const handleBlock   = id => act(() => adminApi.blockUser(id).then(fetchUsers),       "Account has been blocked.");
+  const handleUnblock = id => act(() => adminApi.unblockUser(id).then(fetchUsers),     "User has been unblocked.");
+  const handleLogout  = () => { logout(); navigate("/login"); };
 
   return (
     <div style={{ fontFamily:"'DM Sans','Segoe UI',sans-serif", minHeight:"100vh", background:"linear-gradient(160deg,#eef2ff 0%,#e0e7ff 35%,#dbeafe 65%,#ede9fe 100%)", position:"relative", overflow:"hidden" }}>
       <GlobalStyles/>
 
-      {/* ── Background layer — mirrors landing page exactly ── */}
+      {/* Background layer */}
       <div aria-hidden style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>
-        {/* Blobs */}
         <div style={{ position:"absolute", width:700, height:700, borderRadius:"50%", background:"rgba(37,99,235,.09)", filter:"blur(72px)", top:-220, right:-120 }}/>
         <div style={{ position:"absolute", width:500, height:500, borderRadius:"50%", background:"rgba(124,58,237,.07)", filter:"blur(62px)", bottom:-160, left:-100 }}/>
         <div style={{ position:"absolute", width:380, height:380, borderRadius:"50%", background:"rgba(16,185,129,.06)", filter:"blur(55px)", bottom:"22%", right:"17%" }}/>
         <div style={{ position:"absolute", width:260, height:260, borderRadius:"50%", background:"rgba(245,158,11,.05)", filter:"blur(45px)", top:"38%", left:"8%" }}/>
-
-        {/* Clouds — identical props to landing page */}
         <div className="cloud-a" style={{ position:"absolute", top:80,  left:"6%",   opacity:.45 }}><Cloud style={{width:240,height:96}}/></div>
         <div className="cloud-b" style={{ position:"absolute", top:160, right:"22%", opacity:.28 }}><Cloud style={{width:180,height:72}}/></div>
         <div className="cloud-c" style={{ position:"absolute", top:50,  right:"5%",  opacity:.22 }}><Cloud style={{width:200,height:80}}/></div>
         <div className="cloud-a" style={{ position:"absolute", bottom:"20%", left:"26%",  opacity:.18 }}><Cloud style={{width:220,height:88}}/></div>
         <div className="cloud-b" style={{ position:"absolute", bottom:"6%",  right:"9%",  opacity:.15 }}><Cloud style={{width:160,height:64}}/></div>
-
-        {/* Floating orbs */}
         <div className="float-orb-a" style={{ position:"absolute", width:90, height:90, borderRadius:"50%", background:"linear-gradient(135deg,rgba(37,99,235,.18),rgba(124,58,237,.12))", top:"22%", right:"12%", border:"1px solid rgba(255,255,255,.5)" }}/>
         <div className="float-orb-b" style={{ position:"absolute", width:56, height:56, borderRadius:"50%", background:"linear-gradient(135deg,rgba(16,185,129,.2),rgba(37,99,235,.1))", top:"62%", right:"30%", border:"1px solid rgba(255,255,255,.4)" }}/>
         <div className="float-orb-a" style={{ position:"absolute", width:36, height:36, borderRadius:"50%", background:"rgba(124,58,237,.15)", top:"42%", left:"4%", border:"1px solid rgba(255,255,255,.35)", animationDelay:"3s" }}/>
       </div>
 
-      {/* ── App shell ── */}
+      {/* App shell */}
       <div style={{ position:"relative", zIndex:1, display:"flex", flexDirection:"column", minHeight:"100vh" }}>
         <Navbar activeTab={tab} onTabChange={setTab} onLogout={handleLogout} pendingCount={doctors.filter(d=>d.status==="PENDING").length}/>
         <Toast toast={toast}/>
@@ -910,7 +898,7 @@ export default function AdminDashboard() {
           {tab==="doctors"     && <DoctorRegistrationsTab doctors={doctors} onApprove={handleApprove} onReject={handleReject} loading={loadingAction}/>}
           {tab==="secretaries" && <SecretaryAssignmentsTab assignments={assignments}/>}
           {tab==="users"       && <ManageUsersTab users={users} onDelete={handleDelete} onBlock={handleBlock} onUnblock={handleUnblock} loading={loadingAction}/>}
-          {tab==="analytics"   && <AnalyticsTab/>}
+          {tab==="analytics"   && <AnalyticsTab analytics={analytics}/>}  {/* ← UPDATED */}
         </div>
       </div>
     </div>

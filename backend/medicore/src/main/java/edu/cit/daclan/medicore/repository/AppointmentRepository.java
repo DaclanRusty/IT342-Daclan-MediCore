@@ -5,22 +5,23 @@ import edu.cit.daclan.medicore.entity.Doctor;
 import edu.cit.daclan.medicore.entity.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;  // ← ADD THIS
 
 import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    // Find all appointments for a given patient
     List<Appointment> findAllByPatient(Patient patient);
 
-    // Find all appointments for a doctor with a specific status (e.g., APPROVED)
     List<Appointment> findAllByDoctorAndStatus(Doctor doctor, String status);
 
-    // Find all pending appointments for a doctor (used by secretary)
+    // ↓ Added @Param — this was causing the runtime error
     @Query("SELECT a FROM Appointment a WHERE a.doctor = :doctor AND a.status = 'PENDING'")
-    List<Appointment> findPendingByDoctor(Doctor doctor);
+    List<Appointment> findPendingByDoctor(@Param("doctor") Doctor doctor);
 
-    // Check if a doctor already has an appointment at a specific date and time
+    // ↓ Also add this — secretary needs to see ALL statuses to manage them
+    List<Appointment> findAllByDoctor(Doctor doctor);
+
     boolean existsByDoctorAndRequestedDateAndRequestedTime(
             Doctor doctor, String requestedDate, String requestedTime);
 }

@@ -1,0 +1,185 @@
+package edu.cit.daclan.medicore.controller;
+
+import edu.cit.daclan.medicore.dto.DoctorProfileResponse;
+import edu.cit.daclan.medicore.dto.DoctorProfileUpdateRequest;
+import edu.cit.daclan.medicore.dto.response.ApiResponse;
+import edu.cit.daclan.medicore.entity.Doctor;
+import edu.cit.daclan.medicore.entity.Secretary;
+import edu.cit.daclan.medicore.entity.User;
+import edu.cit.daclan.medicore.repository.DoctorRepository;
+import edu.cit.daclan.medicore.repository.SecretaryRepository;
+import edu.cit.daclan.medicore.repository.UserRepository;
+import edu.cit.daclan.medicore.service.DoctorService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/v1/doctor")
+@CrossOrigin(origins = "*")
+public class DoctorController {
+
+    private final DoctorService       doctorService;
+    private final DoctorRepository    doctorRepository;
+    private final UserRepository      userRepository;
+    private final SecretaryRepository secretaryRepository;
+
+    public DoctorController(DoctorService doctorService,
+                            DoctorRepository doctorRepository,
+                            UserRepository userRepository,
+                            SecretaryRepository secretaryRepository) {
+        this.doctorService       = doctorService;
+        this.doctorRepository    = doctorRepository;
+        this.userRepository      = userRepository;
+        this.secretaryRepository = secretaryRepository;
+    }
+
+    // ── GET /api/v1/doctor/profile ────────────────────────────────────────
+    // Fix #1: Returns all profile fields (firstName, lastName, email,
+    //         phoneNumber, specialization, licenseNumber, yearsOfExperience, bio)
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            DoctorProfileResponse profile = doctorService.getMyProfile(userDetails.getUsername());
+            return ResponseEntity.ok(ApiResponse.success(profile));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // ── PUT /api/v1/doctor/profile ────────────────────────────────────────
+    // Fix #1: Accepts and persists firstName, lastName, phoneNumber,
+    //         specialization, yearsOfExperience, bio, and optional password change.
+    //         Note: bio and yearsOfExperience are only editable here (not at registration).
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody DoctorProfileUpdateRequest request) {
+        try {
+            DoctorProfileResponse updated = doctorService.updateMyProfile(
+                    userDetails.getUsername(), request);
+            return ResponseEntity.ok(ApiResponse.success(updated));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // ── GET /api/v1/doctor/secretary-requests ────────────────────────────
+    // Fix #2: Returns the list of secretaries linked to this doctor, with all
+    //         fields the frontend needs: secretaryId, firstName, lastName,
+    //         email, phoneNumber, status, requestedAt.
+    @GetMapping("/secretary-requests")
+    public ResponseEntity<?> getSecretaryRequests(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            User user = userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Doctor doctor = doctorRepository.findByUser(user)
+                    .orElseThrow(() -> new RuntimeException("Doctor profile not found"));
+
+            List<Secretary> secretaries = secretaryRepository.findByDoctor(doctor);
+
+            // Map each Secretary entity to a plain map so the frontend receives
+            // firstName / lastName / email at the top level (not nested under "user")
+            List<Map<String, Object>> result = secretaries.stream().map(sec -> {
+                User secUser = sec.getUser();
+                return Map.<String, Object>of(
+                        "secretaryId",  sec.getSecretaryId(),
+                        "firstName",    secUser.getFirstName(),
+                        "lastName",     secUser.getLastName(),
+                        "email",        secUser.getEmail(),
+                        "phoneNumber",  secUser.getPhoneNumber() != null
+                                ? secUser.getPhoneNumber() : "",
+                        "status",       sec.getStatus(),
+                        "requestedAt",  sec.getRequestedAt() != null
+                                ? sec.getRequestedAt().toString() : ""
+                );
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(ApiResponse.success(result));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // ── PUT /api/v1/doctor/secretary-requests/{secretaryId}/approve ───────
+    @PutMapping("/secretary-requests/{secretaryId}/approve")
+    public ResponseEntity<?> approveSecretary(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long secretaryId) {
+        try {
+            User user = userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Doctor doctor = doctorRepository.findByUser(user)
+                    .orElseThrow(() -> new RuntimeException("Doctor profile not found"));
+
+            // Ensure the doctor doesn't already have an approved secretary
+            boolean alreadyHasSecretary = secretaryRepository
+                    .findByDoctor(doctor)
+                    .stream()
+                    .anyMatch(s -> "APPROVED".equals(s.getStatus()));
+
+            if (alreadyHasSecretary) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("You already have an assigned secretary."));
+            }
+
+            Secretary secretary = secretaryRepository.findById(secretaryId)
+                    .orElseThrow(() -> new RuntimeException("Secretary request not found"));
+
+            // Make sure this secretary belongs to this doctor
+            if (!secretary.getDoctor().getDoctorId().equals(doctor.getDoctorId())) {
+                return ResponseEntity.status(403)
+                        .body(ApiResponse.error("Not authorized to approve this request."));
+            }
+
+            secretary.setStatus("APPROVED");
+            secretaryRepository.save(secretary);
+
+            return ResponseEntity.ok(ApiResponse.success("Secretary approved successfully."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // ── PUT /api/v1/doctor/secretary-requests/{secretaryId}/reject ────────
+    @PutMapping("/secretary-requests/{secretaryId}/reject")
+    public ResponseEntity<?> rejectSecretary(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long secretaryId) {
+        try {
+            User user = userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Doctor doctor = doctorRepository.findByUser(user)
+                    .orElseThrow(() -> new RuntimeException("Doctor profile not found"));
+
+            Secretary secretary = secretaryRepository.findById(secretaryId)
+                    .orElseThrow(() -> new RuntimeException("Secretary request not found"));
+
+            if (!secretary.getDoctor().getDoctorId().equals(doctor.getDoctorId())) {
+                return ResponseEntity.status(403)
+                        .body(ApiResponse.error("Not authorized to reject this request."));
+            }
+
+            secretary.setStatus("REJECTED");
+            secretaryRepository.save(secretary);
+
+            return ResponseEntity.ok(ApiResponse.success("Secretary request rejected."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+}

@@ -42,57 +42,49 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // IF_REQUIRED keeps OAuth2 redirect state working while staying
-                // effectively stateless for all JWT API calls
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // ── Public endpoints ──────────────────────────────────────────
+                        // ── Public ────────────────────────────────────────────────
                         .requestMatchers("/api/v1/auth/**").permitAll()
-
-                        // ── OAuth2 redirect endpoints ─────────────────────────────────
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
-                        // ── Admin only ────────────────────────────────────────────────
+                        // ── Admin ─────────────────────────────────────────────────
                         .requestMatchers("/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
 
-                        // ── Doctor only ───────────────────────────────────────────────
+                        // ── Doctor ────────────────────────────────────────────────
                         .requestMatchers("/api/v1/doctor/**").hasAuthority("ROLE_DOCTOR")
 
-                        // ── Secretary only ────────────────────────────────────────────
+                        // ── Secretary ─────────────────────────────────────────────
                         .requestMatchers("/api/v1/secretary/**").hasAuthority("ROLE_SECRETARY")
 
-                        // ── Patient only ──────────────────────────────────────────────
+                        // ── Patient profile (GET + PUT /api/v1/patient/profile) ───
+                        // MUST come before the broader /api/v1/patient/** rule
+                        .requestMatchers("/api/v1/patient/profile").hasAuthority("ROLE_PATIENT")
+
+                        // ── Patient (all other patient routes) ────────────────────
                         .requestMatchers("/api/v1/patient/**").hasAuthority("ROLE_PATIENT")
 
-                        // ── Doctor directory — patients and admins only ───────────────
-                        // FIX: was missing, fell through to anyRequest().authenticated()
-                        // which allowed any role but gave no explicit access control
+                        // ── Doctors list (patients + admin can view) ──────────────
                         .requestMatchers(HttpMethod.GET, "/api/v1/doctors").hasAnyAuthority(
                                 "ROLE_PATIENT", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/doctors/with-secretary")
+                        .hasAnyAuthority("ROLE_PATIENT", "ROLE_ADMIN")
 
-                        // ── Appointments — secretary + doctor + patient ───────────────
-                        .requestMatchers("/api/v1/appointments/**").hasAnyAuthority(
-                                "ROLE_SECRETARY", "ROLE_DOCTOR", "ROLE_PATIENT")
-
-                        // ── Appointments — secretary + doctor + patient ───────────────────────
-                        // Already in your config — no change needed for existing rule
+                        // ── Appointments ──────────────────────────────────────────
                         .requestMatchers("/api/v1/appointments/**").hasAnyAuthority(
                                 "ROLE_SECRETARY", "ROLE_DOCTOR", "ROLE_PATIENT")
 
                         .anyRequest().authenticated()
                 )
 
-                // ── OAuth2 Login ──────────────────────────────────────────────────
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
                 )
 
-                // ── JWT filter ────────────────────────────────────────────────────
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
