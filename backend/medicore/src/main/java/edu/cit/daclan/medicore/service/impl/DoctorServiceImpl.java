@@ -9,6 +9,7 @@ import edu.cit.daclan.medicore.repository.UserRepository;
 import edu.cit.daclan.medicore.service.DoctorService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 
 @Service
 public class DoctorServiceImpl implements DoctorService {
@@ -30,10 +31,8 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorProfileResponse getMyProfile(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         Doctor doctor = doctorRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Doctor profile not found"));
-
         return mapToResponse(doctor);
     }
 
@@ -42,39 +41,44 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorProfileResponse updateMyProfile(String email, DoctorProfileUpdateRequest req) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         Doctor doctor = doctorRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Doctor profile not found"));
 
-        // Update User fields
         if (req.getFirstName()  != null) user.setFirstName(req.getFirstName());
         if (req.getLastName()   != null) user.setLastName(req.getLastName());
         if (req.getPhoneNumber()!= null) user.setPhoneNumber(req.getPhoneNumber());
 
-        // Handle optional password change
         if (req.getNewPassword() != null && !req.getNewPassword().isBlank()) {
-            if (req.getCurrentPassword() == null || req.getCurrentPassword().isBlank()) {
+            if (req.getCurrentPassword() == null || req.getCurrentPassword().isBlank())
                 throw new RuntimeException("Current password is required to set a new password.");
-            }
-            if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
+            if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword()))
                 throw new RuntimeException("Current password is incorrect.");
-            }
             user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         }
 
         userRepository.save(user);
 
-        // Update Doctor fields
         if (req.getSpecialization()    != null) doctor.setSpecialization(req.getSpecialization());
         if (req.getYearsOfExperience() != null) doctor.setYearsOfExperience(req.getYearsOfExperience());
         if (req.getBio()               != null) doctor.setBio(req.getBio());
 
         doctorRepository.save(doctor);
-
         return mapToResponse(doctor);
     }
 
-    // ── Helper ────────────────────────────────────────────────────────────
+    // ── UPDATE profile picture — now saves to users table ─────────────────
+    @Override
+    @Transactional
+    public DoctorProfileResponse updateProfilePicture(String email, String base64Image) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        // ✅ Save to user.profilePicture (users table) instead of doctor.profilePicture
+        user.setProfilePicture(base64Image);
+        userRepository.save(user);
+        return getMyProfile(email);
+    }
+
+    // ── Helper — reads profilePicture from User ───────────────────────────
     private DoctorProfileResponse mapToResponse(Doctor doctor) {
         User user = doctor.getUser();
         return DoctorProfileResponse.builder()
@@ -86,7 +90,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .phoneNumber(user.getPhoneNumber())
                 .specialization(doctor.getSpecialization())
                 .licenseNumber(doctor.getLicenseNumber())
-                .profilePicture(doctor.getProfilePicture())
+                .profilePicture(user.getProfilePicture())  // ✅ from users table now
                 .status(doctor.getStatus())
                 .yearsOfExperience(doctor.getYearsOfExperience())
                 .bio(doctor.getBio())

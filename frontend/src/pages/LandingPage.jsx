@@ -162,13 +162,6 @@ export default function LandingPage() {
               <button className="btn-p" onClick={()=>navigate('/register')} style={{padding:'14px 32px',borderRadius:11,fontSize:15}}>Register</button>
               <button className="btn-s" onClick={()=>document.getElementById('about').scrollIntoView({behavior:'smooth'})} style={{padding:'14px 28px',borderRadius:11,fontSize:15}}>Learn More</button>
             </div>
-            <div className="d5" style={{display:'flex',alignItems:'center',gap:20,flexWrap:'wrap'}}>
-              {[{icon:'🔒',text:'Secure & Private'},{icon:'⚡',text:'Real-time Updates'},{icon:'📱',text:'Web & Mobile'}].map((b,i)=>(
-                <div key={i} style={{display:'flex',alignItems:'center',gap:6,fontSize:13,color:'#64748b',fontWeight:500}}>
-                  <span style={{fontSize:15}}>{b.icon}</span>{b.text}
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Right card */}
@@ -247,7 +240,7 @@ export default function LandingPage() {
               What is <span style={{color:'#2563eb'}}>MediCore?</span>
             </h2>
             <p style={{color:'#64748b',fontSize:16,maxWidth:560,margin:'18px auto 0',lineHeight:1.75}}>
-              MediCore is a comprehensive Patient Management System that connects patients, healthcare staff, and doctors through a seamless digital platform.
+              MediCore is a comprehensive Patient Management System that connects patients and doctors through a seamless digital platform.
             </p>
           </div>
 

@@ -41,16 +41,15 @@ public class SecretaryController {
                     .body(ApiResponse.error("Secretary profile not found."));
         }
 
-        // Build flat response map
         Map<String, Object> profile = new java.util.LinkedHashMap<>();
-        profile.put("secretaryId",  secretary.getSecretaryId());
-        profile.put("firstName",    user.getFirstName());
-        profile.put("lastName",     user.getLastName());
-        profile.put("email",        user.getEmail());
-        profile.put("phoneNumber",  user.getPhoneNumber());
-        profile.put("status",       secretary.getStatus());
+        profile.put("secretaryId",   secretary.getSecretaryId());
+        profile.put("firstName",     user.getFirstName());
+        profile.put("lastName",      user.getLastName());
+        profile.put("email",         user.getEmail());
+        profile.put("phoneNumber",   user.getPhoneNumber());
+        profile.put("status",        secretary.getStatus());
+        profile.put("profilePicture", user.getProfilePicture());
 
-        // Assigned doctor info
         if (secretary.getDoctor() != null) {
             Map<String, Object> doc = new java.util.LinkedHashMap<>();
             doc.put("doctorId",       secretary.getDoctor().getDoctorId());
@@ -64,5 +63,31 @@ public class SecretaryController {
         }
 
         return ResponseEntity.ok(ApiResponse.success(profile));
+    }
+
+    // PUT /api/v1/secretary/profile
+    @PutMapping("/profile")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> updateProfile(
+            Authentication auth,
+            @RequestBody Map<String, String> body) {
+        User user = resolveUser(auth);
+
+        if (body.containsKey("firstName"))   user.setFirstName(body.get("firstName"));
+        if (body.containsKey("lastName"))    user.setLastName(body.get("lastName"));
+        if (body.containsKey("phoneNumber")) user.setPhoneNumber(body.get("phoneNumber"));
+
+        userRepository.save(user);
+        return getProfile(auth);
+    }
+
+    // PUT /api/v1/secretary/profile/picture
+    @PutMapping("/profile/picture")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> uploadProfilePicture(
+            Authentication auth,
+            @RequestBody Map<String, String> body) {
+        User user = resolveUser(auth);
+        user.setProfilePicture(body.get("profilePicture"));
+        userRepository.save(user);
+        return getProfile(auth);
     }
 }

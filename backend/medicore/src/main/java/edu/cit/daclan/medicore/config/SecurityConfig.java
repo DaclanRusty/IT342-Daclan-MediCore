@@ -50,24 +50,29 @@ public class SecurityConfig {
                         // ── Public ────────────────────────────────────────────────
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/api/v1/health-tips").permitAll()
 
                         // ── Admin ─────────────────────────────────────────────────
                         .requestMatchers("/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
 
                         // ── Doctor ────────────────────────────────────────────────
                         .requestMatchers("/api/v1/doctor/**").hasAuthority("ROLE_DOCTOR")
+                        .requestMatchers("/api/v1/doctor/profile/picture").hasAuthority("ROLE_DOCTOR")
 
                         // ── Secretary ─────────────────────────────────────────────
                         .requestMatchers("/api/v1/secretary/**").hasAuthority("ROLE_SECRETARY")
+                        .requestMatchers("/api/v1/secretary/profile/picture").hasAuthority("ROLE_SECRETARY")
 
-                        // ── Patient profile (GET + PUT /api/v1/patient/profile) ───
-                        // MUST come before the broader /api/v1/patient/** rule
+                        // ── Patient profile picture ───────────────────────────────
+                        .requestMatchers("/api/v1/patient/profile/picture").hasAuthority("ROLE_PATIENT")  // 👈 added
+
+                        // ── Patient profile (GET + PUT) ───────────────────────────
                         .requestMatchers("/api/v1/patient/profile").hasAuthority("ROLE_PATIENT")
 
                         // ── Patient (all other patient routes) ────────────────────
                         .requestMatchers("/api/v1/patient/**").hasAuthority("ROLE_PATIENT")
 
-                        // ── Doctors list (patients + admin can view) ──────────────
+                        // ── Doctors list ──────────────────────────────────────────
                         .requestMatchers(HttpMethod.GET, "/api/v1/doctors").hasAnyAuthority(
                                 "ROLE_PATIENT", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/doctors/with-secretary")
@@ -105,9 +110,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("http://localhost:*"));
-        configuration.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
-        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

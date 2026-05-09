@@ -38,36 +38,16 @@ async function request(endpoint, options = {}) {
 
 export const authApi = {
   login: (email, password) =>
-    request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    }),
-
+    request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
   googleLogin: (accessToken) =>
-    request('/auth/google', {
-      method: 'POST',
-      body: JSON.stringify({ credential: accessToken }),
-    }),
-
+    request('/auth/google', { method: 'POST', body: JSON.stringify({ credential: accessToken }) }),
   registerPatient: (formData) =>
-    request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ ...formData, role: 'PATIENT', googleVerified: true }),
-    }),
-
+    request('/auth/register', { method: 'POST', body: JSON.stringify({ ...formData, role: 'PATIENT', googleVerified: true }) }),
   registerDoctor: (formData) =>
-    request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ ...formData, role: 'DOCTOR', googleVerified: true }),
-    }),
-
+    request('/auth/register', { method: 'POST', body: JSON.stringify({ ...formData, role: 'DOCTOR', googleVerified: true }) }),
   getAvailableDoctors: () => request('/auth/doctors/available'),
-
   registerSecretary: (formData) =>
-    request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ ...formData, role: 'SECRETARY', googleVerified: true }),
-    }),
+    request('/auth/register', { method: 'POST', body: JSON.stringify({ ...formData, role: 'SECRETARY', googleVerified: true }) }),
 };
 
 export const tokenStorage = {
@@ -97,12 +77,21 @@ export const adminApi = {
   approveDoctor: (doctorId) => request(`/admin/doctors/${doctorId}/approve`, { method: 'PUT' }),
   rejectDoctor:  (doctorId) => request(`/admin/doctors/${doctorId}/reject`, { method: 'PUT' }),
   getSecretaryAssignments: () => request('/admin/secretary-assignments'),
+  getAnalytics:  () => request('/admin/analytics'), 
 };
 
 export const doctorApi = {
-
   getAppointments: () => request('/appointments/doctor'),
-
+  completeAppointment: (id, doctorNotes = null) =>
+    request(`/appointments/${id}/complete`, {
+      method: 'PUT',
+      body: JSON.stringify({ doctor_notes: doctorNotes }),
+    }),
+  cancelAppointment: (id, cancelReason = null) =>
+    request(`/appointments/${id}/cancel`, {
+      method: 'PUT',
+      body: JSON.stringify({ cancel_reason: cancelReason }),
+    }),
   getSecretaryRequests: () => request('/doctor/secretary-requests'),
   approveSecretary: (secretaryId) =>
     request(`/doctor/secretary-requests/${secretaryId}/approve`, { method: 'PUT' }),
@@ -111,6 +100,11 @@ export const doctorApi = {
   getProfile: () => request('/doctor/profile'),
   updateProfile: (payload) =>
     request('/doctor/profile', { method: 'PUT', body: JSON.stringify(payload) }),
+  uploadProfilePicture: (base64Image) =>       // 👈 add this
+    request('/doctor/profile/picture', {
+      method: 'PUT',
+      body: JSON.stringify({ profilePicture: base64Image }),
+    }),
 };
 
 export const patientApi = {
@@ -120,22 +114,43 @@ export const patientApi = {
   bookAppointment:    (payload) => request('/appointments', { method: 'POST', body: JSON.stringify(payload) }),
   getProfile:         () => request('/patient/profile'),
   updateProfile:      (payload) => request('/patient/profile', { method: 'PUT', body: JSON.stringify(payload) }),
+  uploadProfilePicture: (base64Image) =>   // 👈 add this
+    request('/patient/profile/picture', {
+      method: 'PUT',
+      body: JSON.stringify({ profilePicture: base64Image }),
+    }),
+  getTakenSlots: (doctorId, date) =>
+    request(`/appointments/taken-slots?doctorId=${doctorId}&date=${date}`),
 };
+
 export const secretaryApi = {
   getAppointments: () => request('/appointments/secretary'),
-
- 
-  approveAppointment: (id) =>
-    request(`/appointments/${id}/approve`, { method: 'PUT' }),
-
-  rejectAppointment: (id) =>
-    request(`/appointments/${id}/reject`, { method: 'PUT' }),
-
+  // ── RENAMED: approve → confirm, matches new backend endpoint ─────────
+  confirmAppointment: (id) =>
+    request(`/appointments/${id}/confirm`, { method: 'PUT' }),
+  rejectAppointment: (id, rejectedReason = null) =>
+    request(`/appointments/${id}/reject`, {
+      method: 'PUT',
+      body: JSON.stringify({ rejected_reason: rejectedReason }),
+    }),
+  cancelAppointment: (id, cancelReason = null) =>
+    request(`/appointments/${id}/cancel`, {
+      method: 'PUT',
+      body: JSON.stringify({ cancel_reason: cancelReason }),
+    }),
+  // ─────────────────────────────────────────────────────────────────────
   getProfile: () => request('/secretary/profile'),
-
   updateProfile: (payload) =>
     request('/secretary/profile', { method: 'PUT', body: JSON.stringify(payload) }),
+
+  uploadProfilePicture: (base64Image) =>
+  request('/secretary/profile/picture', {
+    method: 'PUT',
+    body: JSON.stringify({ profilePicture: base64Image }),
+  }),
 };
+
+
 
 export const healthTipsApi = {
   getTips: async () => {
