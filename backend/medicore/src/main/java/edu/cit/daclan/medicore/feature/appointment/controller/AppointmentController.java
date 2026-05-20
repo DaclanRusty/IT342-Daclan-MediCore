@@ -8,6 +8,7 @@ import edu.cit.daclan.medicore.shared.dto.response.ApiResponse;
 import edu.cit.daclan.medicore.feature.appointment.dto.response.AppointmentResponse;
 import edu.cit.daclan.medicore.feature.appointment.entity.Appointment;
 import edu.cit.daclan.medicore.feature.appointment.entity.AppointmentStatus;
+import edu.cit.daclan.medicore.feature.appointment.service.AppointmentEmailService;  // ✅
 import edu.cit.daclan.medicore.feature.auth.entity.User;
 import edu.cit.daclan.medicore.feature.doctor.entity.Doctor;
 import edu.cit.daclan.medicore.feature.patient.entity.Patient;
@@ -30,26 +31,29 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/appointments")
 public class AppointmentController {
 
-    private final AppointmentRepository appointmentRepository;
-    private final DoctorRepository      doctorRepository;
-    private final UserRepository        userRepository;
-    private final SecretaryRepository   secretaryRepository;
-    private final PatientRepository     patientRepository;
+    private final AppointmentRepository  appointmentRepository;
+    private final DoctorRepository       doctorRepository;
+    private final UserRepository         userRepository;
+    private final SecretaryRepository    secretaryRepository;
+    private final PatientRepository      patientRepository;
+    private final AppointmentEmailService emailService;  // ✅
 
     public AppointmentController(
             AppointmentRepository appointmentRepository,
             DoctorRepository doctorRepository,
             UserRepository userRepository,
             SecretaryRepository secretaryRepository,
-            PatientRepository patientRepository) {
+            PatientRepository patientRepository,
+            AppointmentEmailService emailService) {  // ✅
         this.appointmentRepository = appointmentRepository;
         this.doctorRepository      = doctorRepository;
         this.userRepository        = userRepository;
         this.secretaryRepository   = secretaryRepository;
         this.patientRepository     = patientRepository;
+        this.emailService          = emailService;  // ✅
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────
 
     private User resolveUser(Authentication auth) {
         return userRepository.findByEmail(auth.getName())
@@ -69,6 +73,7 @@ public class AppointmentController {
         pi.setFirstName(a.getPatient().getUser().getFirstName());
         pi.setLastName(a.getPatient().getUser().getLastName());
         pi.setEmail(a.getPatient().getUser().getEmail());
+        pi.setProfilePicture(a.getPatient().getUser().getProfilePicture());
 
         return AppointmentResponse.builder()
                 .id(a.getId())
@@ -84,19 +89,13 @@ public class AppointmentController {
                 .cancelReason(a.getCancelReason())
                 .rejectedAt(a.getRejectedAt())
                 .rejectedReason(a.getRejectedReason())
+                .expiredAt(a.getExpiredAt())
                 .createdAt(a.getCreatedAt())
                 .updatedAt(a.getUpdatedAt())
                 .build();
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // PATIENT ENDPOINTS
-    // ═══════════════════════════════════════════════════════════════
 
-    /**
-     * POST /api/v1/appointments
-     * Patient books an appointment → starts as PENDING
-     */
     @PostMapping
     public ResponseEntity<ApiResponse<AppointmentResponse>> bookAppointment(
             @RequestBody AppointmentRequest req,
@@ -117,7 +116,6 @@ public class AppointmentController {
         Doctor doctor = doctorRepository.findById(req.getDoctorId()).orElse(null);
         if (doctor == null) return notFound("Doctor not found.");
 
-        // Only block slots that are still active (PENDING or CONFIRMED)
         boolean slotTaken = appointmentRepository
                 .existsByDoctorAndRequestedDateAndRequestedTimeAndStatusIn(
                         doctor, req.getRequestedDate(), req.getRequestedTime(),
@@ -140,10 +138,6 @@ public class AppointmentController {
                 .body(ApiResponse.success(toResponse(appointmentRepository.save(a))));
     }
 
-    /**
-     * GET /api/v1/appointments/me
-     * Patient sees all their appointments (all statuses)
-     */
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<List<AppointmentResponse>>> getMyAppointments(
             Authentication auth) {
@@ -159,14 +153,8 @@ public class AppointmentController {
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // DOCTOR ENDPOINTS
-    // ═══════════════════════════════════════════════════════════════
 
-    /**
-     * GET /api/v1/appointments/doctor
-     * Doctor sees CONFIRMED + COMPLETED + CANCELLED appointments
-     */
+
     @GetMapping("/doctor")
     public ResponseEntity<ApiResponse<List<AppointmentResponse>>> getDoctorAppointments(
             Authentication auth) {
@@ -185,10 +173,6 @@ public class AppointmentController {
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 
-    /**
-     * PUT /api/v1/appointments/{id}/complete
-     * Doctor marks appointment as COMPLETED with optional notes
-     */
     @PutMapping("/{id}/complete")
     public ResponseEntity<ApiResponse<AppointmentResponse>> completeAppointment(
             @PathVariable Long id,
@@ -214,12 +198,14 @@ public class AppointmentController {
             a.setDoctorNotes(req.getDoctorNotes());
         }
 
-        return ResponseEntity.ok(ApiResponse.success(toResponse(appointmentRepository.save(a))));
+        Appointment saved = appointmentRepository.save(a);
+        emailService.sendCompleted(saved);
+        return ResponseEntity.ok(ApiResponse.success(toResponse(saved)));
     }
 
     /**
      * PUT /api/v1/appointments/{id}/cancel
-     * Doctor OR Secretary cancels an appointment with a reason
+     * ✅ Sends cancellation email to patient
      */
     @PutMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<AppointmentResponse>> cancelAppointment(
@@ -229,9 +215,8 @@ public class AppointmentController {
 
         User user = resolveUser(auth);
 
-        // Determine who is cancelling
-        Doctor doctor       = doctorRepository.findByUser(user).orElse(null);
-        Secretary secretary  = secretaryRepository.findByUser(user).orElse(null);
+        Doctor doctor      = doctorRepository.findByUser(user).orElse(null);
+        Secretary secretary = secretaryRepository.findByUser(user).orElse(null);
 
         if (doctor == null && secretary == null)
             return forbidden("Only a doctor or secretary can cancel appointments.");
@@ -239,18 +224,14 @@ public class AppointmentController {
         Appointment a = appointmentRepository.findById(id).orElse(null);
         if (a == null) return notFound("Appointment not found.");
 
-        // Authorization: must belong to their doctor
         Long appointmentDoctorId = a.getDoctor().getDoctorId();
         if (doctor != null && !appointmentDoctorId.equals(doctor.getDoctorId()))
             return forbidden("You can only cancel your own appointments.");
         if (secretary != null && !appointmentDoctorId.equals(secretary.getDoctor().getDoctorId()))
             return forbidden("You can only cancel appointments for your assigned doctor.");
-
-        // Secretary must be approved
         if (secretary != null && !"APPROVED".equals(secretary.getStatus()))
             return forbidden("Your account is pending doctor approval.");
 
-        // Only PENDING or CONFIRMED can be cancelled
         if (a.getStatus() != AppointmentStatus.PENDING
                 && a.getStatus() != AppointmentStatus.CONFIRMED)
             return badRequest("Only PENDING or CONFIRMED appointments can be cancelled.");
@@ -261,17 +242,15 @@ public class AppointmentController {
             a.setCancelReason(req.getCancelReason());
         }
 
-        return ResponseEntity.ok(ApiResponse.success(toResponse(appointmentRepository.save(a))));
+        Appointment saved = appointmentRepository.save(a);
+        emailService.sendCancelled(saved);  // ✅ email patient
+        return ResponseEntity.ok(ApiResponse.success(toResponse(saved)));
     }
 
     // ═══════════════════════════════════════════════════════════════
     // SECRETARY ENDPOINTS
     // ═══════════════════════════════════════════════════════════════
 
-    /**
-     * GET /api/v1/appointments/secretary
-     * Secretary sees ALL appointments for their assigned doctor
-     */
     @GetMapping("/secretary")
     public ResponseEntity<ApiResponse<List<AppointmentResponse>>> getSecretaryAppointments(
             Authentication auth) {
@@ -293,7 +272,7 @@ public class AppointmentController {
 
     /**
      * PUT /api/v1/appointments/{id}/confirm
-     * Secretary confirms (approves) a PENDING appointment
+     * ✅ Sends confirmation email to patient
      */
     @PutMapping("/{id}/confirm")
     public ResponseEntity<ApiResponse<AppointmentResponse>> confirmAppointment(
@@ -315,13 +294,12 @@ public class AppointmentController {
             return badRequest("Only PENDING appointments can be confirmed.");
 
         a.setStatus(AppointmentStatus.CONFIRMED);
-        return ResponseEntity.ok(ApiResponse.success(toResponse(appointmentRepository.save(a))));
+
+        Appointment saved = appointmentRepository.save(a);
+        emailService.sendConfirmed(saved);
+        return ResponseEntity.ok(ApiResponse.success(toResponse(saved)));
     }
 
-    /**
-     * PUT /api/v1/appointments/{id}/reject
-     * Secretary rejects a PENDING appointment with optional reason
-     */
     @PutMapping("/{id}/reject")
     public ResponseEntity<ApiResponse<AppointmentResponse>> rejectAppointment(
             @PathVariable Long id,
@@ -351,9 +329,6 @@ public class AppointmentController {
         return ResponseEntity.ok(ApiResponse.success(toResponse(appointmentRepository.save(a))));
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // Response shorthand helpers
-    // ═══════════════════════════════════════════════════════════════
 
     private <T> ResponseEntity<ApiResponse<T>> notFound(String msg) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(msg));

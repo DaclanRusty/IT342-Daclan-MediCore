@@ -5,28 +5,31 @@ import java.time.LocalDateTime;
 
 public class AppointmentResponse {
 
-    private Long             id;
-    private String           requestedDate;
-    private String           requestedTime;
-    private String           reasonForVisit;
+    private Long              id;
+    private String            requestedDate;
+    private String            requestedTime;
+    private String            reasonForVisit;
     private AppointmentStatus status;
-    private DoctorInfo       doctor;
-    private PatientInfo      patient;
+    private DoctorInfo        doctor;
+    private PatientInfo       patient;
 
     // Completion
-    private LocalDateTime    completedAt;
-    private String           doctorNotes;
+    private LocalDateTime     completedAt;
+    private String            doctorNotes;
 
     // Cancellation
-    private LocalDateTime    cancelledAt;
-    private String           cancelReason;
+    private LocalDateTime     cancelledAt;
+    private String            cancelReason;
 
     // Rejection
-    private LocalDateTime    rejectedAt;
-    private String           rejectedReason;
+    private LocalDateTime     rejectedAt;
+    private String            rejectedReason;
 
-    private LocalDateTime    createdAt;
-    private LocalDateTime    updatedAt;
+    // Expiration ✅
+    private LocalDateTime     expiredAt;
+
+    private LocalDateTime     createdAt;
+    private LocalDateTime     updatedAt;
 
     public AppointmentResponse() {}
 
@@ -44,6 +47,7 @@ public class AppointmentResponse {
     public String getCancelReason()         { return cancelReason; }
     public LocalDateTime getRejectedAt()    { return rejectedAt; }
     public String getRejectedReason()       { return rejectedReason; }
+    public LocalDateTime getExpiredAt()     { return expiredAt; }   // ✅
     public LocalDateTime getCreatedAt()     { return createdAt; }
     public LocalDateTime getUpdatedAt()     { return updatedAt; }
 
@@ -61,10 +65,11 @@ public class AppointmentResponse {
     public void setCancelReason(String r)               { this.cancelReason = r; }
     public void setRejectedAt(LocalDateTime t)          { this.rejectedAt = t; }
     public void setRejectedReason(String r)             { this.rejectedReason = r; }
+    public void setExpiredAt(LocalDateTime t)           { this.expiredAt = t; }    // ✅
     public void setCreatedAt(LocalDateTime t)           { this.createdAt = t; }
     public void setUpdatedAt(LocalDateTime t)           { this.updatedAt = t; }
 
-    // ── Nested DTOs ─────────────────────────────────────────────────────────
+    // ── Nested DTOs ──────────────────────────────────────────────────────────
     public static class DoctorInfo {
         private Long   doctorId;
         private String firstName, lastName, specialization, profilePicture;
@@ -84,46 +89,50 @@ public class AppointmentResponse {
 
     public static class PatientInfo {
         private Long   patientId;
-        private String firstName, lastName, email;
+        private String firstName, lastName, email, profilePicture;
 
         public PatientInfo() {}
-        public Long   getPatientId() { return patientId; }
-        public String getFirstName() { return firstName; }
-        public String getLastName()  { return lastName; }
-        public String getEmail()     { return email; }
-        public void setPatientId(Long id)   { this.patientId = id; }
-        public void setFirstName(String f)  { this.firstName = f; }
-        public void setLastName(String l)   { this.lastName = l; }
-        public void setEmail(String e)      { this.email = e; }
+        public Long   getPatientId()      { return patientId; }
+        public String getFirstName()      { return firstName; }
+        public String getLastName()       { return lastName; }
+        public String getEmail()          { return email; }
+        public String getProfilePicture() { return profilePicture; }
+
+        public void setPatientId(Long id)       { this.patientId = id; }
+        public void setFirstName(String f)      { this.firstName = f; }
+        public void setLastName(String l)       { this.lastName = l; }
+        public void setEmail(String e)          { this.email = e; }
+        public void setProfilePicture(String p) { this.profilePicture = p; }
     }
 
-    // ── Builder ──────────────────────────────────────────────────────────────
+    // ── Builder ───────────────────────────────────────────────────────────────
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
         private Long id;
         private String requestedDate, requestedTime, reasonForVisit;
         private AppointmentStatus status;
-        private DoctorInfo doctor;
+        private DoctorInfo  doctor;
         private PatientInfo patient;
-        private LocalDateTime completedAt, cancelledAt, rejectedAt, createdAt, updatedAt;
+        private LocalDateTime completedAt, cancelledAt, rejectedAt, expiredAt, createdAt, updatedAt;
         private String doctorNotes, cancelReason, rejectedReason;
 
-        public Builder id(Long id)                          { this.id = id; return this; }
-        public Builder requestedDate(String d)              { this.requestedDate = d; return this; }
-        public Builder requestedTime(String t)              { this.requestedTime = t; return this; }
-        public Builder reasonForVisit(String r)             { this.reasonForVisit = r; return this; }
-        public Builder status(AppointmentStatus s)          { this.status = s; return this; }
-        public Builder doctor(DoctorInfo d)                 { this.doctor = d; return this; }
-        public Builder patient(PatientInfo p)               { this.patient = p; return this; }
-        public Builder completedAt(LocalDateTime t)         { this.completedAt = t; return this; }
-        public Builder doctorNotes(String n)                { this.doctorNotes = n; return this; }
-        public Builder cancelledAt(LocalDateTime t)         { this.cancelledAt = t; return this; }
-        public Builder cancelReason(String r)               { this.cancelReason = r; return this; }
-        public Builder rejectedAt(LocalDateTime t)          { this.rejectedAt = t; return this; }
-        public Builder rejectedReason(String r)             { this.rejectedReason = r; return this; }
-        public Builder createdAt(LocalDateTime t)           { this.createdAt = t; return this; }
-        public Builder updatedAt(LocalDateTime t)           { this.updatedAt = t; return this; }
+        public Builder id(Long id)                  { this.id = id; return this; }
+        public Builder requestedDate(String d)      { this.requestedDate = d; return this; }
+        public Builder requestedTime(String t)      { this.requestedTime = t; return this; }
+        public Builder reasonForVisit(String r)     { this.reasonForVisit = r; return this; }
+        public Builder status(AppointmentStatus s)  { this.status = s; return this; }
+        public Builder doctor(DoctorInfo d)         { this.doctor = d; return this; }
+        public Builder patient(PatientInfo p)       { this.patient = p; return this; }
+        public Builder completedAt(LocalDateTime t) { this.completedAt = t; return this; }
+        public Builder doctorNotes(String n)        { this.doctorNotes = n; return this; }
+        public Builder cancelledAt(LocalDateTime t) { this.cancelledAt = t; return this; }
+        public Builder cancelReason(String r)       { this.cancelReason = r; return this; }
+        public Builder rejectedAt(LocalDateTime t)  { this.rejectedAt = t; return this; }
+        public Builder rejectedReason(String r)     { this.rejectedReason = r; return this; }
+        public Builder expiredAt(LocalDateTime t)   { this.expiredAt = t; return this; }  // ✅
+        public Builder createdAt(LocalDateTime t)   { this.createdAt = t; return this; }
+        public Builder updatedAt(LocalDateTime t)   { this.updatedAt = t; return this; }
 
         public AppointmentResponse build() {
             AppointmentResponse r = new AppointmentResponse();
@@ -140,6 +149,7 @@ public class AppointmentResponse {
             r.cancelReason   = cancelReason;
             r.rejectedAt     = rejectedAt;
             r.rejectedReason = rejectedReason;
+            r.expiredAt      = expiredAt;    // ✅
             r.createdAt      = createdAt;
             r.updatedAt      = updatedAt;
             return r;

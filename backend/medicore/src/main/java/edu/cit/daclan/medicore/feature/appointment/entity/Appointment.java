@@ -56,6 +56,10 @@ public class Appointment {
     @Column(name = "rejected_reason", length = 500)
     private String rejectedReason;
 
+    // ── Expiration fields ──────────────────────────────────────────────
+    @Column(name = "expired_at")
+    private LocalDateTime expiredAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -90,6 +94,7 @@ public class Appointment {
     public String getCancelReason()         { return cancelReason; }
     public LocalDateTime getRejectedAt()    { return rejectedAt; }
     public String getRejectedReason()       { return rejectedReason; }
+    public LocalDateTime getExpiredAt()     { return expiredAt; }
     public LocalDateTime getCreatedAt()     { return createdAt; }
     public LocalDateTime getUpdatedAt()     { return updatedAt; }
 
@@ -107,7 +112,7 @@ public class Appointment {
     public void setCancelReason(String r)               { this.cancelReason = r; }
     public void setRejectedAt(LocalDateTime t)          { this.rejectedAt = t; }
     public void setRejectedReason(String r)             { this.rejectedReason = r; }
+    public void setExpiredAt(LocalDateTime t)           { this.expiredAt = t; }
     public void setCreatedAt(LocalDateTime t)           { this.createdAt = t; }
     public void setUpdatedAt(LocalDateTime t)           { this.updatedAt = t; }
 }
-

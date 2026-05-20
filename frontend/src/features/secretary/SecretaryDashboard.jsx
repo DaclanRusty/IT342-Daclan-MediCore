@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { secretaryApi } from "../shared/api";
+import { bookedOn, bookedAgo, expiryLabel, pendingUrgency, urgencyStyle } from '../shared/appointmentTimingHelpers'
 
 const GlobalStyles = () => (
   <>
@@ -126,6 +127,27 @@ const Spinner = ({size=22,color=C.purple}) => (
   </svg>
 );
 
+const BookedInfo = ({ createdAt }) => {
+  if (!createdAt) return null;
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:5,fontSize:11.5,color:"#94a3b8",marginTop:4}}>
+      🕐 {bookedOn(createdAt)} · {bookedAgo(createdAt)}
+    </div>
+  );
+};
+
+const UrgencyBadge = ({ requestedDate }) => {
+  const level = pendingUrgency(requestedDate);
+  const label = expiryLabel(requestedDate);
+  const style = urgencyStyle(level);
+  if (level === "ok" || !label) return null;
+  return (
+    <div style={{display:"inline-flex",alignItems:"center",gap:5,background:style.bg,border:`1px solid ${style.border}`,borderRadius:8,padding:"4px 10px",fontSize:11.5,fontWeight:700,color:style.color,marginTop:4}}>
+      {label}
+    </div>
+  );
+};
+
 const Toast = ({toast}) => {
   if (!toast) return null;
   const e = toast.type==="error";
@@ -143,6 +165,7 @@ const SB = {
   REJECTED:  [C.redLt,  "#991b1b",  C.redBdr],
   CANCELLED: [C.redLt,  C.red,      C.redBdr],
   APPROVED:  [C.greenLt, C.green,   C.greenBdr],
+  EXPIRED:   ["#fef9c3","#854d0e","#fde047"],
 };
 const StatusBadge = ({status=""}) => {
   const [bg,color,border] = SB[status?.toUpperCase()] || SB.PENDING;
@@ -412,7 +435,7 @@ const AppointmentsTab = ({appointments, onSelect}) => {
         <p style={{fontSize:13,color:C.slateL}}>{appointments.length} total appointment{appointments.length!==1?"s":""}</p>
       </div>
       <div className="au2" style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
-        {["ALL","PENDING","CONFIRMED","COMPLETED","CANCELLED","REJECTED"].map(f=>(
+        {["ALL","PENDING","CONFIRMED","COMPLETED","CANCELLED","REJECTED","EXPIRED"].map(f=>(
           <button key={f} className="filter-pill" onClick={()=>setFilter(f)} style={{borderColor:filter===f?C.purple:"rgba(226,232,240,.8)",background:filter===f?C.purpleLt:"rgba(255,255,255,.72)",color:filter===f?C.purple:C.slateL}}>{f}</button>
         ))}
       </div>
@@ -440,14 +463,18 @@ const AppointmentsTab = ({appointments, onSelect}) => {
                   <div style={{fontFamily:"'Sora',sans-serif",fontWeight:700,fontSize:14,color:C.slate,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>Dr. {apptDocFn(a)} {apptDocLn(a)}</div>
                 </div>
               </div>
-              <div style={{display:"flex",gap:14,alignItems:"center",flexShrink:0}}>
-                <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><DateIcon/>{apptDate(a)?new Date(apptDate(a)).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}):"—"}</span>
-                <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><TimeIcon/>{apptTime(a)||"—"}</span>
-              </div>
-              <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-                <StatusBadge status={a.status}/>
-                <span style={{fontSize:12,color:C.purple,fontWeight:700}}>View →</span>
-              </div>
+              <div style={{display:"flex",flexDirection:"column",gap:4,flexShrink:0}}>
+                  <div style={{display:"flex",gap:14,alignItems:"center"}}>
+                    <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><DateIcon/>{apptDate(a)?new Date(apptDate(a)).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}):"—"}</span>
+                    <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><TimeIcon/>{apptTime(a)||"—"}</span>
+                  </div>
+                  <BookedInfo createdAt={a.createdAt}/>
+                  {a.status==="PENDING" && <UrgencyBadge requestedDate={apptDate(a)}/>}
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+                  <StatusBadge status={a.status}/>
+                  <span style={{fontSize:12,color:C.purple,fontWeight:700}}>View →</span>
+                </div>
             </div>
           ))}
         </div>

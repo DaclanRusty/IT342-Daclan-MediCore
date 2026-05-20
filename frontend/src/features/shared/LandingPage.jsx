@@ -211,11 +211,9 @@ export default function LandingPage() {
 
             {/* Floating mini cards */}
             <div className="float-slow" style={{position:'absolute',top:-16,left:-20,background:'#fff',borderRadius:14,padding:'10px 14px',boxShadow:'0 8px 24px rgba(0,0,0,.1)',display:'flex',alignItems:'center',gap:8,fontSize:12,fontWeight:600,color:'#0f172a',zIndex:2,whiteSpace:'nowrap'}}>
-              <div style={{width:28,height:28,borderRadius:8,background:'#f0fdf4',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>🔒</div>
               Google Verified Accounts
             </div>
             <div className="float-orb" style={{position:'absolute',bottom:20,left:-30,background:'#fff',borderRadius:14,padding:'10px 14px',boxShadow:'0 8px 24px rgba(0,0,0,.1)',display:'flex',alignItems:'center',gap:8,fontSize:12,fontWeight:600,color:'#0f172a',zIndex:2,whiteSpace:'nowrap',animationDelay:'2s',width:'auto',height:'auto'}}>
-              <div style={{width:28,height:28,borderRadius:8,background:'#eff6ff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>📅</div>
               Easy Appointment Booking
             </div>
           </div>
