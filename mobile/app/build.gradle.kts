@@ -29,11 +29,17 @@ android {
             )
         }
     }
+
     flavorDimensions += "env"
     productFlavors {
         create("dev") {
             dimension = "env"
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.52:8081/\"")
+
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8081/\"")
+        }
+        create("device") {
+            dimension = "env"
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8081/\"")
         }
         create("staging") {
             dimension = "env"
@@ -44,6 +50,7 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://api.yourdomain.com/\"")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -54,6 +61,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true  // ✅ needed for activity view binding
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -78,8 +86,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation(libs.androidx.appcompat)
     implementation("androidx.cardview:cardview:1.0.0")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
-    // Retrofit + Gson (replaces Moshi to match our code)
+    // ✅ Retrofit + Gson (deduplicated — only one version each)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -87,10 +96,10 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    // Material Design (for buttons, inputs etc)
+    implementation("com.google.android.material:material:1.11.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

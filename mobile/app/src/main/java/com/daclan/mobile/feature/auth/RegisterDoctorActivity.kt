@@ -9,6 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.daclan.mobile.shared.network.RegisterRequest
 import com.daclan.mobile.shared.network.RetrofitClient
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.launch
 
 class RegisterDoctorActivity : AppCompatActivity() {
@@ -25,11 +29,14 @@ class RegisterDoctorActivity : AppCompatActivity() {
     private lateinit var btnBack: Button
     private lateinit var tvError: TextView
 
+    private val RC_GOOGLE = 9001
+    private var googleVerifiedEmail: String? = null
+
     private val specializations = listOf(
-        "Select Specialization","General Medicine","Cardiology","Dermatology",
-        "Endocrinology","Gastroenterology","Neurology","Obstetrics & Gynecology",
-        "Oncology","Ophthalmology","Orthopedics","Pediatrics","Psychiatry",
-        "Pulmonology","Radiology","Surgery","Urology","Other"
+        "Select Specialization", "General Medicine", "Cardiology", "Dermatology",
+        "Endocrinology", "Gastroenterology", "Neurology", "Obstetrics & Gynecology",
+        "Oncology", "Ophthalmology", "Orthopedics", "Pediatrics", "Psychiatry",
+        "Pulmonology", "Radiology", "Surgery", "Urology", "Other"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,32 +55,75 @@ class RegisterDoctorActivity : AppCompatActivity() {
         btnBack           = findViewById(R.id.btnBack)
         tvError           = findViewById(R.id.tvError)
 
-        spinnerSpec.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, specializations)
+        spinnerSpec.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_dropdown_item, specializations
+        )
 
         btnBack.setOnClickListener { finish() }
+
+        // ✅ Verify Google on email field click
+        etEmail.isFocusable = false
+        etEmail.setOnClickListener { startGoogleSignIn() }
+
+        // Or if you have a dedicated verify button
+        findViewById<Button?>(R.id.btnVerifyGoogle)?.setOnClickListener { startGoogleSignIn() }
+
         btnRegister.setOnClickListener { handleRegister() }
     }
 
+    private fun startGoogleSignIn() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.google_web_client_id))
+            .requestEmail()
+            .build()
+        startActivityForResult(GoogleSignIn.getClient(this, gso).signInIntent, RC_GOOGLE)
+    }
+
+    @Deprecated("Using for Google Sign-In result")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != RC_GOOGLE) return
+        try {
+            val account: GoogleSignInAccount = GoogleSignIn
+                .getSignedInAccountFromIntent(data)
+                .getResult(ApiException::class.java)
+            googleVerifiedEmail = account.email
+            etEmail.setText(account.email ?: "")
+            if (etFirstName.text.isBlank()) etFirstName.setText(account.givenName ?: "")
+            if (etLastName.text.isBlank())  etLastName.setText(account.familyName ?: "")
+            findViewById<TextView?>(R.id.tvGoogleStatus)?.apply {
+                text = "✓ Verified: ${account.email}"
+                setTextColor(0xFF059669.toInt())
+                visibility = View.VISIBLE
+            }
+            hideError()
+        } catch (e: ApiException) {
+            showError("Google sign-in failed. Please try again.")
+        }
+    }
+
     private fun handleRegister() {
-        val firstName       = etFirstName.text.toString().trim()
-        val lastName        = etLastName.text.toString().trim()
-        val email           = etEmail.text.toString().trim()
-        val phone           = etPhone.text.toString().trim()
-        val specialization  = spinnerSpec.selectedItem.toString()
-        val license         = etLicense.text.toString().trim()
-        val password        = etPassword.text.toString().trim()
-        val confirmPassword = etConfirmPassword.text.toString().trim()
+        val firstName      = etFirstName.text.toString().trim()
+        val lastName       = etLastName.text.toString().trim()
+        val email          = etEmail.text.toString().trim()
+        val phone          = etPhone.text.toString().trim()
+        val specialization = spinnerSpec.selectedItem.toString()
+        val license        = etLicense.text.toString().trim()
+        val password       = etPassword.text.toString().trim()
+        val confirm        = etConfirmPassword.text.toString().trim()
+
+        if (googleVerifiedEmail == null) {
+            showError("Please verify your Google account first."); return
+        }
 
         when {
             firstName.isEmpty()  -> { showError("First name is required"); return }
             lastName.isEmpty()   -> { showError("Last name is required"); return }
-            email.isEmpty()      -> { showError("Email is required"); return }
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-            -> { showError("Enter a valid email address"); return }
-            specialization == "Select Specialization" -> { showError("Please select a specialization"); return }
+            specialization == "Select Specialization"
+            -> { showError("Please select a specialization"); return }
             license.isEmpty()    -> { showError("License number is required"); return }
             password.length < 8  -> { showError("Password must be at least 8 characters"); return }
-            password != confirmPassword -> { showError("Passwords do not match"); return }
+            password != confirm  -> { showError("Passwords do not match"); return }
         }
 
         hideError()
@@ -95,7 +145,7 @@ class RegisterDoctorActivity : AppCompatActivity() {
                     )
                 )
 
-                if (response.isSuccessful) {
+                if (response.isSuccessful && response.body()?.success == true) {
                     val msg = response.body()?.data?.message
                         ?: "Registration submitted! Please wait for admin approval."
                     val intent = Intent(this@RegisterDoctorActivity, LoginActivity::class.java)
@@ -104,13 +154,11 @@ class RegisterDoctorActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                 } else {
-                    val msg = response.body()?.message
-                        ?: when (response.code()) {
-                            409  -> "Email or license number already registered"
-                            400  -> "Invalid details. Please check your inputs."
-                            else -> "Registration failed (${response.code()})"
-                        }
-                    showError(msg)
+                    showError(response.body()?.errorMessage() ?: when (response.code()) {
+                        409  -> "This email or license number is already registered."
+                        400  -> "Invalid details. Please check your inputs."
+                        else -> "Registration failed (${response.code()})"
+                    })
                 }
             } catch (e: Exception) {
                 showError("Connection error. Is your backend running?")

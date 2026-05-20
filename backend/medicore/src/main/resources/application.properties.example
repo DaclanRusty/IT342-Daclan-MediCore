@@ -1,51 +1,52 @@
-# App
-spring.application.name=medicore
-server.port=8081
+    # App
+    spring.application.name=medicore
+    server.port=8081
 
-# Database
-spring.datasource.url=jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres
-spring.datasource.username=postgres.ureuoezigfmnetvdeywx
-spring.datasource.password=rsdasrf0622
-spring.datasource.driver-class-name=org.postgresql.Driver
+    # Database
+    spring.datasource.url=jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres
+    spring.datasource.username=postgres.ureuoezigfmnetvdeywx
+    spring.datasource.password=rsdasrf0622
+    spring.datasource.driver-class-name=org.postgresql.Driver
 
-spring.datasource.hikari.maximum-pool-size=5
-spring.datasource.hikari.minimum-idle=2
-spring.datasource.hikari.connection-timeout=30000
-spring.datasource.hikari.idle-timeout=600000
-spring.datasource.hikari.max-lifetime=1800000
-spring.datasource.hikari.connection-init-sql=DEALLOCATE ALL
-spring.datasource.hikari.data-source-properties.prepareThreshold=0
+    spring.datasource.hikari.maximum-pool-size=5
+    spring.datasource.hikari.minimum-idle=2
+    spring.datasource.hikari.connection-timeout=30000
+    spring.datasource.hikari.idle-timeout=600000
+    spring.datasource.hikari.max-lifetime=1800000
+    spring.datasource.hikari.connection-init-sql=DEALLOCATE ALL
+    spring.datasource.hikari.data-source-properties.prepareThreshold=0
 
-# JPA
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
+    # JPA
+    spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+    spring.jpa.hibernate.ddl-auto=update
+    spring.jpa.show-sql=true
+    spring.jpa.properties.hibernate.format_sql=true
+    spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
 
-# JWT
-app.jwt.secret=medicore-super-secret-jwt-key-that-is-at-least-32-characters-long-enough
-app.jwt.expiration=86400000
-app.jwt.refresh-expiration=604800000
+    # JWT
+    app.jwt.secret=medicore-super-secret-jwt-key-that-is-at-least-32-characters-long-enough
+    app.jwt.expiration=86400000
+    app.jwt.refresh-expiration=604800000
 
-# CORS
-app.cors.allowed-origins=http://localhost:3000
-app.frontend-url=http://localhost:3000
+    # CORS
+    app.cors.allowed-origins=http://localhost:3000
+    app.frontend-url=http://localhost:3000
+    app.cors.allowed-origins=http://localhost:3000,http://10.0.2.2:8081,http://localhost:8081
 
-# Google OAuth
-google.client-id=431600217501-n72uuai5kjebfokg6ri6h9ge31e44jrq.apps.googleusercontent.com
-spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
-spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
-spring.security.oauth2.client.registration.google.scope=email,profile
-spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8081/login/oauth2/code/google
-# Mail
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=medicore.patientcare@gmail.com
-spring.mail.password=vkhr ykqj gyrx hfrh
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
-spring.mail.properties.mail.smtp.starttls.required=true
-spring.mail.properties.mail.smtp.connectiontimeout=5000
-spring.mail.properties.mail.smtp.timeout=5000
-spring.mail.properties.mail.smtp.writetimeout=5000
+    # Google OAuth
+    google.client-id=431600217501-n72uuai5kjebfokg6ri6h9ge31e44jrq.apps.googleusercontent.com
+    spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
+    spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
+    spring.security.oauth2.client.registration.google.scope=email,profile
+    spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8081/login/oauth2/code/google
+    # Mail
+    spring.mail.host=smtp.gmail.com
+    spring.mail.port=587
+    spring.mail.username=medicore.patientcare@gmail.com
+    spring.mail.password=vkhr ykqj gyrx hfrh
+    spring.mail.properties.mail.smtp.auth=true
+    spring.mail.properties.mail.smtp.starttls.enable=true
+    spring.mail.properties.mail.smtp.starttls.required=true
+    spring.mail.properties.mail.smtp.connectiontimeout=5000
+    spring.mail.properties.mail.smtp.timeout=5000
+    spring.mail.properties.mail.smtp.writetimeout=5000

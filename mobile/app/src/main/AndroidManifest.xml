@@ -12,9 +12,9 @@
         android:theme="@style/Theme.Medicore"
         android:usesCleartextTraffic="true">
 
-        <!-- Login is the launcher screen -->
+        <!-- Landing is the launcher screen -->
         <activity
-            android:name=".LandingActivity"
+            android:name="com.daclan.mobile.feature.landing.LandingActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,12 +22,24 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity" android:exported="false"/>
-        <activity android:name=".DashboardActivity" android:exported="false"/>
-        <activity android:name=".RegisterChooseActivity" android:exported="false"/>
-        <activity android:name=".RegisterPatientActivity" android:exported="false"/>
-        <activity android:name=".RegisterDoctorActivity" android:exported="false"/>
-        <activity android:name=".RegisterSecretaryActivity" android:exported="false"/>
+        <activity
+            android:name="com.daclan.mobile.feature.auth.LoginActivity"
+            android:exported="false"/>
+        <activity
+            android:name="com.daclan.mobile.feature.dashboard.DashboardActivity"
+            android:exported="false"/>
+        <activity
+            android:name="com.daclan.mobile.feature.auth.RegisterChooseActivity"
+            android:exported="false"/>
+        <activity
+            android:name="com.daclan.mobile.feature.auth.RegisterPatientActivity"
+            android:exported="false"/>
+        <activity
+            android:name="com.daclan.mobile.feature.auth.RegisterDoctorActivity"
+            android:exported="false"/>
+        <activity
+            android:name="com.daclan.mobile.feature.auth.RegisterSecretaryActivity"
+            android:exported="false"/>
 
     </application>
 </manifest>

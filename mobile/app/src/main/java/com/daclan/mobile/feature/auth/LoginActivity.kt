@@ -37,16 +37,13 @@ class LoginActivity : AppCompatActivity() {
         layoutSuccess   = findViewById(R.id.layoutSuccess)
         tvSuccessMsg    = findViewById(R.id.tvSuccessMsg)
 
-        // Show success message if came from registration
         val successMsg = intent.getStringExtra("success_message")
         if (!successMsg.isNullOrEmpty()) {
             tvSuccessMsg.text = "✓  $successMsg"
             layoutSuccess.visibility = View.VISIBLE
         }
 
-        // ← THIS WAS MISSING
         btnLogin.setOnClickListener { handleLogin() }
-
         btnGoToRegister.setOnClickListener {
             startActivity(Intent(this, RegisterChooseActivity::class.java))
         }
@@ -56,14 +53,11 @@ class LoginActivity : AppCompatActivity() {
         val email    = etEmail.text.toString().trim()
         val password = etPassword.text.toString().trim()
 
-        // Validate
         if (email.isEmpty() || password.isEmpty()) {
-            showError("Please fill in all fields")
-            return
+            showError("Please fill in all fields"); return
         }
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            showError("Please enter a valid email address")
-            return
+            showError("Please enter a valid email address"); return
         }
 
         hideError()
@@ -75,30 +69,40 @@ class LoginActivity : AppCompatActivity() {
 
                 if (response.isSuccessful && response.body() != null) {
                     val body = response.body()!!
-                    val token = body.data?.accessToken        // ← fix
-                    val user  = body.data?.user               // ← fix
 
-                    val prefs = getSharedPreferences("medicore_prefs", MODE_PRIVATE)
-                    prefs.edit()
-                        .putString("access_token", token)
-                        .putString("user_email", user?.email ?: email)
-                        .putString("user_name", "${user?.firstname ?: ""} ${user?.lastname ?: ""}".trim())
-                        .putString("user_role", user?.role ?: "PATIENT")
-                        .apply()
+                    if (body.success == true && body.data != null) {
+                        val auth = body.data
+                        // ✅ accessToken + nested user object
+                        val token     = auth.accessToken ?: ""
+                        val role      = auth.user?.role  ?: "PATIENT"
+                        val userEmail = auth.user?.email ?: email
+                        val firstName = auth.user?.firstname ?: ""
+                        val lastName  = auth.user?.lastname  ?: ""
 
-                    // navigate to dashboard or home
-                    startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
-                    finish()
+                        getSharedPreferences("medicore_prefs", MODE_PRIVATE).edit()
+                            .putString("auth_token", token)
+                            .putString("user_role",  role)
+                            .putString("user_email", userEmail)
+                            .putString("user_fname", firstName)
+                            .putString("user_lname", lastName)
+                            .putString("user_name",  "$firstName $lastName".trim())
+                            .apply()
 
-                } else {
-                    val errorMsg = when (response.code()) {
-                        401 -> "Invalid email or password"
-                        403 -> "Your account is pending approval"
-                        else -> "Login failed. Please try again."
+                        startActivity(
+                            Intent(this@LoginActivity, DashboardActivity::class.java)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        )
+                        finish()
+                    } else {
+                        showError(body.errorMessage())
                     }
-                    showError(errorMsg)
+                } else {
+                    showError(when (response.code()) {
+                        401  -> "Invalid email or password."
+                        403  -> "Your account is pending approval."
+                        else -> "Login failed (${response.code()})."
+                    })
                 }
-
             } catch (e: Exception) {
                 showError("Connection error. Make sure your backend is running.")
             } finally {
@@ -112,11 +116,7 @@ class LoginActivity : AppCompatActivity() {
         tvError.visibility = View.VISIBLE
         layoutSuccess.visibility = View.GONE
     }
-
-    private fun hideError() {
-        tvError.visibility = View.GONE
-    }
-
+    private fun hideError() { tvError.visibility = View.GONE }
     private fun setLoading(loading: Boolean) {
         btnLogin.isEnabled = !loading
         btnLogin.text = if (loading) "Signing in…" else "Sign In →"
