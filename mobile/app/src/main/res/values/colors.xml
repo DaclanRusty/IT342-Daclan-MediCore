@@ -1,16 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="blue_primary">#2563EB</color>
-    <color name="blue_dark">#1D4ED8</color>
-    <color name="blue_light">#EFF6FF</color>
-    <color name="bg_gradient_start">#EEF2FF</color>
-    <color name="bg_gradient_end">#DBEAFE</color>
+
+    <!-- ── Brand Blue ── -->
+    <color name="blue">#2563EB</color>
+    <color name="blue_dk">#1D4ED8</color>
+    <color name="blue_lt">#EFF6FF</color>
+    <color name="blue_bdr">#BFDBFE</color>
+
+    <color name="primary_blue">#2563EB</color>
+    <color name="text_muted">#94A3B8</color>
+
+
+    <!-- ── Amber ── -->
+    <color name="amber">#F59E0B</color>
+    <color name="amber_dk">#D97706</color>
+    <color name="amber_lt">#FFFBEB</color>
+    <color name="amber_bdr">#FDE68A</color>
+
+    <!-- ── Green ── -->
+    <color name="green">#059669</color>
+    <color name="green_lt">#F0FDF4</color>
+    <color name="green_bdr">#BBF7D0</color>
+
+    <!-- ── Purple ── -->
+    <color name="purple">#7C3AED</color>
+    <color name="purple_lt">#F5F3FF</color>
+    <color name="purple_bdr">#DDD6FE</color>
+
+    <!-- ── Red ── -->
+    <color name="red">#EF4444</color>
+    <color name="red_lt">#FEF2F2</color>
+    <color name="red_bdr">#FECACA</color>
+
+    <!-- ── Slate ── -->
+    <color name="slate">#0F172A</color>
+    <color name="slate_m">#334155</color>
+    <color name="slate_l">#64748B</color>
+    <color name="slate_xl">#94A3B8</color>
+
+    <!-- ── Backgrounds ── -->
+    <color name="bg_screen">#F1F5F9</color>
+    <color name="surface_white">#FFFFFF</color>
+    <color name="divider">#E2E8F0</color>
+    <color name="divider_soft">#F1F5F9</color>
+
+    <!-- ── Glass card bg ── -->
+    <color name="glass_bg">#FFFFFFD9</color><!-- ~85% white -->
+    <color name="glass_border">#FFFFFFF2</color>
+
+    <!-- ── Status badge backgrounds (from SB map) ── -->
+    <color name="badge_pending_bg">#FEF9C3</color>
+    <color name="badge_pending_text">#854D0E</color>
+    <color name="badge_pending_bdr">#FDE047</color>
+
+    <color name="badge_confirmed_bg">#F0FDF4</color>
+    <color name="badge_confirmed_text">#059669</color>
+    <color name="badge_confirmed_bdr">#BBF7D0</color>
+
+    <color name="badge_completed_bg">#EFF6FF</color>
+    <color name="badge_completed_text">#2563EB</color>
+    <color name="badge_completed_bdr">#BFDBFE</color>
+
+    <color name="badge_rejected_bg">#FEF2F2</color>
+    <color name="badge_rejected_text">#991B1B</color>
+    <color name="badge_rejected_bdr">#FECACA</color>
+
+    <color name="badge_cancelled_bg">#F1F5F9</color>
+    <color name="badge_cancelled_text">#64748B</color>
+    <color name="badge_cancelled_bdr">#CBD5E1</color>
+
+    <color name="badge_expired_bg">#FEF9C3</color>
+    <color name="badge_expired_text">#854D0E</color>
+    <color name="badge_expired_bdr">#FDE047</color>
+
+    <!-- ── Info block backgrounds ── -->
+    <color name="info_block_bg">#F8FAFC</color>
+    <color name="notes_block_bg">#EFF6FF</color>
+    <color name="notes_block_bdr">#BFDBFE</color>
+    <color name="cancel_block_bg">#F1F5F9</color>
+    <color name="cancel_block_bdr">#CBD5E1</color>
+    <color name="reject_block_bg">#FEF2F2</color>
+    <color name="reject_block_bdr">#FECACA</color>
+    <color name="confirmed_block_bg">#F0FDF4</color>
+    <color name="confirmed_block_bdr">#BBF7D0</color>
+    <color name="pending_block_bg">#FFFBEB</color>
+    <color name="pending_block_bdr">#FDE68A</color>
+
+    <!-- ── Doctor avatar palette (DOC_COLORS) ── -->
+    <color name="doc_color_0">#2563EB</color>
+    <color name="doc_color_1">#7C3AED</color>
+    <color name="doc_color_2">#059669</color>
+    <color name="doc_color_3">#F59E0B</color>
+    <color name="doc_color_4">#EF4444</color>
+    <color name="doc_color_5">#0891B2</color>
+    <color name="doc_color_6">#DB2777</color>
+    <color name="doc_color_7">#16A34A</color>
+
+    <!-- ── Misc ── -->
     <color name="white">#FFFFFF</color>
-    <color name="text_dark">#0F172A</color>
-    <color name="text_gray">#64748B</color>
-    <color name="text_light">#94A3B8</color>
-    <color name="border_color">#E2E8F0</color>
-    <color name="error_red">#EF4444</color>
-    <color name="success_green">#10B981</color>
-    <color name="card_bg">#F0F4FF</color>
+    <color name="transparent">#00000000</color>
+    <color name="scrim">#850F172A</color><!-- ~52% slate for modal bg -->
+
 </resources>

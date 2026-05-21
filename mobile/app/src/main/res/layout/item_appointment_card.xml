@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Mirrors the appt-card in AppointmentsTab.jsx:
+  • glass card with left 4dp accent border (color by status)
+  • doctor avatar + name + spec
+  • date / time row
+  • booked info row
+  • status badge + sub-label on right
+  • "Tap to view details →" hint
+-->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#D9FFFFFF"
+    android:foreground="@drawable/ripple_card">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Left accent border — color set programmatically -->
+        <View
+            android:id="@+id/viewAccentBorder"
+            android:layout_width="4dp"
+            android:layout_height="match_parent"
+            android:background="@color/blue" />
+
+        <!-- Card body -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <!-- ── Left: avatar ── -->
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="14dp">
+
+                <!-- Initials fallback -->
+                <TextView
+                    android:id="@+id/tvDoctorInitials"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:background="@drawable/circle_avatar_bg" />
+
+                <!-- Profile picture (shown if available) -->
+                <ImageView
+                    android:id="@+id/ivDoctorPic"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/circle_avatar_bg"
+                    android:clipToOutline="true"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <!-- ── Middle: name, spec, date/time, booked, urgency ── -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Doctor name — Sora bold -->
+                <TextView
+                    android:id="@+id/tvApptDoctorName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/slate"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Specialization -->
+                <TextView
+                    android:id="@+id/tvApptSpec"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12.5sp"
+                    android:textColor="@color/slate_l"
+                    android:layout_marginTop="1dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Date and Time row -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="6dp">
+
+                    <!-- Date chip -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginEnd="14dp">
+
+                        <ImageView
+                            android:layout_width="13dp"
+                            android:layout_height="13dp"
+                            android:src="@drawable/ic_calendar"
+                            android:tint="@color/slate_l"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/tvApptDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:textColor="@color/slate_m"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Time chip -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="13dp"
+                            android:layout_height="13dp"
+                            android:src="@drawable/ic_clock"
+                            android:tint="@color/slate_l"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/tvApptTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:textColor="@color/slate_m"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Booked on row — "🕐 Booked May 1 · 2 days ago" -->
+                <TextView
+                    android:id="@+id/tvBookedAt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="11.5sp"
+                    android:textColor="@color/slate_xl"
+                    android:layout_marginTop="4dp"
+                    android:visibility="gone" />
+
+                <!-- Reason snippet -->
+                <TextView
+                    android:id="@+id/tvApptReason"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="11.5sp"
+                    android:textColor="@color/slate_xl"
+                    android:layout_marginTop="4dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- ── Right: status badge + sub-label + hint ── -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="end|center_vertical"
+                android:layout_marginStart="10dp">
+
+                <!-- Status badge pill -->
+                <TextView
+                    android:id="@+id/tvApptStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold"
+                    android:paddingStart="11dp"
+                    android:paddingEnd="11dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:background="@drawable/badge_pending"
+                    android:textColor="@color/badge_pending_text" />
+
+                <!-- Sub-label e.g. "⏳ Awaiting confirmation" -->
+                <TextView
+                    android:id="@+id/tvApptSubLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/amber_dk"
+                    android:layout_marginTop="5dp"
+                    android:gravity="end"
+                    android:visibility="gone" />
+
+                <!-- "Tap to view details →" hint -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tap to view →"
+                    android:textSize="10.5sp"
+                    android:textColor="@color/slate_xl"
+                    android:layout_marginTop="6dp"
+                    android:gravity="end" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
         android:allowBackup="true"
@@ -22,24 +24,20 @@
             </intent-filter>
         </activity>
 
+        <!-- Auth screens -->
+        <activity android:name="com.daclan.mobile.feature.auth.LoginActivity"             android:exported="false"/>
+        <activity android:name="com.daclan.mobile.feature.auth.RegisterChooseActivity"    android:exported="false"/>
+        <activity android:name="com.daclan.mobile.feature.auth.RegisterPatientActivity"   android:exported="false"/>
+        <activity android:name="com.daclan.mobile.feature.auth.RegisterDoctorActivity"    android:exported="false"/>
+        <activity android:name="com.daclan.mobile.feature.auth.RegisterSecretaryActivity" android:exported="false"/>
+
+        <!-- Role router — decides which dashboard to open -->
+        <activity android:name="com.daclan.mobile.feature.dashboard.DashboardActivity"    android:exported="false"/>
+
         <activity
-            android:name="com.daclan.mobile.feature.auth.LoginActivity"
-            android:exported="false"/>
-        <activity
-            android:name="com.daclan.mobile.feature.dashboard.DashboardActivity"
-            android:exported="false"/>
-        <activity
-            android:name="com.daclan.mobile.feature.auth.RegisterChooseActivity"
-            android:exported="false"/>
-        <activity
-            android:name="com.daclan.mobile.feature.auth.RegisterPatientActivity"
-            android:exported="false"/>
-        <activity
-            android:name="com.daclan.mobile.feature.auth.RegisterDoctorActivity"
-            android:exported="false"/>
-        <activity
-            android:name="com.daclan.mobile.feature.auth.RegisterSecretaryActivity"
-            android:exported="false"/>
+            android:name=".feature.patient.PatientDashboardActivity"
+            android:exported="false" />
+
 
     </application>
 </manifest>

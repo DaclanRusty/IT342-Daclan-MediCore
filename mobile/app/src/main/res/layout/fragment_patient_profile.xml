@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors PatientProfileTab.jsx — avatar header + info fields + security note -->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F1F5F9"
+    android:scrollbars="none"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="40dp">
+
+        <!-- ── Success banner (shown after save) ── -->
+        <LinearLayout
+            android:id="@+id/layoutProfileSuccess"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_confirmed_blocked"
+            android:padding="14dp"
+            android:layout_marginBottom="14dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✅"
+                android:textSize="14sp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Profile updated successfully!"
+                android:textSize="13.5sp"
+                android:textStyle="bold"
+                android:textColor="#166534" />
+        </LinearLayout>
+
+        <!-- ── Error banner ── -->
+        <LinearLayout
+            android:id="@+id/layoutProfileError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_reject_block"
+            android:padding="14dp"
+            android:layout_marginBottom="14dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚠️"
+                android:textSize="14sp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvProfileError"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#991B1B" />
+        </LinearLayout>
+
+        <!-- ── Profile card (glass) ── -->
+        <androidx.cardview.widget.CardView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="#D9FFFFFF"
+            android:layout_marginBottom="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <!-- Avatar row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <!-- Avatar circle with camera icon -->
+                    <FrameLayout
+                        android:layout_width="78dp"
+                        android:layout_height="78dp"
+                        android:layout_marginEnd="16dp">
+
+                        <TextView
+                            android:id="@+id/tvProfileInitials"
+                            android:layout_width="78dp"
+                            android:layout_height="78dp"
+                            android:gravity="center"
+                            android:text="P"
+                            android:textSize="26sp"
+                            android:textStyle="bold"
+                            android:textColor="#FFFFFF"
+                            android:background="@drawable/bg_avatar_nav" />
+
+                        <ImageView
+                            android:id="@+id/ivProfilePic"
+                            android:layout_width="78dp"
+                            android:layout_height="78dp"
+                            android:scaleType="centerCrop"
+                            android:clipToOutline="true"
+                            android:background="@drawable/bg_avatar_nav"
+                            android:visibility="gone" />
+
+                        <!-- Camera badge -->
+                        <LinearLayout
+                            android:id="@+id/btnChangePic"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="bottom|end"
+                            android:gravity="center"
+                            android:background="@drawable/bg_stat_blue"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="📷"
+                                android:textSize="10sp" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <!-- Name + email + badges -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvProfileFullName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#0F172A" />
+
+                        <TextView
+                            android:id="@+id/tvProfileEmail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="13.5sp"
+                            android:textColor="#64748B"
+                            android:layout_marginTop="2dp" />
+
+                        <!-- Role + status badges row -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Patient"
+                                android:textSize="11.5sp"
+                                android:textStyle="bold"
+                                android:textColor="#2563EB"
+                                android:background="@drawable/badge_completed"
+                                android:paddingStart="11dp"
+                                android:paddingEnd="11dp"
+                                android:paddingTop="3dp"
+                                android:paddingBottom="3dp"
+                                android:layout_marginEnd="6dp" />
+
+                            <TextView
+                                android:id="@+id/tvProfileStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ACTIVE"
+                                android:textSize="11.5sp"
+                                android:textStyle="bold"
+                                android:textColor="#059669"
+                                android:background="@drawable/badge_confirmed"
+                                android:paddingStart="11dp"
+                                android:paddingEnd="11dp"
+                                android:paddingTop="3dp"
+                                android:paddingBottom="3dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#F1F5F9"
+                    android:layout_marginBottom="18dp" />
+
+                <!-- 👤 Personal Information label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="👤  Personal Information"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#334155"
+                    android:layout_marginBottom="14dp" />
+
+                <!-- Full Name row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp"
+                    android:layout_marginBottom="2dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="FULL NAME"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="#94A3B8"
+                        android:letterSpacing="0.06"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvProfileName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14.5sp"
+                        android:textColor="#334155" />
+                </LinearLayout>
+
+                <!-- Email row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="EMAIL ADDRESS"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="#94A3B8"
+                        android:letterSpacing="0.06"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvProfileEmailField"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14.5sp"
+                        android:textColor="#334155" />
+                </LinearLayout>
+
+                <!-- Phone row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PHONE NUMBER"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="#94A3B8"
+                        android:letterSpacing="0.06"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvProfilePhone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14.5sp"
+                        android:textColor="#334155"
+                        android:hint="Not provided"
+                        android:textColorHint="#94A3B8" />
+                </LinearLayout>
+
+                <!-- Date of birth row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="DATE OF BIRTH"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="#94A3B8"
+                        android:letterSpacing="0.06"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvProfileDob"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14.5sp"
+                        android:textColor="#334155"
+                        android:hint="Not provided"
+                        android:textColorHint="#94A3B8" />
+                </LinearLayout>
+
+                <!-- Gender row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GENDER"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="#94A3B8"
+                        android:letterSpacing="0.06"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvProfileGender"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14.5sp"
+                        android:textColor="#334155"
+                        android:hint="Not provided"
+                        android:textColorHint="#94A3B8" />
+                </LinearLayout>
+
+                <!-- Address row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ADDRESS"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="#94A3B8"
+                        android:letterSpacing="0.06"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvProfileAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14.5sp"
+                        android:textColor="#334155"
+                        android:hint="Not provided"
+                        android:textColorHint="#94A3B8" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- ── Security note card ── -->
+        <androidx.cardview.widget.CardView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="1dp"
+            app:cardBackgroundColor="#D9FFFFFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <!-- Lock icon circle -->
+                <FrameLayout
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/badge_completed"
+                    android:layout_marginEnd="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="🔒"
+                        android:textSize="17sp" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Account Security"
+                        android:textSize="13.5sp"
+                        android:textStyle="bold"
+                        android:textColor="#0F172A"
+                        android:layout_marginBottom="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Your account is secured via Google OAuth or JWT authentication."
+                        android:textSize="12.5sp"
+                        android:textColor="#64748B"
+                        android:lineSpacingMultiplier="1.4" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ── MedicoreDialog — rounded white dialog ── -->
+    <style name="MedicoreDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_dialog_rounded</item>
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="colorAccent">@color/blue</item>
+        <item name="android:textColorPrimary">@color/slate</item>
+        <item name="buttonBarPositiveButtonStyle">@style/MedicoreDialog.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/MedicoreDialog.GhostButton</item>
+    </style>
+
+    <style name="MedicoreDialog.Button" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/blue</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="MedicoreDialog.GhostButton" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/slate_l</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+</resources>

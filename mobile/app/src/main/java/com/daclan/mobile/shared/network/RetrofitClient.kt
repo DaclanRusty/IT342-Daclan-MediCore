@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit
 import com.daclan.mobile.BuildConfig
 
 object RetrofitClient {
+
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
@@ -18,12 +19,22 @@ object RetrofitClient {
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    val instance: AuthApiService by lazy {
+    private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(AuthApiService::class.java)
     }
+
+    val instance: AuthApiService by lazy {
+        retrofit.create(AuthApiService::class.java)
+    }
+
+    val patientApi: PatientApiService by lazy {
+        retrofit.create(PatientApiService::class.java)
+    }
+
+    // Helper — builds "Bearer <token>" header
+    fun bearerToken(token: String) = "Bearer $token"
 }

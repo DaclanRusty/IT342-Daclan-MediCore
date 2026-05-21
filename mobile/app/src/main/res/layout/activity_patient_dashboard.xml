@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F1F5F9">
+
+    <!-- ══════════════════════════════════════════════════════════
+         TOP NAVBAR
+         Matches: sticky nav with glass bg, logo, user avatar, logout
+         ══════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:background="#B8FFFFFF"
+        android:elevation="4dp">
+
+        <!-- Logo mark + wordmark -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- "M" blue square logo — matches the 36x36 rounded div -->
+            <TextView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:text="M"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_logo_mark"
+                android:layout_marginEnd="10dp" />
+
+            <!-- "Medi" + "Core" wordmark -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MediCore"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#0F172A"
+                android:letterSpacing="-0.02" />
+        </LinearLayout>
+
+        <!-- Right side: avatar circle + name + logout -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Avatar circle (initials fallback / profile pic) -->
+            <FrameLayout
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:id="@+id/tvNavInitials"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:text="P"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/bg_avatar_nav" />
+
+                <ImageView
+                    android:id="@+id/ivNavAvatar"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/bg_avatar_nav"
+                    android:clipToOutline="true"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <!-- Name + role label -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Patient"
+                    android:textSize="10.5sp"
+                    android:textColor="#94A3B8" />
+
+                <TextView
+                    android:id="@+id/tvNavName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Loading…"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:maxWidth="120dp" />
+            </LinearLayout>
+
+            <!-- Logout button — icon only on mobile -->
+            <ImageView
+                android:id="@+id/btnLogout"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_logout"
+                android:tint="#64748B"
+                android:background="@drawable/bg_btn_ghost_circle"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Logout" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Thin shadow line under navbar -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#0A2563EB" />
+
+    <!-- ══════════════════════════════════════════════════════════
+         FRAGMENT CONTAINER — fills all space between navbar and bottom nav
+         ══════════════════════════════════════════════════════════ -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#F1F5F9" />
+
+    <!-- Thin shadow line above bottom nav -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#0D000000" />
+
+    <!-- ══════════════════════════════════════════════════════════
+         BOTTOM NAVIGATION BAR
+         Matches TABS = [home, appointments, doctors, profile]
+         ══════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:background="#CDFFFFFF"
+        android:elevation="8dp">
+
+        <!-- Home tab -->
+        <LinearLayout
+            android:id="@+id/btnNavHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/ripple_nav_item">
+
+            <ImageView
+                android:id="@+id/iconHome"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_home"
+                android:tint="#2563EB"
+                android:contentDescription="Home" />
+
+            <TextView
+                android:id="@+id/labelHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Home"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#2563EB"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+
+        <!-- Appointments tab -->
+        <LinearLayout
+            android:id="@+id/btnNavAppointments"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/ripple_nav_item">
+
+            <ImageView
+                android:id="@+id/iconAppointments"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_calendar"
+                android:tint="#94A3B8"
+                android:contentDescription="Appointments" />
+
+            <TextView
+                android:id="@+id/labelAppointments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Appointments"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#94A3B8"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+
+        <!-- Doctors tab -->
+        <LinearLayout
+            android:id="@+id/btnNavDoctors"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/ripple_nav_item">
+
+            <ImageView
+                android:id="@+id/iconDoctors"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_pulse"
+                android:tint="#94A3B8"
+                android:contentDescription="Doctors" />
+
+            <TextView
+                android:id="@+id/labelDoctors"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Doctors"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#94A3B8"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+
+        <!-- Profile tab -->
+        <LinearLayout
+            android:id="@+id/btnNavProfile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/ripple_nav_item">
+
+            <ImageView
+                android:id="@+id/iconProfile"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_user"
+                android:tint="#94A3B8"
+                android:contentDescription="Profile" />
+
+            <TextView
+                android:id="@+id/labelProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Profile"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#94A3B8"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
