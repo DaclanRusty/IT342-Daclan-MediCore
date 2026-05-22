@@ -1,36 +1,38 @@
 package com.daclan.mobile.feature.patient
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.daclan.mobile.R
+import com.daclan.mobile.shared.network.DataCache
 import com.daclan.mobile.shared.network.DoctorSummary
-import com.daclan.mobile.shared.network.RetrofitClient
-import kotlinx.coroutines.launch
 
 class DoctorsFragment : Fragment() {
 
-    private lateinit var layoutDoctors: LinearLayout
+    private lateinit var layoutDoctors:   LinearLayout
     private lateinit var progressDoctors: ProgressBar
-    private lateinit var tvEmpty: TextView
-    private lateinit var tvError: TextView
-    private lateinit var etSearch: EditText
+    private lateinit var layoutEmpty:     LinearLayout  // ✅ fixed: was TextView
+    private lateinit var tvError:         TextView
+    private lateinit var etSearch:        EditText
 
-    private var allDoctors: List<DoctorSummary> = emptyList()
+    private val docColors = arrayOf(
+        "#2563eb","#7c3aed","#059669","#f59e0b","#ef4444","#0891b2","#db2777","#16a34a"
+    )
+    private fun docColor(id: Long?) = docColors[((id ?: 0L) % docColors.size).toInt()]
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, saved: Bundle?): View =
         inflater.inflate(R.layout.fragment_doctors, container, false)
 
     override fun onViewCreated(view: View, saved: Bundle?) {
         super.onViewCreated(view, saved)
-
         layoutDoctors   = view.findViewById(R.id.layoutDoctors)
         progressDoctors = view.findViewById(R.id.progressDoctors)
-        tvEmpty         = view.findViewById(R.id.tvEmptyDoctors)
+        layoutEmpty     = view.findViewById(R.id.layoutEmptyDoctors)  // ✅ fixed
         tvError         = view.findViewById(R.id.tvErrorDoctors)
         etSearch        = view.findViewById(R.id.etSearchDoctors)
 
@@ -40,40 +42,25 @@ class DoctorsFragment : Fragment() {
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        loadDoctors()
+        loadFromCache()
     }
 
-    private fun loadDoctors() {
-        progressDoctors.visibility = View.VISIBLE
-        layoutDoctors.removeAllViews()
-        tvEmpty.visibility = View.GONE
-        tvError.visibility = View.GONE
-
-        lifecycleScope.launch {
-            try {
-                val dashboard = activity as? PatientDashboardActivity ?: return@launch
-                val token     = dashboard.getToken()
-                val resp      = RetrofitClient.patientApi.getAllDoctors(RetrofitClient.bearerToken(token))
-                progressDoctors.visibility = View.GONE
-                if (resp.isSuccessful && resp.body()?.success == true) {
-                    allDoctors = resp.body()?.data ?: emptyList()
-                    renderDoctors(allDoctors)
-                } else {
-                    tvError.text       = "Failed to load doctors."
-                    tvError.visibility = View.VISIBLE
-                }
-            } catch (e: Exception) {
-                progressDoctors.visibility = View.GONE
-                tvError.text       = "Connection error."
-                tvError.visibility = View.VISIBLE
-            }
+    fun loadFromCache() {
+        if (!isAdded) return
+        if (DataCache.doctorsLoaded) {
+            progressDoctors.visibility = View.GONE
+            renderDoctors(DataCache.doctors)
+        } else {
+            progressDoctors.visibility = View.VISIBLE
+            layoutEmpty.visibility = View.GONE  // ✅ fixed
+            tvError.visibility = View.GONE
         }
     }
 
     private fun filterDoctors(query: String) {
-        if (query.isBlank()) { renderDoctors(allDoctors); return }
+        if (query.isBlank()) { renderDoctors(DataCache.doctors); return }
         val q = query.lowercase()
-        renderDoctors(allDoctors.filter {
+        renderDoctors(DataCache.doctors.filter {
             it.firstName?.lowercase()?.contains(q) == true ||
                     it.lastName?.lowercase()?.contains(q)  == true ||
                     it.specialization?.lowercase()?.contains(q) == true
@@ -81,15 +68,16 @@ class DoctorsFragment : Fragment() {
     }
 
     private fun renderDoctors(list: List<DoctorSummary>) {
+        if (!isAdded) return
         layoutDoctors.removeAllViews()
-        if (list.isEmpty()) { tvEmpty.visibility = View.VISIBLE; return }
-        tvEmpty.visibility = View.GONE
+        if (list.isEmpty()) { layoutEmpty.visibility = View.VISIBLE; return }  // ✅ fixed
+        layoutEmpty.visibility = View.GONE  // ✅ fixed
         list.forEachIndexed { idx, doc ->
             layoutDoctors.addView(buildDoctorCard(doc))
             if (idx < list.size - 1) {
                 val space = View(requireContext())
                 space.layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 10)
+                    LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(10))
                 layoutDoctors.addView(space)
             }
         }
@@ -97,9 +85,10 @@ class DoctorsFragment : Fragment() {
 
     private fun buildDoctorCard(doc: DoctorSummary): View {
         val card = layoutInflater.inflate(R.layout.item_doctor_card, layoutDoctors, false)
+        val fn = doc.firstName ?: ""
+        val ln = doc.lastName  ?: ""
 
-        card.findViewById<TextView>(R.id.tvDocName).text =
-            "Dr. ${doc.firstName ?: ""} ${doc.lastName ?: ""}".trim()
+        card.findViewById<TextView>(R.id.tvDocName).text  = "Dr. $fn $ln".trim()
         card.findViewById<TextView>(R.id.tvDocSpec).text  = doc.specialization ?: "General Medicine"
         card.findViewById<TextView>(R.id.tvDocEmail).text = doc.email ?: ""
 
@@ -112,15 +101,16 @@ class DoctorsFragment : Fragment() {
         }
 
         val tvInitials = card.findViewById<TextView>(R.id.tvDocInitials)
-        val fn = doc.firstName ?: ""
-        val ln = doc.lastName  ?: ""
         tvInitials.text = "${fn.firstOrNull()?.uppercaseChar() ?: ""}${ln.firstOrNull()?.uppercaseChar() ?: ""}"
+        tvInitials.background = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(Color.parseColor(docColor(doc.doctorId)))
+        }
 
-        val ivPic = card.findViewById<ImageView>(R.id.ivDocPic)
-        if (doc.profilePicture != null) {
+        val ivPic = card.findViewById<android.widget.ImageView>(R.id.ivDocPic)
+        if (!doc.profilePicture.isNullOrEmpty()) {
             try {
-                val bytes  = android.util.Base64.decode(
-                    doc.profilePicture.substringAfter(","), android.util.Base64.DEFAULT)
+                val bytes  = android.util.Base64.decode(doc.profilePicture.substringAfter(","), android.util.Base64.DEFAULT)
                 val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 ivPic.setImageBitmap(bitmap)
                 ivPic.visibility      = View.VISIBLE
@@ -130,12 +120,15 @@ class DoctorsFragment : Fragment() {
 
         card.findViewById<Button>(R.id.btnBookDoctor).setOnClickListener {
             val bookFrag = BookAppointmentFragment.newInstance(doc)
-            parentFragmentManager.beginTransaction()
+            requireActivity().supportFragmentManager
+                .beginTransaction()
                 .replace(R.id.fragmentContainer, bookFrag)
-                .addToBackStack(null)
+                .addToBackStack("doctors")
                 .commit()
         }
 
         return card
     }
+
+    private fun dpToPx(dp: Int) = (dp * resources.displayMetrics.density).toInt()
 }

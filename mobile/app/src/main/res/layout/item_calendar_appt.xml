@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:background="@drawable/bg_confirmed_block"
+    android:padding="10dp" android:layout_marginBottom="4dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+        <TextView android:id="@+id/tvCalApptName" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:textSize="13sp" android:textStyle="bold" android:textColor="#0F172A"/>
+        <TextView android:id="@+id/tvCalApptStatus" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textSize="10sp" android:textStyle="bold" android:textColor="#059669" android:background="@drawable/badge_confirmed"
+            android:paddingStart="8dp" android:paddingEnd="8dp" android:paddingTop="2dp" android:paddingBottom="2dp"/>
+    </LinearLayout>
+    <TextView android:id="@+id/tvCalApptReason" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textSize="11.5sp" android:textColor="#64748B" android:layout_marginTop="2dp"/>
+</LinearLayout>
