@@ -2,6 +2,7 @@ package com.daclan.mobile.feature.auth
 
 import android.content.Intent
 import com.daclan.mobile.feature.dashboard.DashboardActivity
+import com.daclan.mobile.feature.doctor.DoctorDashboardActivity
 import com.daclan.mobile.R
 import android.os.Bundle
 import android.view.View
@@ -11,9 +12,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.daclan.mobile.feature.secretary.SecretaryDashboardActivity
 import com.daclan.mobile.shared.network.LoginRequest
 import com.daclan.mobile.shared.network.RetrofitClient
 import kotlinx.coroutines.launch
+
 
 class LoginActivity : AppCompatActivity() {
 
@@ -72,7 +75,6 @@ class LoginActivity : AppCompatActivity() {
 
                     if (body.success == true && body.data != null) {
                         val auth = body.data
-                        // ✅ accessToken + nested user object
                         val token     = auth.accessToken ?: ""
                         val role      = auth.user?.role  ?: "PATIENT"
                         val userEmail = auth.user?.email ?: email
@@ -88,8 +90,14 @@ class LoginActivity : AppCompatActivity() {
                             .putString("user_name",  "$firstName $lastName".trim())
                             .apply()
 
+                        val destination = when (role.uppercase()) {
+                            "DOCTOR"    -> DoctorDashboardActivity::class.java
+                            "SECRETARY" -> SecretaryDashboardActivity::class.java
+                            else        -> DashboardActivity::class.java
+                        }
+
                         startActivity(
-                            Intent(this@LoginActivity, DashboardActivity::class.java)
+                            Intent(this@LoginActivity, destination)
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                         )
                         finish()

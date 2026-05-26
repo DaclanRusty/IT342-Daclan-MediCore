@@ -49,6 +49,23 @@ public class AppointmentEmailService {
         );
     }
 
+    public void sendRejected(Appointment a) {
+        String doctor = "Dr. " + a.getDoctor().getUser().getFirstName()
+                + " " + a.getDoctor().getUser().getLastName();
+        send(
+                a.getPatient().getUser().getEmail(),
+                "❌ Appointment Not Approved — MediCore",
+                buildRejectedHtml(
+                        a.getPatient().getUser().getFirstName(),
+                        doctor,
+                        a.getDoctor().getSpecialization(),
+                        a.getRequestedDate(),
+                        a.getRequestedTime(),
+                        a.getRejectedReason()
+                )
+        );
+    }
+
     public void sendCancelled(Appointment a) {
         String doctor = "Dr. " + a.getDoctor().getUser().getFirstName()
                 + " " + a.getDoctor().getUser().getLastName();
@@ -120,6 +137,18 @@ public class AppointmentEmailService {
                         "<p style='margin:0 0 20px'>Your consultation with <strong>" + doctor + "</strong> on <strong>" + date + "</strong> has been completed.</p>" +
                         notesSection +
                         tipBox("If you have follow-up concerns, please book a new appointment through the MediCore app.")
+        );
+    }
+
+    private String buildRejectedHtml(String patient, String doctor, String spec, String date, String time, String reason) {
+        return wrap("Appointment Not Approved ❌",
+                "<p style='margin:0 0 16px'>Hi <strong>" + patient + "</strong>,</p>" +
+                        "<p style='margin:0 0 20px'>Unfortunately, your appointment request was <strong>not approved</strong> by the clinic secretary. Here are the details:</p>" +
+                        infoBox(row("Doctor", doctor), row("Specialization", spec), row("Date", date), row("Time", time),
+                                row("Reason", reason != null && !reason.isBlank() ? reason : "No reason provided")) +
+                        "<div style='background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px;margin-top:20px;font-size:13px;color:#991b1b'>" +
+                        "❌ Your appointment was reviewed and could not be accommodated at the requested schedule.</div>" +
+                        tipBox("Please book a new appointment at a different date or time. We apologize for the inconvenience.")
         );
     }
 

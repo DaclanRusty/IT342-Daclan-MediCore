@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { patientApi, healthTipsApi } from "../shared/api";
-import { bookedOn, bookedAgo, expiryLabel, pendingUrgency, urgencyStyle } from '../shared/appointmentTimingHelpers'
+
 
 // ── Feature components ────────────────────────────────────────────────────
 import HomeTab            from "./HomeTab";

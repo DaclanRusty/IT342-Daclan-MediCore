@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="#ECFDF5">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:background="#FFFFFF" android:elevation="2dp"
+        android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="16dp" android:paddingBottom="12dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Appointments" android:textSize="22sp" android:textStyle="bold"
+            android:textColor="#0F172A" android:layout_marginBottom="12dp"/>
+        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:scrollbars="none">
+            <LinearLayout android:id="@+id/doctorFilterGroup" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal"/>
+        </HorizontalScrollView>
+    </LinearLayout>
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E2E8F0"/>
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <ProgressBar android:id="@+id/progressDoctorAppts" android:layout_width="32dp" android:layout_height="32dp"
+            android:layout_gravity="center" android:indeterminateTint="#059669" android:visibility="gone"/>
+        <LinearLayout android:id="@+id/layoutDoctorApptEmpty" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center" android:orientation="vertical" android:gravity="center" android:padding="40dp" android:visibility="gone">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📭" android:textSize="32sp" android:gravity="center" android:layout_marginBottom="8dp"/>
+            <TextView android:id="@+id/tvDoctorApptEmptyText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No appointments found." android:textSize="14sp" android:textColor="#94A3B8" android:gravity="center"/>
+        </LinearLayout>
+        <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:scrollbars="none" android:overScrollMode="never">
+            <LinearLayout android:id="@+id/layoutDoctorAppts" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="14dp" android:paddingBottom="32dp"/>
+        </ScrollView>
+    </FrameLayout>
+</LinearLayout>

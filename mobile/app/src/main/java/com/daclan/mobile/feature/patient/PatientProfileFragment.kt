@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.daclan.mobile.R
 import com.daclan.mobile.shared.network.PatientProfile
+import com.daclan.mobile.shared.network.DataCache
 import com.daclan.mobile.shared.network.RetrofitClient
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -112,6 +113,16 @@ class PatientProfileFragment : Fragment() {
 
         // Also update the navbar avatar
         (activity as? PatientDashboardActivity)?.updateNavAvatar(profile)
+    }
+
+
+    fun loadFromCache() {
+        if (!isAdded) return
+        if (DataCache.profileLoaded && DataCache.profile != null) {
+            renderProfile(DataCache.profile)
+        } else {
+            loadProfile()
+        }
     }
 
     private fun pickImage() {

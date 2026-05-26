@@ -51,8 +51,9 @@ public class PatientController {
                             .phoneNumber(u.getPhoneNumber())
                             .specialization(doc.getSpecialization() != null ? doc.getSpecialization() : "")
                             .licenseNumber(doc.getLicenseNumber())
-                            .profilePicture(doc.getProfilePicture())
+                            .profilePicture(u.getProfilePicture())
                             .status(doc.getStatus()             != null ? doc.getStatus()        : "")
+                            .profilePicture(u.getProfilePicture())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -68,6 +69,7 @@ public class PatientController {
                 .stream()
                 .map(this::doctorToMap)
                 .collect(Collectors.toList());
+
 
         return ResponseEntity.ok(ApiResponse.success(result));
     }
@@ -113,10 +115,10 @@ public class PatientController {
         m.put("phoneNumber",       d.getUser().getPhoneNumber());
         m.put("specialization",    d.getSpecialization());
         m.put("licenseNumber",     d.getLicenseNumber());
-        m.put("profilePicture",    d.getUser().getProfilePicture());  // ✅ from users table
         m.put("yearsOfExperience", d.getYearsOfExperience());
         m.put("bio",               d.getBio());
         m.put("status",            d.getStatus());
+        m.put("profilePicture",    d.getUser().getProfilePicture());
         return m;
     }
 }

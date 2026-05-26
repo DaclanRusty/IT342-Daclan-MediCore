@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="#F1F5F9">
 
-    <!-- Header bar -->
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,226 +56,331 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Scrollable form body -->
-    <ScrollView
+    <!-- Step progress bars -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp">
+
+        <View
+            android:id="@+id/stepBar1"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="#2563EB" />
+
+        <View
+            android:id="@+id/stepBar2"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:background="#E2E8F0" />
+    </LinearLayout>
+
+    <!-- ═══ STEP 1: Select a Doctor ═══ -->
+    <LinearLayout
+        android:id="@+id/layoutStep1"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:scrollbars="none"
-        android:overScrollMode="never">
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="32dp">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="none">
 
-            <!-- Step progress bar -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="18dp">
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="4dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:background="@drawable/bg_step_bar_active" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="4dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/bg_step_bar_active" />
-            </LinearLayout>
-
-            <!-- Error banner -->
-            <LinearLayout
-                android:id="@+id/layoutBookError"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/bg_reject_block"
-                android:padding="12dp"
-                android:layout_marginBottom="14dp"
-                android:visibility="gone">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚠️"
-                    android:textSize="14sp"
-                    android:layout_marginEnd="8dp" />
+                    android:text="Select a Doctor"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A"
+                    android:layout_marginBottom="12dp" />
 
-                <TextView
-                    android:id="@+id/tvBookError"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="13sp"
-                    android:textColor="#991B1B"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Selected doctor banner -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/bg_selected_doctor"
-                android:padding="14dp"
-                android:layout_marginBottom="18dp">
-
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="12dp">
-
-                    <TextView
-                        android:id="@+id/tvBookDoctorInitials"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:gravity="center"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF"
-                        android:background="@drawable/circle_avatar_bg" />
-                </FrameLayout>
-
+                <!-- Doctor list container -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/layoutDoctorList"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:background="#FFFFFF"
+                    android:padding="4dp" />
 
-                    <TextView
-                        android:id="@+id/tvBookDoctorName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="#0F172A" />
-
-                    <TextView
-                        android:id="@+id/tvBookDoctorSpec"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="#2563EB"
-                        android:textStyle="bold"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
             </LinearLayout>
+        </ScrollView>
 
-            <!-- Date field label -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Requested Date *"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:textColor="#334155"
-                android:layout_marginBottom="6dp" />
+        <!-- Step 1 buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#FFFFFF"
+            android:elevation="4dp"
+            android:padding="16dp">
 
-            <!-- Date input -->
-            <EditText
-                android:id="@+id/etBookDate"
-                android:layout_width="match_parent"
-                android:layout_height="46dp"
-                android:hint="Select a date"
-                android:textSize="14sp"
-                android:textColor="#0F172A"
-                android:background="@drawable/bg_input_field"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:focusable="false"
-                android:clickable="true"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Time slots label -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Requested Time *"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:textColor="#334155"
-                android:layout_marginBottom="10dp" />
-
-            <!-- Slots grid -->
-            <LinearLayout
-                android:id="@+id/layoutTimeSlots"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Reason label -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Reason for Visit *"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:textColor="#334155"
-                android:layout_marginBottom="6dp" />
-
-            <!-- Reason textarea -->
-            <EditText
-                android:id="@+id/etBookReason"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:hint="Please describe your symptoms or reason for visit…"
-                android:textSize="14sp"
-                android:textColor="#0F172A"
-                android:background="@drawable/bg_input_field"
-                android:padding="14dp"
-                android:gravity="top|start"
-                android:inputType="textMultiLine"
-                android:maxLength="500"
-                android:layout_marginBottom="6dp" />
-
-            <!-- Character counter -->
-            <TextView
-                android:id="@+id/tvReasonCount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="0/500"
-                android:textSize="11.5sp"
-                android:textColor="#94A3B8"
-                android:gravity="end"
-                android:layout_marginBottom="12dp" />
-
-            <!-- Loading spinner -->
-            <ProgressBar
-                android:id="@+id/progressBook"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="8dp"
-                android:indeterminateTint="#2563EB"
-                android:visibility="gone" />
-
-            <!-- Submit button -->
             <Button
-                android:id="@+id/btnConfirmBook"
-                android:layout_width="match_parent"
+                android:id="@+id/btnCancelStep1"
+                android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:text="Submit Appointment"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Cancel"
+                android:textSize="14sp"
+                android:textColor="#334155"
+                android:background="@drawable/bg_btn_outline"
+                android:stateListAnimator="@null" />
+
+            <Button
+                android:id="@+id/btnNext"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Next →"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/bg_btn_primary"
                 android:stateListAnimator="@null" />
-
         </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
+
+    <!-- ═══ STEP 2: Booking Form ═══ -->
+    <LinearLayout
+        android:id="@+id/layoutStep2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="none"
+            android:overScrollMode="never">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="32dp">
+
+                <!-- Error banner -->
+                <LinearLayout
+                    android:id="@+id/layoutBookError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_reject_block"
+                    android:padding="12dp"
+                    android:layout_marginBottom="14dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚠️"
+                        android:textSize="14sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvBookError"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13sp"
+                        android:textColor="#991B1B"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Selected doctor banner -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_selected_doctor"
+                    android:padding="14dp"
+                    android:layout_marginBottom="18dp">
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="12dp">
+
+                        <TextView
+                            android:id="@+id/tvBookDoctorInitials"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:gravity="center"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="#FFFFFF"
+                            android:background="@drawable/circle_avatar_bg" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvBookDoctorName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#0F172A" />
+
+                        <TextView
+                            android:id="@+id/tvBookDoctorSpec"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:textColor="#2563EB"
+                            android:textStyle="bold"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <!-- Change doctor link -->
+                    <TextView
+                        android:id="@+id/btnChangeDoctor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Change"
+                        android:textSize="13sp"
+                        android:textColor="#2563EB"
+                        android:textStyle="bold"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="4dp" />
+                </LinearLayout>
+
+                <!-- Date label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Requested Date *"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#334155"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Date input -->
+                <EditText
+                    android:id="@+id/etBookDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:hint="Select a date"
+                    android:textSize="14sp"
+                    android:textColor="#0F172A"
+                    android:background="@drawable/bg_input_field"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Time slots label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Requested Time *"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#334155"
+                    android:layout_marginBottom="10dp" />
+
+                <!-- Slots grid -->
+                <LinearLayout
+                    android:id="@+id/layoutTimeSlots"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Reason label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reason for Visit *"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#334155"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Reason input -->
+                <EditText
+                    android:id="@+id/etBookReason"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:hint="Please describe your symptoms or reason for visit…"
+                    android:textSize="14sp"
+                    android:textColor="#0F172A"
+                    android:background="@drawable/bg_input_field"
+                    android:padding="14dp"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:maxLength="500"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Character counter -->
+                <TextView
+                    android:id="@+id/tvReasonCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="0/500"
+                    android:textSize="11.5sp"
+                    android:textColor="#94A3B8"
+                    android:gravity="end"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Loading spinner -->
+                <ProgressBar
+                    android:id="@+id/progressBook"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="8dp"
+                    android:indeterminateTint="#2563EB"
+                    android:visibility="gone" />
+
+                <!-- Submit button -->
+                <Button
+                    android:id="@+id/btnConfirmBook"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="Submit Appointment ✓"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/bg_btn_primary"
+                    android:stateListAnimator="@null" />
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 </LinearLayout>

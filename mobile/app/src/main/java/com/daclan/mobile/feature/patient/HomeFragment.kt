@@ -10,11 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.daclan.mobile.R
 import com.daclan.mobile.shared.network.AppointmentResponse
-import com.daclan.mobile.shared.network.RetrofitClient
-import kotlinx.coroutines.launch
+import com.daclan.mobile.shared.network.DataCache
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -34,7 +32,6 @@ class HomeFragment : Fragment() {
     private val docColors = arrayOf(
         "#2563eb","#7c3aed","#059669","#f59e0b","#ef4444","#0891b2","#db2777","#16a34a"
     )
-    // Fixed: parameter is Long? to match doctorId type
     private fun docColor(id: Long?) = docColors[((id ?: 0L) % docColors.size).toInt()]
 
     private val badgeMap = mapOf(
@@ -66,35 +63,34 @@ class HomeFragment : Fragment() {
         val dashboard = activity as? PatientDashboardActivity
         tvWelcome.text = "Welcome back, ${dashboard?.getFirstName() ?: "there"}!"
 
-        btnBookNew.setOnClickListener { dashboard?.switchTab("doctors") }
+        btnBookNew.setOnClickListener {
+            requireActivity().supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragmentContainer, BookAppointmentFragment.newInstance())
+                .addToBackStack("home")
+                .commit()
+        }
         btnViewAll.setOnClickListener { dashboard?.switchTab("appointments") }
 
-        loadAppointments()
+        loadFromCache()
     }
 
-    private fun loadAppointments() {
-        progressAppts.visibility = View.VISIBLE
-        layoutEmpty.visibility   = View.GONE
-        layoutCards.visibility   = View.GONE
-
-        lifecycleScope.launch {
-            try {
-                val dashboard = activity as? PatientDashboardActivity ?: return@launch
-                val resp = RetrofitClient.patientApi.getMyAppointments(
-                    RetrofitClient.bearerToken(dashboard.getToken()))
-                progressAppts.visibility = View.GONE
-
-                if (resp.isSuccessful && resp.body()?.success == true) {
-                    val all = resp.body()?.data ?: emptyList()
-                    updateStats(all)
-                    renderCards(all)
-                } else {
-                    showEmpty()
-                }
-            } catch (_: Exception) {
-                progressAppts.visibility = View.GONE
-                showEmpty()
-            }
+    fun loadFromCache() {
+        if (!isAdded) return
+        if (!::progressAppts.isInitialized) return
+        if (DataCache.appointmentsLoaded) {
+            progressAppts.visibility = View.GONE
+            updateStats(DataCache.appointments)
+            renderCards(DataCache.appointments)
+        } else {
+            progressAppts.visibility = View.VISIBLE
+            layoutEmpty.visibility   = View.GONE
+            layoutCards.visibility   = View.GONE
+        }
+        // Update welcome name if profile loaded
+        if (DataCache.profileLoaded) {
+            val fn = DataCache.profile?.firstName ?: (activity as? PatientDashboardActivity)?.getFirstName() ?: "there"
+            tvWelcome.text = "Welcome back, $fn!"
         }
     }
 
@@ -113,6 +109,7 @@ class HomeFragment : Fragment() {
         layoutCards.removeAllViews()
         if (upcoming.isEmpty()) { showEmpty(); return }
         layoutCards.visibility = View.VISIBLE
+        layoutEmpty.visibility = View.GONE
 
         upcoming.chunked(2).forEach { pair ->
             val row = LinearLayout(requireContext()).apply {
@@ -134,11 +131,10 @@ class HomeFragment : Fragment() {
                 wrap.addView(buildCard(appt))
                 row.addView(wrap)
             }
-            // Spacer for odd last item
             if (pair.size == 1) {
                 row.addView(View(requireContext()).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                    layoutParams = LinearLayout.LayoutParams(0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
                 })
             }
             layoutCards.addView(row)
@@ -149,7 +145,7 @@ class HomeFragment : Fragment() {
         val card   = layoutInflater.inflate(R.layout.item_home_appt_card, layoutCards, false)
         val fn     = appt.doctor?.firstName ?: ""
         val ln     = appt.doctor?.lastName  ?: ""
-        val docId  = appt.doctor?.doctorId ?: appt.doctor?.id  // Long?
+        val docId  = appt.doctor?.doctorId ?: appt.doctor?.id
         val status = (appt.status ?: "").uppercase()
 
         card.findViewById<TextView>(R.id.tvHomeCardDoctorName).text = "Dr. $fn $ln".trim()

@@ -125,7 +125,7 @@ export const patientApi = {
 
 export const secretaryApi = {
   getAppointments: () => request('/appointments/secretary'),
-  // ── RENAMED: approve → confirm, matches new backend endpoint ─────────
+
   confirmAppointment: (id) =>
     request(`/appointments/${id}/confirm`, { method: 'PUT' }),
   rejectAppointment: (id, rejectedReason = null) =>
@@ -138,7 +138,7 @@ export const secretaryApi = {
       method: 'PUT',
       body: JSON.stringify({ cancel_reason: cancelReason }),
     }),
-  // ─────────────────────────────────────────────────────────────────────
+
   getProfile: () => request('/secretary/profile'),
   updateProfile: (payload) =>
     request('/secretary/profile', { method: 'PUT', body: JSON.stringify(payload) }),

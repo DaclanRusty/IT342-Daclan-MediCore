@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:padding="20dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Mark as Completed" android:textSize="18sp" android:textStyle="bold"
+        android:textColor="#0F172A" android:layout_marginBottom="6dp"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Patient: " android:textSize="13sp" android:textColor="#64748B"/>
+        <TextView android:id="@+id/tvCompletePatientName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textStyle="bold" android:textColor="#0F172A"/>
+    </LinearLayout>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Doctor Notes (optional)" android:textSize="13sp" android:textStyle="bold"
+        android:textColor="#334155" android:layout_marginBottom="6dp"/>
+    <EditText android:id="@+id/etDoctorNotes" android:layout_width="match_parent" android:layout_height="100dp"
+        android:hint="e.g. Prescribed medication, follow-up in 2 weeks…" android:textSize="14sp" android:textColor="#0F172A"
+        android:background="@drawable/bg_input_field" android:padding="12dp" android:gravity="top|start"
+        android:inputType="textMultiLine"/>
+</LinearLayout>

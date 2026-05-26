@@ -33,7 +33,7 @@ const HomeTab = ({ user, appts, apptLoad, apptErr, onBook, onGoTo, onRetryAppts,
             </h1>
             <p style={{fontSize:15,color:C.slateL,fontWeight:500,maxWidth:480}}>Manage your appointments and explore our network of healthcare professionals.</p>
           </div>
-          <button className="btn-primary" onClick={()=>onBook(null)} style={{fontSize:15,padding:"13px 26px",flexShrink:0}}><PlusIcon/> Book New Appointment</button>
+          <button className="btn-primary" onClick={()=>onBook(null)} style={{fontSize:15,padding:"13px 26px",flexShrink:0}}><PlusIcon/> Book Now</button>
         </div>
       </div>
 

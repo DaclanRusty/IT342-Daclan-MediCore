@@ -1,11 +1,11 @@
 package com.daclan.mobile.shared.network
 
+import com.daclan.mobile.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import com.daclan.mobile.BuildConfig
 
 object RetrofitClient {
 
@@ -15,17 +15,22 @@ object RetrofitClient {
 
     private val client = OkHttpClient.Builder()
         .addInterceptor(logging)
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .addHeader("ngrok-skip-browser-warning", "true")
+                .build()
+            chain.proceed(request)
+        }
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    private val retrofit: Retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(BuildConfig.BASE_URL)
+        .client(client)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
     val instance: AuthApiService by lazy {
         retrofit.create(AuthApiService::class.java)
@@ -35,6 +40,13 @@ object RetrofitClient {
         retrofit.create(PatientApiService::class.java)
     }
 
-    // Helper — builds "Bearer <token>" header
+    val doctorApi: DoctorApiService by lazy {
+        retrofit.create(DoctorApiService::class.java)
+    }
+
+    val secretaryApi: SecretaryApiService by lazy {
+        retrofit.create(SecretaryApiService::class.java)
+    }
+
     fun bearerToken(token: String) = "Bearer $token"
 }

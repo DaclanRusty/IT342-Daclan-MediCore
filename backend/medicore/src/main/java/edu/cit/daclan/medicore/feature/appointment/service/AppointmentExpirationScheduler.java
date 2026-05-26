@@ -26,16 +26,7 @@ public class AppointmentExpirationScheduler {
         this.emailService          = emailService;
     }
 
-    /**
-     * Runs every hour at the top of the hour.
-     *
-     * Rule: A PENDING appointment is expired if the current time is
-     * 24 hours or less before the scheduled appointment datetime.
-     *
-     * Example: appointment on May 18 at 08:00 AM
-     *   → expires at May 17 at 08:00 AM (24h before)
-     *   → next hourly tick at or after May 17 08:00 AM will expire it
-     */
+
     @Scheduled(cron = "0 0 * * * *")
     public void expirePendingAppointments() {
         LocalDateTime now = LocalDateTime.now();
@@ -63,10 +54,7 @@ public class AppointmentExpirationScheduler {
         System.out.println("[Scheduler] Done — " + toExpire.size() + " appointment(s) marked EXPIRED.");
     }
 
-    /**
-     * Returns true if the appointment should be expired now.
-     * Expires if: now >= (appointmentDateTime - 24 hours)
-     */
+
     private boolean isExpired(Appointment a, LocalDateTime now) {
         try {
             String dateStr = a.getRequestedDate();
@@ -87,10 +75,6 @@ public class AppointmentExpirationScheduler {
         }
     }
 
-    /**
-     * Parses time strings like "08:00 AM", "08:00", "8:00 AM".
-     * Falls back to midnight if unparseable.
-     */
     private LocalTime parseTime(String timeStr) {
         if (timeStr == null || timeStr.isBlank()) return LocalTime.MIDNIGHT;
         try {

@@ -79,9 +79,9 @@
             android:indeterminateTint="#2563EB"
             android:visibility="gone" />
 
-        <!-- Empty state -->
+        <!-- Empty state ✅ fixed: id changed to layoutEmptyDoctors -->
         <LinearLayout
-            android:id="@+id/tvEmptyDoctors"
+            android:id="@+id/layoutEmptyDoctors"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

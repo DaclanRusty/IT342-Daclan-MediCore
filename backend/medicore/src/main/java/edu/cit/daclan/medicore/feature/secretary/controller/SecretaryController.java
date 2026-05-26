@@ -56,7 +56,7 @@ public class SecretaryController {
             doc.put("firstName",      secretary.getDoctor().getUser().getFirstName());
             doc.put("lastName",       secretary.getDoctor().getUser().getLastName());
             doc.put("specialization", secretary.getDoctor().getSpecialization());
-            doc.put("profilePicture", secretary.getDoctor().getProfilePicture());
+            doc.put("profilePicture", secretary.getDoctor().getUser().getProfilePicture());
             profile.put("assignedDoctor", doc);
         } else {
             profile.put("assignedDoctor", null);

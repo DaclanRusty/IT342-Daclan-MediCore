@@ -164,7 +164,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🔒 Secure &amp; Private  ·  ⚡ Real-time  ·  📱 Web &amp; Mobile"
+                    android:text=" Secure &amp; Private  ·  Real-time  ·  Web &amp; Mobile"
                     android:textColor="#64748B"
                     android:textSize="12sp"/>
             </LinearLayout>

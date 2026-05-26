@@ -1,19 +1,11 @@
 package edu.cit.daclan.medicore.feature.appointment.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AppointmentRequest {
 
-    @JsonProperty("doctor_id")
     private Long doctorId;
-
-    @JsonProperty("requested_date")
     private String requestedDate;
-
-    @JsonProperty("requested_time")
     private String requestedTime;
-
-    @JsonProperty("reason_for_visit")
     private String reasonForVisit;
 
     public AppointmentRequest() {}

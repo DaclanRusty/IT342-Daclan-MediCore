@@ -6,6 +6,8 @@ import edu.cit.daclan.medicore.feature.doctor.dto.response.DoctorSummaryResponse
 import edu.cit.daclan.medicore.feature.appointment.entity.Appointment;
 import edu.cit.daclan.medicore.feature.auth.entity.User;
 import edu.cit.daclan.medicore.feature.appointment.repository.AppointmentRepository;
+import edu.cit.daclan.medicore.feature.doctor.repository.DoctorRepository;
+import edu.cit.daclan.medicore.feature.patient.repository.PatientRepository;
 import edu.cit.daclan.medicore.feature.secretary.repository.SecretaryRepository;
 import edu.cit.daclan.medicore.feature.auth.repository.UserRepository;
 import edu.cit.daclan.medicore.feature.doctor.service.DoctorApprovalService;
@@ -27,15 +29,21 @@ public class AdminController {
     private final SecretaryRepository   secretaryRepository;
     private final UserRepository        userRepository;
     private final AppointmentRepository appointmentRepository;
+    private final DoctorRepository      doctorRepository;
+    private final PatientRepository     patientRepository;
 
     public AdminController(DoctorApprovalService doctorApprovalService,
                            SecretaryRepository secretaryRepository,
                            UserRepository userRepository,
-                           AppointmentRepository appointmentRepository) {
+                           AppointmentRepository appointmentRepository,
+                           DoctorRepository doctorRepository,
+                           PatientRepository patientRepository) {
         this.doctorApprovalService = doctorApprovalService;
         this.secretaryRepository   = secretaryRepository;
         this.userRepository        = userRepository;
         this.appointmentRepository = appointmentRepository;
+        this.doctorRepository      = doctorRepository;
+        this.patientRepository     = patientRepository;
     }
 
     // ── Users ─────────────────────────────────────────────────────────────
@@ -51,7 +59,34 @@ public class AdminController {
 
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable Long userId) {
-        userRepository.findById(userId).ifPresent(userRepository::delete);
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return ResponseEntity.ok(ApiResponse.success("User not found"));
+
+        String role = user.getRole() != null ? user.getRole().toUpperCase() : "";
+
+        switch (role) {
+            case "DOCTOR" -> {
+                var doctor = doctorRepository.findByUser(user).orElse(null);
+                if (doctor != null) {
+                    appointmentRepository.deleteAll(appointmentRepository.findAllByDoctor(doctor));
+                    secretaryRepository.deleteAll(secretaryRepository.findByDoctor(doctor));
+                    doctorRepository.delete(doctor);
+                }
+            }
+            case "SECRETARY" -> {
+                var secretary = secretaryRepository.findByUser(user).orElse(null);
+                if (secretary != null) secretaryRepository.delete(secretary);
+            }
+            case "PATIENT" -> {
+                var patient = patientRepository.findByUser(user).orElse(null);
+                if (patient != null) {
+                    appointmentRepository.deleteAll(appointmentRepository.findAllByPatient(patient));
+                    patientRepository.delete(patient);
+                }
+            }
+        }
+
+        userRepository.delete(user);
         return ResponseEntity.ok(ApiResponse.success("User deleted"));
     }
 
@@ -84,7 +119,7 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(toUserMap(user)));
     }
 
-    // ── toUserMap — now includes profilePicture ───────────────────────────
+    // ── toUserMap ─────────────────────────────────────────────────────────
     private Map<String, Object> toUserMap(User u) {
         String status = u.getStatus() != null ? u.getStatus() : "ACTIVE";
         Map<String, Object> map = new java.util.LinkedHashMap<>();
@@ -95,7 +130,7 @@ public class AdminController {
         map.put("role",           u.getRole()         != null ? u.getRole()         : "");
         map.put("phoneNumber",    u.getPhoneNumber()  != null ? u.getPhoneNumber()  : "");
         map.put("status",         status);
-        map.put("profilePicture", u.getProfilePicture() != null ? u.getProfilePicture() : ""); // 👈 added
+        map.put("profilePicture", u.getProfilePicture() != null ? u.getProfilePicture() : "");
         return map;
     }
 
@@ -123,7 +158,7 @@ public class AdminController {
                 doctorApprovalService.updateDoctorStatus(doctorId, "REJECTED")));
     }
 
-    // ── Secretary Assignments — now includes profile pictures ─────────────
+    // ── Secretary Assignments ─────────────────────────────────────────────
 
     @GetMapping("/secretary-assignments")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getSecretaryAssignments() {
@@ -134,16 +169,16 @@ public class AdminController {
                     var docUser = s.getDoctor().getUser();
                     var secUser = s.getUser();
                     Map<String, Object> m = new java.util.LinkedHashMap<>();
-                    m.put("secretaryId",           s.getSecretaryId());
-                    m.put("secretaryName",         secUser.getFirstName() + " " + secUser.getLastName());
-                    m.put("secretaryEmail",        secUser.getEmail());
-                    m.put("secretaryProfilePicture", secUser.getProfilePicture() != null ? secUser.getProfilePicture() : ""); // 👈 added
-                    m.put("doctorId",              s.getDoctor().getDoctorId());
-                    m.put("doctorName",            "Dr. " + docUser.getFirstName() + " " + docUser.getLastName());
-                    m.put("doctorEmail",           docUser.getEmail());
-                    m.put("doctorProfilePicture",  docUser.getProfilePicture() != null ? docUser.getProfilePicture() : "");   // 👈 added
-                    m.put("specialization",        s.getDoctor().getSpecialization());
-                    m.put("assignedSince",         s.getRequestedAt() != null ? s.getRequestedAt().toString() : "");
+                    m.put("secretaryId",             s.getSecretaryId());
+                    m.put("secretaryName",           secUser.getFirstName() + " " + secUser.getLastName());
+                    m.put("secretaryEmail",          secUser.getEmail());
+                    m.put("secretaryProfilePicture", secUser.getProfilePicture() != null ? secUser.getProfilePicture() : "");
+                    m.put("doctorId",                s.getDoctor().getDoctorId());
+                    m.put("doctorName",              "Dr. " + docUser.getFirstName() + " " + docUser.getLastName());
+                    m.put("doctorEmail",             docUser.getEmail());
+                    m.put("doctorProfilePicture",    docUser.getProfilePicture() != null ? docUser.getProfilePicture() : "");
+                    m.put("specialization",          s.getDoctor().getSpecialization());
+                    m.put("assignedSince",           s.getRequestedAt() != null ? s.getRequestedAt().toString() : "");
                     return m;
                 })
                 .collect(Collectors.toList());

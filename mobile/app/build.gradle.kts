@@ -21,8 +21,11 @@ android {
     }
 
     buildTypes {
+        debug {
+        }
         release {
             isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"https://api.yourdomain.com/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -34,12 +37,8 @@ android {
     productFlavors {
         create("dev") {
             dimension = "env"
-
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8081/\"")
-        }
-        create("device") {
-            dimension = "env"
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8081/\"")
+            applicationIdSuffix = ".dev"
+            buildConfigField("String", "BASE_URL", "\"http://192.168.8.154:8081/\"")
         }
         create("staging") {
             dimension = "env"
@@ -53,7 +52,7 @@ android {
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility  = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -61,7 +60,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-        viewBinding = true  // ✅ needed for activity view binding
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -88,7 +87,7 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
-    // ✅ Retrofit + Gson (deduplicated — only one version each)
+
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

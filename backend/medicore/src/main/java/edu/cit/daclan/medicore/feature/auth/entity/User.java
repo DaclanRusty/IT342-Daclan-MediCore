@@ -36,6 +36,9 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    // ← LAZY: profile picture is NOT loaded on every query
+    // It's only fetched when getProfilePicture() is explicitly called
+    @Basic(fetch = FetchType.LAZY)
     @Column(name = "profile_picture", columnDefinition = "TEXT")
     private String profilePicture;
 

@@ -308,7 +308,6 @@
                         <input type="checkbox" checked={rememberMe} onChange={e=>setRememberMe(e.target.checked)} style={{accentColor:'#2563eb',width:14,height:14}}/>
                         Remember me
                       </label>
-                      <button type="button" style={{background:'none',border:'none',color:'#2563eb',fontSize:12,fontWeight:700,cursor:'pointer'}}>Forgot password?</button>
                     </div>
 
                     {/* Errors */}

@@ -1,5 +1,6 @@
 package com.daclan.mobile.feature.patient
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -16,7 +17,7 @@ class DoctorsFragment : Fragment() {
 
     private lateinit var layoutDoctors:   LinearLayout
     private lateinit var progressDoctors: ProgressBar
-    private lateinit var layoutEmpty:     LinearLayout  // ✅ fixed: was TextView
+    private lateinit var layoutEmpty:     LinearLayout
     private lateinit var tvError:         TextView
     private lateinit var etSearch:        EditText
 
@@ -32,7 +33,7 @@ class DoctorsFragment : Fragment() {
         super.onViewCreated(view, saved)
         layoutDoctors   = view.findViewById(R.id.layoutDoctors)
         progressDoctors = view.findViewById(R.id.progressDoctors)
-        layoutEmpty     = view.findViewById(R.id.layoutEmptyDoctors)  // ✅ fixed
+        layoutEmpty     = view.findViewById(R.id.layoutEmptyDoctors)
         tvError         = view.findViewById(R.id.tvErrorDoctors)
         etSearch        = view.findViewById(R.id.etSearchDoctors)
 
@@ -52,7 +53,7 @@ class DoctorsFragment : Fragment() {
             renderDoctors(DataCache.doctors)
         } else {
             progressDoctors.visibility = View.VISIBLE
-            layoutEmpty.visibility = View.GONE  // ✅ fixed
+            layoutEmpty.visibility = View.GONE
             tvError.visibility = View.GONE
         }
     }
@@ -70,8 +71,8 @@ class DoctorsFragment : Fragment() {
     private fun renderDoctors(list: List<DoctorSummary>) {
         if (!isAdded) return
         layoutDoctors.removeAllViews()
-        if (list.isEmpty()) { layoutEmpty.visibility = View.VISIBLE; return }  // ✅ fixed
-        layoutEmpty.visibility = View.GONE  // ✅ fixed
+        if (list.isEmpty()) { layoutEmpty.visibility = View.VISIBLE; return }
+        layoutEmpty.visibility = View.GONE
         list.forEachIndexed { idx, doc ->
             layoutDoctors.addView(buildDoctorCard(doc))
             if (idx < list.size - 1) {
@@ -89,7 +90,7 @@ class DoctorsFragment : Fragment() {
         val ln = doc.lastName  ?: ""
 
         card.findViewById<TextView>(R.id.tvDocName).text  = "Dr. $fn $ln".trim()
-        card.findViewById<TextView>(R.id.tvDocSpec).text  = doc.specialization ?: "General Medicine"
+        card.findViewById<TextView>(R.id.tvDocSpec).text  = doc.specialization ?: "—"
         card.findViewById<TextView>(R.id.tvDocEmail).text = doc.email ?: ""
 
         val secView = card.findViewById<TextView>(R.id.tvDocSecretary)
@@ -118,6 +119,12 @@ class DoctorsFragment : Fragment() {
             } catch (_: Exception) {}
         }
 
+        // View Profile button
+        card.findViewById<Button>(R.id.btnViewProfile).setOnClickListener {
+            showProfileDialog(doc)
+        }
+
+        // Book button
         card.findViewById<Button>(R.id.btnBookDoctor).setOnClickListener {
             val bookFrag = BookAppointmentFragment.newInstance(doc)
             requireActivity().supportFragmentManager
@@ -128,6 +135,62 @@ class DoctorsFragment : Fragment() {
         }
 
         return card
+    }
+
+    private fun showProfileDialog(doc: DoctorSummary) {
+        val fn = doc.firstName ?: ""
+        val ln = doc.lastName  ?: ""
+
+        val dialogView = layoutInflater.inflate(R.layout.dialog_doctor_profile, null)
+
+        // Avatar initials + color
+        val tvInit = dialogView.findViewById<TextView>(R.id.tvProfileDialogInitials)
+        tvInit.text = "${fn.firstOrNull()?.uppercaseChar() ?: ""}${ln.firstOrNull()?.uppercaseChar() ?: ""}"
+        tvInit.background = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(Color.parseColor(docColor(doc.doctorId)))
+        }
+
+        // Profile pic
+        val ivPic = dialogView.findViewById<android.widget.ImageView>(R.id.ivProfileDialogPic)
+        if (!doc.profilePicture.isNullOrEmpty()) {
+            try {
+                val bytes  = android.util.Base64.decode(doc.profilePicture.substringAfter(","), android.util.Base64.DEFAULT)
+                val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                ivPic.setImageBitmap(bitmap)
+                ivPic.visibility  = View.VISIBLE
+                tvInit.visibility = View.GONE
+            } catch (_: Exception) {}
+        }
+
+        // Populate all fields
+        dialogView.findViewById<TextView>(R.id.tvProfileDialogName).text = "Dr. $fn $ln".trim()
+        dialogView.findViewById<TextView>(R.id.tvProfileDialogSpec).text = doc.specialization ?: "—"
+        dialogView.findViewById<TextView>(R.id.tvProfileDialogSpec2).text = doc.specialization ?: "—"
+        dialogView.findViewById<TextView>(R.id.tvProfileDialogYoe).text =
+            if (doc.yearsOfExperience != null) "${doc.yearsOfExperience} years" else "—"
+        dialogView.findViewById<TextView>(R.id.tvProfileDialogBio).text =
+            if (!doc.bio.isNullOrEmpty()) doc.bio else "No biography provided."
+
+        val dialog = AlertDialog.Builder(requireContext(), R.style.MedicoreDialog)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.btnProfileDialogBook).setOnClickListener {
+            dialog.dismiss()
+            val bookFrag = BookAppointmentFragment.newInstance(doc)
+            requireActivity().supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragmentContainer, bookFrag)
+                .addToBackStack("doctors")
+                .commit()
+        }
+
+        dialogView.findViewById<android.widget.ImageView>(R.id.btnProfileDialogClose).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun dpToPx(dp: Int) = (dp * resources.displayMetrics.density).toInt()

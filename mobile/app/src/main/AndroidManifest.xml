@@ -24,18 +24,24 @@
             </intent-filter>
         </activity>
 
-        <!-- Auth screens -->
         <activity android:name="com.daclan.mobile.feature.auth.LoginActivity"             android:exported="false"/>
         <activity android:name="com.daclan.mobile.feature.auth.RegisterChooseActivity"    android:exported="false"/>
         <activity android:name="com.daclan.mobile.feature.auth.RegisterPatientActivity"   android:exported="false"/>
         <activity android:name="com.daclan.mobile.feature.auth.RegisterDoctorActivity"    android:exported="false"/>
         <activity android:name="com.daclan.mobile.feature.auth.RegisterSecretaryActivity" android:exported="false"/>
 
-        <!-- Role router — decides which dashboard to open -->
         <activity android:name="com.daclan.mobile.feature.dashboard.DashboardActivity"    android:exported="false"/>
 
         <activity
             android:name=".feature.patient.PatientDashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.daclan.mobile.feature.doctor.DoctorDashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.daclan.mobile.feature.secretary.SecretaryDashboardActivity"
             android:exported="false" />
 
 

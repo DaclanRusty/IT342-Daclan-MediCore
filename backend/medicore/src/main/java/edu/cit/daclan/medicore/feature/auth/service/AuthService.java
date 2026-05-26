@@ -255,6 +255,10 @@ public class AuthService {
 
     // ── Login ─────────────────────────────────────────────────────────────
     public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (user == null)
+            throw new IllegalArgumentException("Your account does not exist.");
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -262,10 +266,6 @@ public class AuthService {
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid email or password.");
         }
-
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadCredentialsException(
-                        "Invalid email or password."));
 
         if ("BLOCKED".equalsIgnoreCase(user.getStatus()))
             throw new IllegalStateException(

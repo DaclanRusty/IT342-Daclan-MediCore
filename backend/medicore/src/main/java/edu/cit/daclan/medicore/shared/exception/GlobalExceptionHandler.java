@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
             BadCredentialsException e) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error("AUTH-001", "Invalid email or password credentials"));
+                .body(ApiResponse.error("AUTH-001", e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -425,56 +425,179 @@ const DashboardTab = ({profile, appointments, onGoTo, onSelectAppt}) => {
 };
 
 // ── Appointments Tab ─────────────────────────────────────────────────────
-const AppointmentsTab = ({appointments, onSelect}) => {
+const AppointmentsTab = ({ appointments, onSelect }) => {
   const [filter, setFilter] = useState("ALL");
-  const filtered = filter==="ALL" ? appointments : appointments.filter(a=>a.status===filter);
+
+  const filtered =
+    filter === "ALL"
+      ? appointments
+      : appointments.filter((a) => a.status === filter);
+
   return (
-    <div className="pw" style={{padding:"24px 32px 56px",maxWidth:1120,margin:"0 auto"}}>
-      <div className="au1" style={{marginBottom:20}}>
-        <h2 style={{fontFamily:"'Sora',sans-serif",fontSize:22,fontWeight:900,color:C.slate,marginBottom:4}}>All Appointments</h2>
-        <p style={{fontSize:13,color:C.slateL}}>{appointments.length} total appointment{appointments.length!==1?"s":""}</p>
+    <div className="pw" style={{ padding: "24px 32px 56px", maxWidth: 1120, margin: "0 auto" }}>
+      <div className="au1" style={{ marginBottom: 20 }}>
+        <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: 22, fontWeight: 900, color: C.slate, marginBottom: 4 }}>
+          All Appointments
+        </h2>
+        <p style={{ fontSize: 13, color: C.slateL }}>
+          {appointments.length} total appointment{appointments.length !== 1 ? "s" : ""}
+        </p>
       </div>
-      <div className="au2" style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
-        {["ALL","PENDING","CONFIRMED","COMPLETED","CANCELLED","REJECTED","EXPIRED"].map(f=>(
-          <button key={f} className="filter-pill" onClick={()=>setFilter(f)} style={{borderColor:filter===f?C.purple:"rgba(226,232,240,.8)",background:filter===f?C.purpleLt:"rgba(255,255,255,.72)",color:filter===f?C.purple:C.slateL}}>{f}</button>
+
+      <div className="au2" style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        {["ALL", "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED", "REJECTED", "EXPIRED"].map((f) => (
+          <button
+            key={f}
+            className="filter-pill"
+            onClick={() => setFilter(f)}
+            style={{
+              borderColor: filter === f ? C.purple : "rgba(226,232,240,.8)",
+              background: filter === f ? C.purpleLt : "rgba(255,255,255,.72)",
+              color: filter === f ? C.purple : C.slateL,
+            }}
+          >
+            {f}
+          </button>
         ))}
       </div>
-      {filtered.length===0 ? (
-        <div className="glass au3" style={{padding:56,textAlign:"center",color:C.slateXL,fontSize:14}}><div style={{fontSize:36,marginBottom:10}}>📭</div>No {filter==="ALL"?"":filter.toLowerCase()} appointments.</div>
+
+      {filtered.length === 0 ? (
+        <div className="glass au3" style={{ padding: 56, textAlign: "center", color: C.slateXL, fontSize: 14 }}>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>📭</div>
+          No {filter === "ALL" ? "" : filter.toLowerCase()} appointments.
+        </div>
       ) : (
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          {filtered.map((a,i)=>(
-            <div key={a.id} className="appt-card appt-row au3" onClick={()=>onSelect(a)} style={{padding:"16px 22px",display:"flex",alignItems:"center",gap:16,cursor:"pointer",flexWrap:"wrap",animationDelay:`${i*.04}s`}}>
-              <div style={{display:"flex",alignItems:"center",gap:12,flex:1,minWidth:160}}>
-                <div style={{width:42,height:42,borderRadius:"50%",background:`linear-gradient(135deg,${C.purple},${C.purpleDk})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:14,flexShrink:0}}>
-                  {getInitials(apptPatFn(a),apptPatLn(a))||"P"}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {filtered.map((a, i) => (
+            <div
+              key={a.id}
+              className="appt-card appt-row au3"
+              onClick={() => onSelect(a)}
+              style={{
+                padding: "18px 22px",
+                display: "grid",
+                gridTemplateColumns: "260px 260px 1fr 140px",
+                alignItems: "center",
+                columnGap: 28,
+                rowGap: 14,
+                cursor: "pointer",
+                animationDelay: `${i * 0.04}s`,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "50%",
+                    background: `linear-gradient(135deg,${C.purple},${C.purpleDk})`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontFamily: "'Sora',sans-serif",
+                    fontWeight: 800,
+                    fontSize: 14,
+                    flexShrink: 0,
+                    overflow: "hidden",
+                  }}
+                >
+                  {a.patient?.profilePicture ? (
+                    <img src={a.patient.profilePicture} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    getInitials(apptPatFn(a), apptPatLn(a)) || "P"
+                  )}
                 </div>
-                <div style={{minWidth:0}}>
-                  <div style={{fontSize:11,color:C.slateXL,fontWeight:600,marginBottom:2}}>PATIENT</div>
-                  <div style={{fontFamily:"'Sora',sans-serif",fontWeight:700,fontSize:14,color:C.slate,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{apptPatFn(a)} {apptPatLn(a)}</div>
-                </div>
-              </div>
-              <div style={{display:"flex",alignItems:"center",gap:12,flex:1,minWidth:160}}>
-                <div style={{width:42,height:42,borderRadius:"50%",background:`linear-gradient(135deg,#059669,#047857)`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:14,flexShrink:0,overflow:"hidden"}}>
-                  {apptDocPic(a) ? <img src={apptDocPic(a)} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/> : getInitials(apptDocFn(a),apptDocLn(a))||"D"}
-                </div>
-                <div style={{minWidth:0}}>
-                  <div style={{fontSize:11,color:C.slateXL,fontWeight:600,marginBottom:2}}>DOCTOR</div>
-                  <div style={{fontFamily:"'Sora',sans-serif",fontWeight:700,fontSize:14,color:C.slate,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>Dr. {apptDocFn(a)} {apptDocLn(a)}</div>
-                </div>
-              </div>
-              <div style={{display:"flex",flexDirection:"column",gap:4,flexShrink:0}}>
-                  <div style={{display:"flex",gap:14,alignItems:"center"}}>
-                    <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><DateIcon/>{apptDate(a)?new Date(apptDate(a)).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}):"—"}</span>
-                    <span style={{fontSize:13,color:C.slateM,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><TimeIcon/>{apptTime(a)||"—"}</span>
+
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 11, color: C.slateXL, fontWeight: 700, marginBottom: 2 }}>PATIENT</div>
+                  <div
+                    style={{
+                      fontFamily: "'Sora',sans-serif",
+                      fontWeight: 800,
+                      fontSize: 14,
+                      color: C.slate,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {apptPatFn(a)} {apptPatLn(a)}
                   </div>
-                  <BookedInfo createdAt={a.createdAt}/>
-                  {a.status==="PENDING" && <UrgencyBadge requestedDate={apptDate(a)}/>}
                 </div>
-                <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-                  <StatusBadge status={a.status}/>
-                  <span style={{fontSize:12,color:C.purple,fontWeight:700}}>View →</span>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg,#059669,#047857)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontFamily: "'Sora',sans-serif",
+                    fontWeight: 800,
+                    fontSize: 14,
+                    flexShrink: 0,
+                    overflow: "hidden",
+                  }}
+                >
+                  {apptDocPic(a) ? (
+                    <img src={apptDocPic(a)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    getInitials(apptDocFn(a), apptDocLn(a)) || "D"
+                  )}
                 </div>
+
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 11, color: C.slateXL, fontWeight: 700, marginBottom: 2 }}>DOCTOR</div>
+                  <div
+                    style={{
+                      fontFamily: "'Sora',sans-serif",
+                      fontWeight: 800,
+                      fontSize: 14,
+                      color: C.slate,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Dr. {apptDocFn(a)} {apptDocLn(a)}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 0 }}>
+                <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 13, color: C.slateM, fontWeight: 700, display: "flex", alignItems: "center", gap: 5 }}>
+                    <DateIcon />
+                    {apptDate(a)
+                      ? new Date(apptDate(a)).toLocaleDateString("en-PH", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })
+                      : "—"}
+                  </span>
+
+                  <span style={{ fontSize: 13, color: C.slateM, fontWeight: 700, display: "flex", alignItems: "center", gap: 5 }}>
+                    <TimeIcon />
+                    {apptTime(a) || "—"}
+                  </span>
+                </div>
+
+                <BookedInfo createdAt={a.createdAt} />
+
+                {a.status === "PENDING" && <UrgencyBadge requestedDate={apptDate(a)} />}
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 12, whiteSpace: "nowrap" }}>
+                <StatusBadge status={a.status} />
+                <span style={{ fontSize: 12, color: C.purple, fontWeight: 800 }}>View →</span>
+              </div>
             </div>
           ))}
         </div>

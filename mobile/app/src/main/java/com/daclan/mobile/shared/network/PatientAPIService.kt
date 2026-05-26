@@ -1,5 +1,6 @@
 package com.daclan.mobile.shared.network
 
+import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -22,50 +23,17 @@ data class PatientInfo(
     val profilePicture: String? = null
 )
 
-data class AppointmentResponse(
-    val id:            Long?   = null,
-    val requestedDate: String? = null,
-    val requestedTime: String? = null,
-
-    // Backend sends "reasonForVisit" — keep both for safety
-    val reason:        String? = null,
-    val reasonForVisit:String? = null,
-
-    val status:        String? = null,
-    val doctor:        DoctorInfo?  = null,
-    val patient:       PatientInfo? = null,
-
-    // Completion
-    val completedAt:   String? = null,
-    val doctorNotes:   String? = null,
-
-    // Cancellation
-    val cancelledAt:   String? = null,
-    val cancelReason:  String? = null,
-    val cancelledBy:   String? = null,   // PATIENT | DOCTOR | SECRETARY
-
-    // Rejection
-    val rejectedAt:     String? = null,
-    val rejectedReason: String? = null,
-    val rejectReason:   String? = null,  // alias
-
-    // Expiration
-    val expiredAt:     String? = null,
-
-    val createdAt:     String? = null,
-    val updatedAt:     String? = null,
-)
-
-// ── Doctor Summary ─────────────────────────────────────────────────────────
 data class DoctorSummary(
-    val doctorId:       Long?   = null,
-    val firstName:      String? = null,
-    val lastName:       String? = null,
-    val specialization: String? = null,
-    val email:          String? = null,
-    val profilePicture: String? = null,
-    val status:         String? = null,
-    val secretary:      SecretaryInfo? = null
+    val doctorId:          Long?   = null,
+    val firstName:         String? = null,
+    val lastName:          String? = null,
+    val specialization:    String? = null,
+    val email:             String? = null,
+    val profilePicture:    String? = null,
+    val status:            String? = null,
+    val yearsOfExperience: Int?    = null,  // ← ADD
+    val bio:               String? = null,  // ← ADD
+    val secretary:         SecretaryInfo? = null
 )
 
 data class SecretaryInfo(
@@ -96,15 +64,6 @@ data class PatientProfileUpdateRequest(
     val phoneNumber: String,
     val address:     String
 )
-
-// ── Book Appointment ───────────────────────────────────────────────────────
-data class BookAppointmentRequest(
-    val doctorId:      Long,
-    val requestedDate: String,
-    val requestedTime: String,
-    val reason:        String
-)
-
 
 // ── Patient API Service ────────────────────────────────────────────────────
 interface PatientApiService {

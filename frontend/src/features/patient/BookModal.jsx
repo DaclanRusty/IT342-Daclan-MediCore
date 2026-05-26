@@ -43,7 +43,12 @@ const BookModal = ({ doctors, onSuccess, onClose, preselectedDoctor = null }) =>
     if (!sel || !date || !time || !reason.trim()) { setErr("Please fill in all required fields."); return; }
     setBusy(true); setErr("");
     try {
-      await patientApi.bookAppointment({ doctor_id:docId(sel), requested_date:date, requested_time:time, reason_for_visit:reason.trim() });
+      await patientApi.bookAppointment({ 
+        doctorId: docId(sel), 
+        requestedDate: date, 
+        requestedTime: time, 
+        reasonForVisit: reason.trim() 
+      });
       onSuccess("Appointment submitted! Status: Pending — awaiting secretary approval.");
     } catch(e) { setErr(e.message || "Failed to submit appointment. Please try again."); }
     finally { setBusy(false); }

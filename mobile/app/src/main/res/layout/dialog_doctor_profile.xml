@@ -1,6 +1,208 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Purple header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#7C3AED"
+        android:padding="20dp">
+
+        <!-- Close button row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:id="@+id/btnProfileDialogClose"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_check"
+                android:tint="#FFFFFF"
+                android:background="@drawable/bg_btn_ghost_circle"
+                android:padding="7dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Close" />
+        </LinearLayout>
+
+        <!-- Avatar + name -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <FrameLayout
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="13dp">
+
+                <TextView
+                    android:id="@+id/tvProfileDialogInitials"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:gravity="center"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/circle_avatar_bg" />
+
+                <ImageView
+                    android:id="@+id/ivProfileDialogPic"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:scaleType="centerCrop"
+                    android:clipToOutline="true"
+                    android:background="@drawable/circle_avatar_bg"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DOCTOR PROFILE"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#CCFFFFFF"
+                    android:letterSpacing="0.06"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:id="@+id/tvProfileDialogName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF" />
+
+                <TextView
+                    android:id="@+id/tvProfileDialogSpec"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textColor="#DDFFFFFF"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Body -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Experience + Specialization cards -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/bg_confirmed_blocked"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EXPERIENCE"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="#2563EB"
+                    android:letterSpacing="0.06"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tvProfileDialogYoe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="—"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/bg_confirmed_blocked"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SPECIALIZATION"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="#059669"
+                    android:letterSpacing="0.06"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tvProfileDialogSpec2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="—"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- About / Bio -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ABOUT"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#94A3B8"
+            android:letterSpacing="0.06"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/tvProfileDialogBio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No biography provided."
+            android:textSize="13.5sp"
+            android:textColor="#334155"
+            android:lineSpacingMultiplier="1.5"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Book Appointment button -->
+        <Button
+            android:id="@+id/btnProfileDialogBook"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="+ Book Appointment"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_btn_primary"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+</LinearLayout>
